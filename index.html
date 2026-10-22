@@ -199,6 +199,12 @@ body.slide .setp{transition:translate .5s cubic-bezier(.22,.9,.22,1)}
 .scrim{position:absolute;inset:0;background:rgba(0,0,0,.42);opacity:0;transition:opacity .3s}
 .sheet{position:relative;width:100%;max-width:640px;max-height:92svh;overflow:auto;background:var(--sheet);-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);border-radius:30px 30px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .42s cubic-bezier(.2,.9,.25,1);overscroll-behavior:contain;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
 .sheet-wrap.open .scrim{opacity:1}
+html.locked,html.locked body{overflow:hidden}
+.sheet-wrap .scrim{touch-action:none}
+.sheet{touch-action:pan-y}
+button.mic-big{border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+button.mic-big:active{transform:scale(.94)}
+button.mic-big:not(.on){opacity:.92}
 .sheet-wrap.open .sheet{transform:none}
 .grab{width:42px;height:5px;border-radius:3px;background:color-mix(in srgb, var(--ink) 20%, transparent);margin:0 auto 16px}
 .sheet h2{font-size:27px;line-height:1.12;font-weight:800;letter-spacing:-.022em;margin:2px 0 8px;text-wrap:balance}
@@ -250,7 +256,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .examples{display:flex;flex-direction:column;gap:2px;margin:0 0 18px}
 .examples button{text-align:left;font-size:15px;color:var(--ink-2);padding:9px 0}
 .examples button::before{content:"«"}.examples button::after{content:"»"}
-.mic-big{width:104px;height:104px;border-radius:52px;margin:30px auto 20px;display:grid;place-items:center;color:var(--cam-ink);position:relative;background:var(--cam);box-shadow:var(--cam-glow)}
+.mic-big{width:104px;height:104px;border-radius:52px;margin:24px auto 18px;display:grid;place-items:center;color:var(--cam-ink);position:relative;background:var(--cam);box-shadow:var(--cam-glow)}
 .mic-big.on::before,.mic-big.on::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--azure);animation:ripple 1.8s ease-out infinite}
 .mic-big.on::after{animation-delay:.9s}
 @keyframes ripple{from{transform:scale(.85);opacity:1}to{transform:scale(1.5);opacity:0}}
@@ -464,7 +470,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.16';
+const VERSION = '1.17';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -834,16 +840,24 @@ function renderCal(anim) {
 // ================= Fogli =================
 let onSheetClose = null;
 function openSheet(html, after) {
-  const w = $('#sheetWrap'); $('#sheetBody').innerHTML = html; w.hidden = false; $('#sheet').scrollTop = 0;
+  const w = $('#sheetWrap'); $('#sheetBody').innerHTML = html; w.hidden = false; $('#sheet').scrollTop = 0; document.documentElement.classList.add('locked');
   requestAnimationFrame(() => requestAnimationFrame(() => w.classList.add('open')));
   if (after) after($('#sheetBody'));
 }
 function closeSheet() {
   const w = $('#sheetWrap'); w.classList.remove('open');
   if (onSheetClose) { const f = onSheetClose; onSheetClose = null; f(); }
-  setTimeout(() => { if (!w.classList.contains('open')) { w.hidden = true; $('#sheetBody').innerHTML = ''; } }, 420);
+  setTimeout(() => { if (!w.classList.contains('open')) { w.hidden = true; $('#sheetBody').innerHTML = ''; document.documentElement.classList.remove('locked'); } }, 420);
 }
 $('#scrim').addEventListener('click', closeSheet);
+// mentre un foglio è aperto, lo sfondo sotto resta fermo: si scorre solo il foglio (e solo se è più lungo dello schermo)
+$('#sheetWrap').addEventListener('touchmove', e => {
+  const sh = $('#sheet');
+  if (!sh.contains(e.target)) { e.preventDefault(); return; }
+  if (e.target.closest('.chips.scroll')) return;
+  const ta = e.target.closest('textarea'); if (ta && ta.scrollHeight > ta.clientHeight + 1) return;
+  if (sh.scrollHeight <= sh.clientHeight + 1) e.preventDefault();
+}, { passive: false });
 (() => { let y0 = null; const sh = $('#sheet');
   sh.addEventListener('touchstart', e => { y0 = sh.scrollTop <= 0 && !e.target.closest('.chips.scroll') ? e.touches[0].clientY : null; }, { passive: true });
   sh.addEventListener('touchmove', e => { if (y0 == null) return; const dy = e.touches[0].clientY - y0; if (dy > 0 && !e.target.closest('textarea,input')) { sh.style.transition = 'none'; sh.style.transform = `translateY(${dy}px)`; } }, { passive: true });
@@ -912,9 +926,10 @@ async function scanFlow(file) {
 $('#btnPhoto').addEventListener('click', () => pickPhoto(true, scanFlow));
 
 // ================= Editor: nuova memo, conferma, modifica =================
-const LEADS_TIMED = [[5, '5 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [1440, 'Il giorno prima']];
+const LEADS_TIMED = [[0, 'Puntuale'], [5, '5 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [1440, 'Il giorno prima']];
 const LEADS_DAYS = [[0, 'La mattina stessa'], [1440, 'Il giorno prima'], [10080, 'Una settimana prima'], [43200, 'Un mese prima'], [86400, '2 mesi prima'], [129600, '3 mesi prima']];
 function leadLabel(min, timed) {
+  if (timed && min === 0) return 'puntuale';
   if (timed && min < 60) return `${min} minuti prima`;
   if (timed && min < 1440) return min === 60 ? "un'ora prima" : `${Math.round(min / 60)} ore prima`;
   const d = Math.round(min / 1440);
@@ -1034,52 +1049,112 @@ $('#btnAdd').addEventListener('click', () => openEditor({ type: 'altro', title: 
 
 // ================= Voce =================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null;
+// Un solo "orecchio", riusato ogni volta. Su iPhone, aprirne uno nuovo mentre il vecchio non ha ancora chiuso,
+// o chiuderlo di colpo, può lasciare il microfono muto: qui si aspetta sempre che abbia chiuso davvero.
+const Ear = (() => {
+  let r = null, busy = false, h = null, queued = null;
+  const make = () => {
+    const x = new SR(); x.lang = 'it-IT'; x.interimResults = true; x.continuous = true; x.maxAlternatives = 1;
+    x.onstart = () => { if (h && h.start) h.start(); };
+    x.onresult = e => { if (h && h.result) h.result(joinResults(e.results)); };
+    x.onerror = e => { if (h && h.error) h.error((e && e.error) || 'error'); };
+    x.onend = () => { busy = false; const cb = h && h.end; if (queued) { const q = queued; queued = null; q(); } else if (cb) cb(); };
+    return x;
+  };
+  function start(handlers) {
+    if (!SR) return false;
+    h = handlers;
+    if (busy) { queued = () => start(handlers); try { r.stop(); } catch (e) {} return true; }
+    if (!r) r = make();
+    try { r.start(); busy = true; return true; }
+    catch (e) { try { reset(); r = make(); h = handlers; r.start(); busy = true; return true; } catch (e2) { return false; } }
+  }
+  function stop() { h = null; queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } }
+  // se qualcosa si è inceppato, la prossima volta si riparte con un orecchio nuovo
+  function reset() { const old = r; r = null; busy = false; h = null; queued = null;
+    if (old) { old.onresult = old.onend = old.onerror = old.onstart = null; try { old.abort(); } catch (e) {} } }
+  return { start, stop, reset };
+})();
+// iPhone a volte ripete nei risultati tutto quello che hai già detto: qui si tiene una copia sola
+function joinResults(results) {
+  let out = '';
+  for (let i = 0; i < results.length; i++) {
+    const t = String(results[i][0].transcript || '').trim(); if (!t) continue;
+    const a = out.toLowerCase(), b = t.toLowerCase();
+    if (!out || b.startsWith(a)) out = t;
+    else if (a.endsWith(b) || (b.length > 12 && a.includes(b))) continue;
+    else out += ' ' + t;
+  }
+  return out;
+}
+const joinText = (a, b) => [a, b].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+const MIC_SVG = '<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>';
 function openVoice() {
-  const examples = ['Oggi alle 18 parrucchiere', "Il bollo dell'auto scade a fine novembre", "Tra mezz'ora chiamare la mamma", 'Ho comprato la lavatrice oggi'];
+  const examples = ['Domani alle 18 parrucchiere', 'Mi scade la patente a marzo 2028', 'Stasera vado da Luca alle 20: ricordami di prendere il vino'];
   openSheet(`<h2 style="text-align:center">Dimmi cosa ricordarti</h2>
-    <div class="mic-big" id="vMic" aria-hidden="true"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>
+    <button class="mic-big" id="vMic" aria-label="Parla">${MIC_SVG}</button>
     <p class="hint" id="vHint">Parla pure, con calma: ti ascolto.</p>
     <div class="field"><textarea class="input" id="vText" rows="3" enterkeyhint="done" placeholder="Per esempio: domani alle 9 e mezza dentista"></textarea></div>
     <div class="examples" id="vEx">${examples.map(x => `<button>${esc(x)}</button>`).join('')}</div>
     <button class="btn btn-main" id="vGo" disabled>Ricordamelo</button>`, body => {
     const ta = body.querySelector('#vText'), go = body.querySelector('#vGo'), mic = body.querySelector('#vMic'), hint = body.querySelector('#vHint');
-    const upd = () => { go.disabled = !ta.value.trim(); };
-    ta.addEventListener('input', upd);
-    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (ta.value.trim()) submitSpeech(ta.value); } });
-    body.querySelector('#vEx').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stopRec(); ta.value = b.textContent; upd(); });
-    go.onclick = () => { stopRec(); submitSpeech(ta.value); };
-    const fallback = () => { mic.classList.remove('on'); hint.textContent = 'Tocca il microfono sulla tastiera e parla, oppure scrivi.'; ta.focus(); };
-    if (!SR) { fallback(); return; }
-    // ascolta con calma: crea il MeMo solo dopo 3,5 secondi di silenzio, così puoi pensare mentre parli
-    let base = '', gotAny = false, quiet = null, done = false, restarts = 0;
-    const finish = () => { if (done) return; done = true; clearTimeout(quiet); stopRec(); mic.classList.remove('on');
-      if (ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 300); } else fallback(); };
-    const arm = () => { clearTimeout(quiet); quiet = setTimeout(finish, 3500); };
+    const ex = body.querySelector('#vEx');
+    const upd = () => { go.disabled = !ta.value.trim(); ex.hidden = !!ta.value.trim(); };
+    let on = false, base = '', started = false, closed = false, quiet = null, watch = null, sendT = null;
+    const say = t => { hint.textContent = t; };
+    const clear = () => { clearTimeout(quiet); clearTimeout(watch); clearTimeout(sendT); };
+    const idle = msg => { on = false; mic.classList.remove('on'); mic.setAttribute('aria-label', 'Parla'); if (msg) say(msg); };
+    const send = () => { clear(); if (closed || !ta.value.trim()) return; Ear.stop(); idle('Ho capito.'); sendT = setTimeout(() => { if (!closed && $('#vText') === ta) submitSpeech(ta.value); }, 350); };
+    // dopo che hai parlato, aspetta 3 secondi e mezzo di silenzio prima di creare il MeMo
+    const armQuiet = (ms = 3500) => { clearTimeout(quiet); quiet = setTimeout(() => {
+      if (ta.value.trim()) send();
+      else { Ear.stop(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); }
+    }, ms); };
     const listen = () => {
-      try {
-        rec = new SR(); rec.lang = 'it-IT'; rec.interimResults = true; rec.continuous = true;
-        rec.onresult = e => { gotAny = true; let t = ''; for (const r of e.results) t += r[0].transcript; ta.value = (base + ' ' + t).replace(/\s+/g, ' ').trim(); upd(); hint.textContent = 'Ti ascolto… quando hai finito, fai una pausa.'; arm(); };
-        rec.onerror = ev => { if (done) return; if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) { rec = null; done = true; fallback(); } };
-        // iPhone a volte chiude il microfono da solo: se stavi ancora parlando, lo riapre e continua
-        rec.onend = () => { if (done) return; rec = null; base = ta.value; if (restarts++ < 6) listen(); else finish(); };
-        rec.start();
-      } catch (e) { done = true; fallback(); }
+      if (!SR) { idle('Tocca il microfono sulla tastiera e parla, oppure scrivi.'); ta.focus(); return; }
+      clear(); base = ta.value.trim(); started = false; on = true;
+      mic.classList.add('on'); mic.setAttribute('aria-label', 'Ho finito'); say(base ? 'Dimmi pure il resto…' : 'Parla pure, con calma: ti ascolto.');
+      const ok = Ear.start({
+        start: () => { started = true; },
+        result: txt => { if (!on) return; ta.value = joinText(base, txt); upd(); say('Ti ascolto… quando hai finito, fai una pausa.'); armQuiet(); },
+        error: code => {
+          if (code === 'aborted' || code === 'no-speech') return;
+          clear(); Ear.reset();
+          if (code === 'not-allowed' || code === 'service-not-allowed') idle('Non riesco a usare il microfono: controlla che Safari possa usarlo e che la Dettatura sia attiva. Intanto puoi scrivere qui sotto.');
+          else if (code === 'audio-capture') idle("Il microfono è occupato da un'altra app. Chiudila e tocca di nuovo qui.");
+          else if (code === 'network') idle('Per capire la voce serve internet. Intanto puoi scrivere qui sotto.');
+          else idle('Qualcosa non è andato. Tocca il microfono e riprova.');
+        },
+        // il telefono ha chiuso il microfono da solo: quello che hai detto resta, puoi aggiungere altro
+        end: () => { if (!on || closed) return;
+          if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(3000); }
+          else { clear(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); } }
+      });
+      if (!ok) { Ear.reset(); idle('Non riesco ad aprire il microfono. Tocca qui e riprova, oppure scrivi.'); return; }
+      armQuiet(9000); // se all'inizio non dici niente, aspetta un po' prima di arrendersi
+      watch = setTimeout(() => { if (on && !started) { Ear.reset(); idle('Il microfono non è partito. Toccalo e riprova.'); } }, 3500);
     };
-    mic.classList.add('on'); listen(); arm(); onSheetClose = () => { done = true; clearTimeout(quiet); stopRec(); };
-    ta.addEventListener('focus', () => { if (!done) { done = true; clearTimeout(quiet); stopRec(); mic.classList.remove('on'); hint.textContent = 'Scrivi pure, poi tocca Ricordamelo.'; } });
+    mic.onclick = () => { haptic(); if (on) { if (ta.value.trim()) send(); else { clear(); Ear.stop(); idle('Tocca il microfono quando vuoi parlare.'); } } else listen(); };
+    ta.addEventListener('input', () => { upd(); clearTimeout(sendT); });
+    ta.addEventListener('focus', () => { if (on) { clear(); Ear.stop(); idle('Scrivi pure, poi tocca Ricordamelo.'); } else clearTimeout(quiet), clearTimeout(sendT); });
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (ta.value.trim()) { clear(); Ear.stop(); submitSpeech(ta.value); } } });
+    body.querySelector('#vEx').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; clear(); Ear.stop(); idle('Tocca Ricordamelo, o il microfono per dirlo tu.'); ta.value = b.textContent; upd(); });
+    go.onclick = () => { clear(); Ear.stop(); submitSpeech(ta.value); };
+    onSheetClose = () => { closed = true; clear(); Ear.stop(); };
+    listen();
   });
 }
-function stopRec() { if (rec) { const r = rec; rec = null; r.onresult = r.onend = r.onerror = null; try { r.stop(); } catch (e) {} try { r.abort(); } catch (e) {} } const m = $('#vMic'); if (m) m.classList.remove('on'); }
+function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove('on'); }
 async function submitSpeech(text) {
   stopRec();
   const res = P.parseSpeech(text);
   if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
-  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
+  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim()  };
+  if (res.leadMin != null && it.time) it.leadMin = res.leadMin;
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
   const st = P.statusOf(it);
   toast(`${it.title}, ${it.purchase ? 'garanzia fino al ' + fmtLong(it.due) : whenText(it)}`, st.key === 'now' ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`, [
-    { label: 'Modifica', fn: () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, purchase: it.purchase }, { head: 'Modifica', typeLocked: true }) },
+    { label: 'Modifica', fn: () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase }, { head: 'Modifica', typeLocked: true }) },
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
   ]);
 }
@@ -1129,7 +1204,7 @@ async function openDetail(id) {
   const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
   const past = it.time ? st.minutesLeft < 0 : st.left < 0;
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
-    : it.time ? `<b>${esc(cap(whenText(it)))}</b>, ${inWords(st.minutesLeft)}.` : `Scade <b>${esc(whenText(it))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
+    : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `Scade <b>${esc(whenText(it))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
   const nextList = allRemindText(it);
   const remind = st.key === 'now' ? ' Te lo sto ricordando adesso.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';

@@ -88,6 +88,11 @@
       todo: "Se qualcosa non funziona, portalo al negozio con lo scontrino prima che scada la garanzia: hai diritto a riparazione o sostituzione.",
       link: null,
       kw: [[/garanzi/, 6], [/scontrin/, 5], [/documento\s*commerciale/, 6], [/\btotale\b/, 1], [/\biva\b/, 1], [/pagamento\s*elettronico|contanti|\bresto\b/, 1], [/\bcomprat[oaie]\b|\bacquistat[oaie]\b|\bpres[oaie]\s+(oggi|ieri)/, 3]] },
+    { id: 'commissione', label: 'Commissione', emoji: '🛍️', lead: 0, leadMin: 30, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando?',
+      todo: '',
+      link: null,
+      kw: [[/\b(comprare|compra|compro|prendere|prendi|prendo|ritirare|ritira|ritiro|recuperare|acquistare|procurare|portare|porta|porto)\b/, 3], [/\bspesa\b|supermercat|farmacia|lavanderia|\bpacco\b|\bvino\b|\bfiori\b|\bregalo\b|\btorta\b/, 2]] },
     { id: 'altro', label: 'Altro', emoji: '📌', lead: 0, leadMin: 10, recur: null, dateKind: 'expiry', done: 'archive',
       ask: 'Quando?',
       todo: '',
@@ -305,7 +310,8 @@
   }
 
   /** Analizza una frase tipo "ricordami che il bollo scade a fine novembre" o "oggi alle 18 parrucchiere". */
-  function parseSpeech(raw, now) {
+  function parseOne(raw, now, opt) {
+    opt = opt || {};
     const nowD = now || new Date();
     const today = todayISO(nowD);
     const src = String(raw || '').trim();
@@ -393,7 +399,7 @@
           else if (!am && h >= 1 && h <= 7 && !(tm.hasMin && type === 'viaggio')) h += 12;
         }
         time = hhmm(h === 24 ? 12 : h, tm.min);
-        if (!date) {
+        if (!date && !opt.noDefault) {
           // nessun giorno detto: oggi se l'ora non è ancora passata, altrimenti domani
           const cand = new Date(nowD); cand.setHours(h, tm.min, 0, 0);
           date = cand > nowD ? today : addDays(today, 1);
@@ -427,13 +433,122 @@
       for (let i = 0; i < 6; i++) { for (const f of fillers) s = s.replace(f, ' ').trim(); }
       s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
       const T2 = TYPE_BY_ID[typeId];
+      if (typeId !== 'garanzia') s = summarize(s, opt.ctx != null ? opt.ctx : src);
       const dt = docTitle(typeId, src); if (dt) s = dt;
-      if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:il|lo|la|i|gli|le)\s+|l')/i, '');
+      if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:ho|abbiamo)\s+)?(?:comprat[oaie]|acquistat[oaie]|pres[oaie])\s+/i, '').replace(/^(?:(?:il|lo|la|i|gli|le|un|uno|una)\s+|l'|un')/i, '');
       if (!s || s.length < 2) s = typeId === 'altro' ? 'MeMo' : T2.label;
       s = s.charAt(0).toUpperCase() + s.slice(1);
       if (s.length > 60) s = s.slice(0, 57).trim() + '…';
       return { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
     }
+  }
+
+  // ---------- Titolo breve: "andare a prendere il vino" (sapendo che vai da Mattia) → "Vino per Mattia" ----------
+  const GET_RE = /^(?:(?:andare|passare|correre|fare\s+un\s+salto|uscire)\s+(?:a|ad)\s+)?(prendere|prendi|prendo|comprare|compra|compro|acquistare|recuperare|procurare|procurarmi|portare|porta|porto)\s+(.+)$/i;
+  const MOVE_RE = /^(?:andare|passare|correre|fare\s+un\s+salto|uscire)\s+(?:a|ad)\s+(?=\S+(?:are|ere|ire)\b)/i;
+  const ART_RE = /^(?:(?:il|lo|la|i|gli|le|un|uno|una|del|dello|della|dei|degli|delle|qualche|un\s+po'?\s+di|un\s+paio\s+di)\s+|(?:l'|un'|dell'))/i;
+  const PEOPLE_RE = /^(?:(?:i|il|la|le|gli|lo|mio|mia|miei|mie|tuo|tua|nostro|nostra)\s+)*(?:bambin|figli|ragazz|bimb|mamma|madre|papa|papà|padre|nonn|zi[oaie]\b|moglie|marito|fidanzat|amic|compagn|cugin|fratell|sorell|suocer|cane|gatto|nipot|collega|capo)/i;
+  const KIN_RE = /^(mamma|madre|papa|papà|padre|nonn[oaie]|zi[oaie]|moglie|marito|fidanzat[oaie]|sorell[ae]|fratell[oi]|suocer[oaie]|cugin[oaie]|amic[oaie]|nipot[ei]|capo|collega|colleghi|bambini|figli[oa]?)$/i;
+  const NOT_NAME = new Set(('me te lui lei noi voi loro solo sola soli sole casa qui qua li la lo fare bere mangiare pagare parte tempo ora adesso subito sempre poco molto ' +
+    'oggi domani dopodomani stasera stamattina lunedi martedi mercoledi giovedi venerdi sabato domenica calma favore sicurezza qualche qualcuno tutti tutto niente ' +
+    'medico dentista parrucchiere parrucchiera barbiere meccanico dottore dottoressa avvocato commercialista notaio estetista veterinario tabaccaio benzinaio farmacista ' +
+    'idraulico elettricista fornaio panettiere macellaio gommista ottico oculista psicologo fisioterapista sarto calzolaio lavoro scuola ufficio palestra mercato ' +
+    'supermercato centro fuori dentro sopra sotto quando dove come cosa chi due tre quattro cinque sei sette otto nove dieci mezzogiorno mezzanotte').split(' '));
+  const capw = w => w.charAt(0).toUpperCase() + w.slice(1);
+  const isName = w => { const n = norm(w); return n.length >= 3 && !NOT_NAME.has(n) && !/(?:are|ere|ire|ando|endo|mente)$/.test(n) && !/^\d/.test(n) && !MONTHS[n]; };
+  // a chi è destinato: "per Mattia", "per la cena", "a Giulia" (con portare), o dal contesto "vado da Mattia", "cena da Luca", "festa di Anna"
+  function forWhom(text, ownPer) {
+    if (!text) return '';
+    if (ownPer) { const m = /\bper\s+((?:(?:il|la|lo|l'|i|le|gli|mia|mio|tua|tuo)\s+)*[A-Za-zÀ-ÿ']+(?:\s+di\s+[A-Za-zÀ-ÿ']+)?)/i.exec(text); if (m && !/^(favore|sicurezza|tempo|piacere|caso|bene|ora|oggi|domani|stasera)$/i.test(m[1])) return 'per ' + fixName(m[1]); }
+    const re = /\b(?:a\s+casa\s+(?:di|del|della|dello)|a\s+(?:cena|pranzo|colazione)\s+da|alla\s+festa\s+di|festa\s+di|compleanno\s+di|da|con)\s+((?:(?:la|il|lo|mia|mio|tua|tuo|nostra|nostro)\s+)*)([A-Za-zÀ-ÿ']+)/gi;
+    let m;
+    while ((m = re.exec(text))) {
+      const pre = m[1].trim(), w = m[2];
+      if (KIN_RE.test(norm(w))) return 'per ' + (pre ? pre.toLowerCase() + ' ' : '') + w.toLowerCase();
+      if (!pre && isName(w)) return 'per ' + capw(w);
+    }
+    return '';
+  }
+  function fixName(x) { const ws = x.split(/\s+/); const last = ws[ws.length - 1]; if (!KIN_RE.test(norm(last)) && isName(last) && ws.length === 1) ws[ws.length - 1] = capw(last); return ws.join(' '); }
+  const CUT_RE = /\s+(?:per|da|dal|dalla|dallo|dai|dalle|al|alla|allo|ai|alle|all'|agli|in|nel|nella|a|ad|prima|dopo|quando|perch[eé]|che|cos[iì]|poi|quindi|mentre|appena|domani|oggi|stasera)(?![\wÀ-ÿ']).*$|\s*[,;:.!?].*$/i;
+  const BEFORE_RE = new RegExp(`\\s*\\b(?:un'?\\s*ora(?:\\s+e\\s+mezz[ao])?|mezz'?\\s*ora|un\\s+quarto\\s+d'?\\s*ora|(?:\\d+|${NUMW})\\s+(?:minut[oi]|or[ae]))\\s+prima\\b`, 'i');
+  function summarize(s, ctx) {
+    s = String(s || '').replace(BEFORE_RE, ' ').replace(/\s{2,}/g, ' ').replace(MOVE_RE, '').trim();
+    const g = GET_RE.exec(s);
+    if (g) {
+      const verb = g[1].toLowerCase(), rest = g[2].trim();
+      if (PEOPLE_RE.test(rest)) {
+        // "prendere i bambini" resta com'è: non sono una cosa da comprare
+        const inf = /^prend/.test(verb) ? 'Prendere' : /^port/.test(verb) ? 'Portare' : capw(verb);
+        return inf + ' ' + rest.replace(CUT_RE, '').trim();
+      }
+      let obj = rest.replace(CUT_RE, '').trim();
+      obj = obj.replace(ART_RE, '').replace(/\s+e\s+(?:(?:il|lo|la|i|gli|le|un|uno|una|del|dello|della|dei|degli|delle)\s+|(?:l'|un'|dell'))/gi, ' e ').trim();
+      if (!obj) return s;
+      let who = forWhom(rest, true);
+      if (!who && /^port/.test(verb)) { const a = /\s+a\s+([A-Za-zÀ-ÿ']+)/i.exec(rest); if (a && (isName(a[1]) || KIN_RE.test(norm(a[1])))) who = 'per ' + fixName(a[1]); }
+      if (!who) who = forWhom(ctx, false);
+      return capw(obj) + (who ? ' ' + who : '');
+    }
+    // altri verbi: si tiene l'azione, senza i "perché..." e i "quindi..." in coda
+    return s.replace(/\s+(?:perch[eé]|cos[iì]|quindi|che\s+poi|e\s+poi)(?![\wÀ-ÿ']).*$|\s*[,;.!?]\s.*$/i, '').trim();
+  }
+
+  // "…domani vado da Mattia alle 19, quindi ricordami di prendere il vino alle 18": il contesto prima, la cosa da fare dopo
+  const TRIGGER_RE = /(?:^|[\s,.;:!?]+)(?:(?:e|quindi|allora|poi|percio|cosi|ma)\s+)?(?:per\s+favore\s+)?(?:ricordami|ricordarmi|ricordamelo|ricordati|ricorda|non\s+(?:farmi\s+)?dimenticare|non\s+dimenticarti|fammi\s+ricordare|segnami|segnati|avvisami)\s*(di|che|:)?\s*/;
+  const DUTY_RE = /(?:[,.;:]\s*|\s+(?:quindi|allora|percio|cosi)\s+)(?:(?:e|quindi|allora|percio|cosi)\s+)?(?:devo|dovrei|dobbiamo|bisogna|mi\s+serve|ho\s+bisogno\s+di)\s+(?=\S+(?:are|ere|ire)\b)/;
+  const LEAD_IN_RE = /^(?:\s*(?:ehi|ok|okay|ciao|senti|guarda|allora|dunque|niente|cioe|memo|per\s+favore|mi\s+raccomando)\b[\s,.!]*)*$/;
+  function splitTask(src) {
+    const t = norm(src);
+    let m = TRIGGER_RE.exec(t), di = false;
+    if (m) {
+      di = m[1] === 'di' || (!m[1] && /^\s*(alle|all'|tra|fra|domani|oggi|stasera|il|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b[^]*?\bdi\s+\S+(?:are|ere|ire)\b/.test(t.slice(m.index + m[0].length)));
+      const ctx = src.slice(0, m.index), task = src.slice(m.index + m[0].length);
+      if (!task.trim()) return null;
+      return { ctx: LEAD_IN_RE.test(norm(ctx)) ? '' : ctx.replace(/[\s,.;:!?]+$/, ''), task, di };
+    }
+    m = DUTY_RE.exec(t);
+    if (m && m.index > 3) return { ctx: src.slice(0, m.index), task: src.slice(m.index + m[0].length), di: false, duty: true };
+    return null;
+  }
+  // "un'ora prima", "mezz'ora prima", "20 minuti prima": anticipo rispetto all'orario del contesto
+  function minutesBefore(t) {
+    let m;
+    if ((m = /\b(?:un'?\s*ora\s+e\s+mezz[ao])\s+prima\b/.exec(t))) return 90;
+    if ((m = /\bmezz'?\s*ora\s+prima\b/.exec(t))) return 30;
+    if ((m = /\bun\s+quarto\s+d'?\s*ora\s+prima\b/.exec(t))) return 15;
+    if ((m = /\b(?:un'?|una)\s*ora\s+prima\b/.exec(t))) return 60;
+    if ((m = new RegExp(`\\b(\\d+|${NUMW})\\s+(minut[oi]|or[ae])\\s+prima\\b`).exec(t))) { const k = /^\d+$/.test(m[1]) ? +m[1] : NUM_WORDS[m[1]]; return /^or/.test(m[2]) ? k * 60 : k; }
+    return null;
+  }
+  const EVENT_TYPES = ['appuntamento', 'salute', 'viaggio', 'compleanno'];
+  function parseSpeech(raw, now) {
+    const nowD = now || new Date(), src = String(raw || '').trim(), today = todayISO(nowD);
+    const sp = splitTask(src);
+    if (!sp) return parseOne(src, nowD);
+    const a = parseOne(sp.task, nowD, { noDefault: true, ctx: sp.ctx });
+    const c = sp.ctx ? parseOne(sp.ctx, nowD, { noDefault: true }) : null;
+    if (a.type === 'garanzia') return a.date ? a : parseOne(src, nowD);
+    let date = a.date, time = a.time, leadMin = null;
+    const isGet = GET_RE.test(norm(sp.task).replace(/^(?:\s*(?:che|di|devo|dovrei)\s+)+/, ''));
+    if (time) {
+      if (!date && c && c.date) date = c.date;
+      if ((sp.di || sp.duty) && !EVENT_TYPES.includes(a.type)) leadMin = 0;
+    } else if (c && c.time) {
+      time = c.time; date = date || c.date;
+      const onlyTime = !c.typeScore && (!c.title || c.title === 'MeMo'); // "tra un'ora ricordami di…": l'orario è proprio quello dell'avviso
+      const pre = minutesBefore(norm(sp.task));
+      leadMin = pre != null ? pre : onlyTime ? (sp.di && !EVENT_TYPES.includes(a.type) ? 0 : null) : isGet ? 60 : null;
+    } else if (!date && c) date = c.date;
+    if (time && !date) {
+      const [h, mi] = time.split(':').map(Number), cand = new Date(nowD); cand.setHours(h, mi, 0, 0);
+      date = cand > nowD ? today : addDays(today, 1);
+    }
+    let type = a.typeScore ? a.type : 'altro', title = a.title;
+    if ((!title || title === 'MeMo') && c) { title = c.title; if (!a.typeScore) type = c.type; }
+    const out = { type, title, date, time, purchase: null, confident: !!date, typeScore: a.typeScore };
+    if (leadMin != null && time) out.leadMin = leadMin;
+    return out;
   }
 
   // ---------- Promemoria: quando avvisare ----------
