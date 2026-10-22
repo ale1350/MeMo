@@ -27,8 +27,8 @@
   --dock:rgba(255,255,255,.8); --dock-stroke:rgba(18,24,38,.06); --dock-ink:#121826; --side:#EEF2F8;
   --cam:var(--brand-grad); --cam-ink:#fff; --cam-glow:0 0 0 6px rgba(76,141,246,.14), 0 12px 30px rgba(91,97,255,.38);
   --btn-bg:var(--brand-grad); --btn-ink:#fff; --toast-bg:#121826; --toast-ink:#fff;
-  --calm:#2FCDBE; --calm-2:#7B61FF; --soon:#4C8DF6; --soon-2:#7B61FF; --now:#FF5C6C; --now-2:#FFA35A; --empty:#7B61FF; --empty-2:#2FCDBE;
-  --now-ink:#E23548; --soon-ink:#2F6FE0; --thread:#4C8DF6;
+  --calm:#2FCDBE; --calm-2:#7B61FF; --soon:#4C8DF6; --soon-2:#7B61FF; --now:#7B61FF; --now-2:#4C8DF6; --empty:#7B61FF; --empty-2:#2FCDBE;
+  --now-ink:#5B43E0; --soon-ink:#2F6FE0; --thread:#4C8DF6;
   --aurora:.38; --ring-track:rgba(18,24,38,.06); --ring-w:7; --num-w:850; --num-fill:linear-gradient(165deg,#121826 32%,var(--mood2) 70%,var(--mood1)); --glow:none;
   --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --scheme:light;
@@ -39,7 +39,7 @@ body[data-mood="soon"]{--mood1:var(--soon);--mood2:var(--soon-2)}
 body[data-mood="empty"]{--mood1:var(--empty);--mood2:var(--empty-2)}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg);color-scheme:var(--scheme);scroll-snap-type:y proximity}
+html{background:var(--bg);color-scheme:var(--scheme)}
 html,body{margin:0;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;text-size-adjust:100%}
 body{min-height:100svh;background:var(--bg);overscroll-behavior-y:none}
 button,input,textarea{font:inherit;color:inherit}
@@ -66,7 +66,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .icon-btn:active{background:var(--card-press)}
 
 /* ---------- schermata principale a pieno schermo ---------- */
-.hero{position:sticky;top:0;height:100svh;z-index:1;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 40px) 28px calc(150px + env(safe-area-inset-bottom));scroll-snap-align:start}
+.hero{position:sticky;top:0;height:100svh;z-index:1;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 40px) 28px calc(170px + env(safe-area-inset-bottom));scroll-snap-align:start;scroll-snap-stop:always}
 .hero-inner{text-align:center;transform-origin:50% 40%;will-change:transform,opacity;max-width:430px}
 .ring{position:relative;width:min(64vw,260px,36svh);aspect-ratio:1;margin:0 auto 26px}
 .ring svg.r{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -76,14 +76,16 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ring .num{font-size:clamp(70px,24vw,112px);line-height:.9;font-weight:var(--num-w);letter-spacing:-.06em;background:var(--num-fill);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
 .ring .unit{font-size:14.5px;font-weight:700;color:var(--ink-2);margin-top:10px}
 .ring .knot{width:46%;color:var(--mood1)}
-.hero h1{font-size:clamp(27px,7.6vw,34px);line-height:1.08;font-weight:800;letter-spacing:-.025em;margin:0 0 10px;text-wrap:balance}
+.hero h1{font-size:clamp(25px,7vw,32px);line-height:1.08;font-weight:800;letter-spacing:-.025em;margin:0 0 10px;text-wrap:balance}
+.hero h1 .h2l{display:block;white-space:nowrap}
+.hero h1 .brandw{background:linear-gradient(120deg,#7B61FF,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{font-size:16.5px;line-height:1.45;color:var(--ink-2);margin:0 auto;max-width:30ch;text-wrap:pretty}
-.peek{position:fixed;left:0;right:0;bottom:calc(122px + env(safe-area-inset-bottom));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
+.peek{position:fixed;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
 .peek svg{animation:cue 2.4s ease-in-out infinite}
 @keyframes cue{50%{transform:translateY(4px)}}
 
 /* ---------- la linea delle scadenze ---------- */
-.list-sec{position:relative;z-index:2;min-height:100svh;padding:calc(env(safe-area-inset-top) + 62px) 16px calc(150px + env(safe-area-inset-bottom));scroll-snap-align:start}
+.list-sec{position:relative;z-index:2;min-height:100svh;padding:calc(env(safe-area-inset-top) + 62px) 16px calc(150px + env(safe-area-inset-bottom));scroll-snap-align:start;scroll-snap-stop:always}
 .list-sec::before{content:"";position:absolute;left:0;right:0;top:-45svh;height:45svh;background:linear-gradient(to bottom, transparent, var(--bg));pointer-events:none}
 .list-sec::after{content:"";position:absolute;inset:0;background:var(--bg);z-index:-1}
 .wrap{max-width:620px;margin:0 auto}
@@ -112,7 +114,6 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .row[data-s="now"] .count b,.row[data-s="now"] .s{color:var(--now-ink)}
 .row[data-s="soon"] .count b{color:var(--soon-ink)}
 .tip{font-size:13px;color:var(--ink-3);text-align:center;margin:16px 0 0}
-.starter h2{font-size:14.5px;font-weight:750;color:var(--ink-3);margin:22px 4px 12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:7px;padding:10px 14px 10px 12px;border-radius:999px;background:var(--card);border:1px solid var(--stroke);box-shadow:var(--card-shadow);font-size:15px;font-weight:650;white-space:nowrap;transition:transform .15s,background .2s}
 .chip:active{transform:scale(.96)}
@@ -125,9 +126,6 @@ button{cursor:pointer;border:0;background:none;padding:0}
 /* ---------- intestazione lista e calendario ---------- */
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 4px 18px}
 .list-head .list-title{margin:0}
-.seg{display:flex;background:#E6EBF3;border-radius:14px;padding:3px;flex:0 0 auto}
-.seg button{padding:8px 12px;border-radius:11px;font-size:14px;font-weight:750;color:var(--ink-2);transition:background .2s,color .2s}
-.seg button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(18,24,38,.1)}
 .cal{background:var(--card);border-radius:24px;box-shadow:var(--card-shadow);padding:14px 10px 10px;border:1px solid var(--stroke);touch-action:pan-y}
 .cal-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px 8px}
 .cal-head h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.015em}
@@ -164,13 +162,14 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .top-actions{display:flex;align-items:center}
 
-/* ---------- barra delle azioni ---------- */
-.dock{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:12;display:flex;align-items:flex-end;gap:24px;padding:10px 22px 8px;border-radius:40px;background:var(--dock);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7);border:1px solid var(--dock-stroke);box-shadow:0 18px 50px rgba(0,0,0,.25)}
-.dock button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:color-mix(in srgb, var(--dock-ink) 70%, transparent)}
-.dock .side .ic{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--side);color:var(--dock-ink)}
-.dock .cam .ic{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:var(--cam-ink);background:var(--cam);box-shadow:var(--cam-glow);margin-top:-24px}
-.dock .ic{transition:transform .15s}
-.dock button:active .ic{transform:scale(.92)}
+.dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
+.dock .rb{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:750;color:var(--ink-2)}
+.dock .c{display:grid;place-items:center;border-radius:50%;transition:transform .15s}
+.dock .photo .c{width:62px;height:62px;color:#fff;background:linear-gradient(135deg,#4C8DF6,#2FCDBE);box-shadow:0 10px 24px rgba(47,205,190,.35), inset 0 1px 0 rgba(255,255,255,.3)}
+.dock .voice .c{width:88px;height:88px;color:#fff;background:linear-gradient(135deg,#7B61FF,#4C8DF6 60%,#2FCDBE);box-shadow:0 0 0 8px rgba(123,97,255,.12), 0 16px 34px rgba(91,97,255,.42), inset 0 1px 0 rgba(255,255,255,.3)}
+.dock .add .c{width:62px;height:62px;color:var(--ink);background:#fff;box-shadow:0 8px 22px rgba(43,72,140,.14);border:1px solid rgba(18,24,38,.06)}
+.dock button:active .c{transform:scale(.93)}
+.dock::before{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(150px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 45%,transparent);z-index:-1}
 
 /* ---------- fogli ---------- */
 .sheet-wrap{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
@@ -248,7 +247,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .viewer button{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;border-radius:22px;background:rgba(255,255,255,.14);display:grid;place-items:center}
 
 /* ---------- toast col nodo ---------- */
-.toast{position:fixed;left:14px;right:14px;bottom:calc(118px + env(safe-area-inset-bottom));z-index:30;max-width:560px;margin:0 auto;background:var(--toast-bg);color:var(--toast-ink);border-radius:22px;padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;font-size:15.5px;line-height:1.35;transform:translateY(24px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1.2),opacity .25s;pointer-events:none;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.toast{position:fixed;left:14px;right:14px;bottom:calc(100px + env(safe-area-inset-bottom));z-index:30;max-width:560px;margin:0 auto;background:var(--toast-bg);color:var(--toast-ink);border-radius:22px;padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;font-size:15.5px;line-height:1.35;transform:translateY(24px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1.2),opacity .25s;pointer-events:none;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .toast.show{transform:none;opacity:1;pointer-events:auto}
 .toast .msg{flex:1;min-width:0}
 .toast .msg b{display:block;font-weight:800}
@@ -333,28 +332,20 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 
 <section class="list-sec" id="listSec">
   <div class="wrap">
-    <div class="list-head"><h2 class="list-title" id="listTitle">Scadenze</h2>
-      <div class="seg" role="tablist" aria-label="Come vuoi vedere le scadenze"><button role="tab" data-v="linea" aria-selected="true">Linea</button><button role="tab" data-v="cal" aria-selected="false">Calendario</button></div></div>
-    <div id="viewCal" hidden></div>
-    <div id="viewLinea">
+    <div class="list-head"><h2 class="list-title" id="listTitle">I tuoi promemoria</h2></div>
     <div class="thread" id="list"></div>
     <p class="tip" id="swipeTip" hidden>Scorri una scadenza verso sinistra per segnarla come fatta.</p>
-    <section class="starter" id="starter">
-      <h2>Scegli cosa vuoi ricordare e dimmi solo la data</h2>
-      <div class="chips" id="starterChips"></div>
-    </section>
     <div class="install" id="installHint" hidden>
       <p>Aggiungi MeMo alla Home: tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>. Così i dati restano al sicuro sul telefono.</p>
       <button class="icon-btn" id="installClose" aria-label="Chiudi" style="width:32px;height:32px"><svg width="14" height="14" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
     </div>
-    </div>
   </div>
 </section>
 
-<nav class="dock" aria-label="Aggiungi una scadenza">
-  <button class="side" id="btnVoice"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dillo</button>
-  <button class="cam" id="btnPhoto"><span class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
-  <button class="side" id="btnAdd"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
+<nav class="dock" aria-label="Aggiungi un promemoria">
+  <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
+  <button class="rb voice" id="btnVoice"><span class="c"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
+  <button class="rb add" id="btnAdd"><span class="c"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
 </nav>
 
 <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
@@ -377,7 +368,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.3';
+const VERSION = '1.5';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -469,8 +460,10 @@ function countParts(it, st) {
 function rowSub(it, st) {
   if (st.key === 'now') {
     if (it.time) return st.minutesLeft >= 0 ? `${cap(whenText(it))}, ${inWords(st.minutesLeft)}` : `Era ${whenText(it)}`;
-    if (st.left < 0) return `Scadenza passata il ${fmtDay(it.due)}`;
-    return st.left <= 1 ? `Scade ${dayWord(it.due)}` : `Scade il ${fmtDay(it.due)}`;
+    const exp = ['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'abbonamento', 'bolletta', 'garanzia'].includes(it.type);
+    if (st.left < 0) return exp ? `Scaduto il ${fmtDay(it.due)}` : `Era il ${fmtDay(it.due)}`;
+    if (st.left <= 1) return exp ? `Scade ${dayWord(it.due)}` : cap(dayWord(it.due));
+    return exp ? `Scade il ${fmtDay(it.due)}` : `Il ${fmtDay(it.due)}`;
   }
   return `Ti avviso ${remindText(st.remind, !!it.time)}`;
 }
@@ -497,15 +490,15 @@ function render() {
   const showNum = on => { num.hidden = unit.hidden = !on; on ? knot.setAttribute('hidden', '') : knot.removeAttribute('hidden'); };
   if (!active.length) {
     showNum(false); fill = 100;
-    h.textContent = 'Inizia da una foto.';
-    p.textContent = 'Un documento, uno scontrino, un appuntamento. Al resto pensa MeMo.';
+    h.innerHTML = 'Dimmi cosa ricordarti.<span class="h2l">Al resto ci pensa <span class="brandw">MeMo</span>.</span>';
+    p.textContent = 'Scadenze, appuntamenti, documenti. Te li ricordo io.';
     mini.textContent = 'Nessuna scadenza';
   } else if (groups.now.length) {
     const n = groups.now.length, first = groups.now[0];
-    showNum(true); fill = 100; countUp(num, n); unit.textContent = 'da sistemare';
-    h.textContent = n === 1 ? first.i.title : `${first.i.title} e ${n === 2 ? "un'altra" : 'altre ' + (n - 1)}`;
-    p.textContent = n === 1 ? rowSub(first.i, first.s) + '.' : 'Toccale per vedere cosa fare.';
-    mini.textContent = n === 1 ? '1 cosa da sistemare' : `${n} cose da sistemare`;
+    showNum(true); fill = 100; countUp(num, n); unit.textContent = n === 1 ? 'promemoria per te' : 'promemoria per te';
+    h.textContent = n === 1 ? first.i.title : `${first.i.title} e ${n === 2 ? "un'altra cosa" : (n - 1) + ' altre cose'}`;
+    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Al resto penso io.` : 'Le trovi qui sotto. Al resto penso io.';
+    mini.textContent = n === 1 ? '1 promemoria per te' : `${n} promemoria per te`;
   } else {
     const next = active.slice().sort((a, b) => a.s.remind - b.s.remind)[0];
     const mins = Math.max(0, Math.round((next.s.remind - nowD) / 60000));
@@ -527,9 +520,9 @@ function render() {
   }
   requestAnimationFrame(() => arc.style.strokeDashoffset = String(100 - fill));
 
-  $('#peekTxt').textContent = active.length ? (active.length === 1 ? 'La tua scadenza' : `Le tue ${active.length} scadenze`) : 'Da dove iniziare';
-  $('#listTitle').textContent = view === 'cal' ? 'Calendario' : active.length ? 'Scadenze' : 'Si comincia';
-  const names = { now: 'Da fare adesso', soon: 'In arrivo', calm: 'Sotto controllo' };
+  $('#peekTxt').textContent = active.length === 1 ? 'Il tuo promemoria' : `I tuoi ${active.length} promemoria`;
+  $('#peek').hidden = !active.length; $('#listSec').hidden = !active.length;
+  const names = { now: 'Adesso', soon: 'Prossimamente', calm: 'Più avanti' };
   const list = $('#list');
   list.innerHTML = ['now', 'soon', 'calm'].filter(k => groups[k].length).map(k => `
     <section class="group"><h2>${names[k]}</h2><div class="rows">
@@ -552,15 +545,10 @@ function render() {
     rowObserver = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rowObserver.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px' });
     list.querySelectorAll('.row-wrap').forEach((el, k) => { el.style.transitionDelay = Math.min(k, 6) * 45 + 'ms'; rowObserver.observe(el); });
   } else list.querySelectorAll('.row-wrap').forEach(el => el.classList.add('in'));
-  $('#starter').hidden = active.length > 2;
   $('#swipeTip').hidden = !active.length || store.get('swiped') === '1';
   try { if ('setAppBadge' in navigator) groups.now.length ? navigator.setAppBadge(groups.now.length) : navigator.clearAppBadge(); } catch (e) {}
-  if (view === 'cal') renderCal();
+  if ($('#viewCal')) renderCal();
   onScroll();
-}
-function renderStarter() {
-  const ids = ['cie', 'patente', 'passaporto', 'garanzia', 'bollo', 'revisione', 'assicurazione', 'appuntamento', 'compleanno', 'abbonamento'];
-  $('#starterChips').innerHTML = ids.map(id => `<button class="chip" data-type="${id}"><span aria-hidden="true">${T(id).emoji}</span>${esc(T(id).label)}</button>`).join('');
 }
 
 // ---------- scorrendo: lo stato svanisce piano e la linea delle scadenze sale ----------
@@ -583,21 +571,34 @@ function onScroll() {
   });
 }
 window.addEventListener('scroll', onScroll, { passive: true });
+// un gesto basta: appena lasci il dito, MeMo completa il movimento nella direzione in cui stavi andando
+(() => {
+  let lastY = window.scrollY, dir = 0, touching = false, gliding = false, t = null;
+  const listTop = () => $('#listSec').offsetTop;
+  const glide = y => { gliding = true; window.scrollTo({ top: y, behavior: 'smooth' }); clearTimeout(t); t = setTimeout(() => { gliding = false; }, 650); };
+  const settle = () => {
+    if (touching || gliding || $('#listSec').hidden || $('#sheetWrap').hidden === false) return;
+    const y = window.scrollY, top = listTop();
+    if (y <= 2 || y >= top - 2) return;
+    glide(dir > 0 ? top : 0);
+  };
+  window.addEventListener('scroll', () => { const y = window.scrollY; if (y !== lastY) dir = y > lastY ? 1 : -1; lastY = y; if (!gliding) { clearTimeout(t); t = setTimeout(settle, 80); } }, { passive: true });
+  window.addEventListener('touchstart', () => { touching = true; }, { passive: true });
+  window.addEventListener('touchend', () => { touching = false; clearTimeout(t); t = setTimeout(settle, 60); }, { passive: true });
+  window.addEventListener('touchcancel', () => { touching = false; }, { passive: true });
+  window.memoGlideToList = () => glide(listTop());
+})();
 window.addEventListener('resize', () => render());
-$('#peek').addEventListener('click', () => $('#listSec').scrollIntoView({ behavior: 'smooth' }));
+$('#peek').addEventListener('click', () => window.memoGlideToList());
 
 
 // ================= Calendario =================
-let view = store.get('view') === 'cal' ? 'cal' : 'linea';
 let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
 let calSel = P.todayISO();
 const monthKey = (y, m) => `${y}-${pad(m + 1)}`;
-function setView(v, scroll) {
-  view = v; store.set('view', v);
-  $('#viewLinea').hidden = v !== 'linea'; $('#viewCal').hidden = v !== 'cal';
-  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === v));
-  render();
-  if (scroll) $('#listSec').scrollIntoView({ behavior: 'smooth' });
+function openCalendar() {
+  const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO();
+  openSheet('<h2>Calendario</h2><div id="viewCal"></div>', () => renderCal());
 }
 // le scadenze che si ripetono (bollo, compleanno...) compaiono in tutti gli anni
 function occurrencesIn(it, y, m) {
@@ -650,7 +651,7 @@ function renderCal(anim) {
       <button id="cPrev" aria-label="Mese precedente">${chev('M15 5l-7 7 7 7')}</button><button id="cNext" aria-label="Mese successivo">${chev('M9 5l7 7-7 7')}</button></div></div>
       <div class="dow">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map(x => `<span>${x}</span>`).join('')}</div>
       <div class="grid ${anim || ''}" id="cGrid">${cells}</div>
-      <div class="legend"><span><i class="marks"><i class="now"></i></i>da fare</span><span><i class="marks"><i class="soon"></i></i>in arrivo</span><span><i class="marks"><i></i></i>sotto controllo</span><span><i class="marks"><i class="rep"></i></i>si ripete</span></div></div>
+      <div class="legend"><span><i class="marks"><i class="now"></i></i>adesso</span><span><i class="marks"><i class="soon"></i></i>prossimamente</span><span><i class="marks"><i></i></i>più avanti</span><span><i class="marks"><i class="rep"></i></i>si ripete</span></div></div>
     ${keys.length ? `<div class="chips scroll cal-jump" id="cJump">${keys.map(k => `<button class="chip" data-m="${k}" aria-pressed="${k === mk}">${cap(P.parseISO(k + '-01').toLocaleDateString('it-IT', { month: 'short', year: 'numeric' }))} <span class="cnt">${months[k]}</span></button>`).join('')}</div>` : ''}
     <div class="cal-day">${selList ? `<h4>${esc(cap(selLabel))}</h4>
       ${selList.length ? `<div class="rows">${selList.map(x => calRow(x.it, x.st, x.rep)).join('')}</div>` : '<p class="cal-empty">Niente in questo giorno.</p>'}
@@ -673,8 +674,7 @@ function renderCal(anim) {
   cb.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) goMonth(dx < 0 ? 1 : -1, dx < 0 ? 'slide-l' : 'slide-r'); });
 }
-document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { haptic(); setView(b.dataset.v); }));
-$('#btnCal').addEventListener('click', () => setView('cal', true));
+$('#btnCal').addEventListener('click', () => { haptic(); openCalendar(); });
 
 // ================= Fogli =================
 let onSheetClose = null;
@@ -708,7 +708,7 @@ function toast(title, sub, actions = []) {
 function hideToast() { $('#toast').classList.remove('show'); }
 function savedToast(it) {
   const st = P.statusOf(it);
-  toast('Fatto. Puoi dimenticartelo.', st.key === 'now' ? 'È già il momento: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`);
+  toast('Fatto. Puoi dimenticartelo.', st.key === 'now' ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`);
 }
 
 // ================= Foto =================
@@ -833,7 +833,7 @@ function openEditor(draft, opts = {}) {
         const rem = P.remindAt(it), timed = !!it.time;
         const lead = state.leadMin != null ? state.leadMin : P.defaultLeadMin(it);
         const pre = ty.dateKind === 'purchase' ? `Garanzia valida fino al ${fmtLong(state.due)}. ` : '';
-        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'È già il momento di occupartene: lo metto in cima.' : `Ti avviso ${remindText(rem, timed)}, ${leadLabel(lead, timed)}.`);
+        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(rem, timed)}, ${leadLabel(lead, timed)}.`);
         const leads = body.querySelector('#eLeads'); leads.hidden = !showLeads;
         leads.innerHTML = (timed ? LEADS_TIMED : LEADS_DAYS).map(([m, l]) => `<button class="chip" data-m="${m}" aria-pressed="${m === lead}">${l}</button>`).join('');
       }
@@ -872,8 +872,6 @@ function openEditor(draft, opts = {}) {
   });
 }
 $('#btnAdd').addEventListener('click', () => openEditor({ type: 'altro', title: '', date: null }, { head: 'Nuova memo', focus: '#eTitle' }));
-$('#starterChips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; const id = c.dataset.type;
-  openEditor({ type: id, title: T(id).label, date: null }, { head: T(id).label, sub: 'Dimmi solo la data, al resto penso io.', typeLocked: true, markMissing: true }); });
 
 // ================= Voce =================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -913,7 +911,7 @@ async function submitSpeech(text) {
   const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
   const st = P.statusOf(it);
-  toast(`${it.title}, ${it.purchase ? 'garanzia fino al ' + fmtLong(it.due) : whenText(it)}`, st.key === 'now' ? 'È già il momento: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`, [
+  toast(`${it.title}, ${it.purchase ? 'garanzia fino al ' + fmtLong(it.due) : whenText(it)}`, st.key === 'now' ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`, [
     { label: 'Modifica', fn: () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, purchase: it.purchase }, { head: 'Modifica', typeLocked: true }) },
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
   ]);
@@ -965,7 +963,7 @@ async function openDetail(id) {
   const past = it.time ? st.minutesLeft < 0 : st.left < 0;
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
     : it.time ? `<b>${esc(cap(whenText(it)))}</b>, ${inWords(st.minutesLeft)}.` : `Scade <b>${esc(whenText(it))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
-  const remind = st.key === 'now' ? ' È il momento di occupartene.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
+  const remind = st.key === 'now' ? ' Te lo sto ricordando adesso.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
   const doneSub = ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
@@ -1045,7 +1043,7 @@ $('#btnSettings').addEventListener('click', openSettings);
 function showIntro() {
   const slides = [
     { art: `<div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div>`, h: 'Fai una foto.', p: "Carta d'identità, patente, scontrino, bolletta: MeMo legge da solo cos'è e quando scade." },
-    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Parla come faresti con un amico. Se preferisci scrivere, c'è il tasto Scrivi." },
+    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Tocca Dimmi e parla come faresti con un amico. Per scrivere a mano c'è il piccolo +." },
     { art: `<div class="lead-list"><div>🛂 Passaporto<span>4 mesi prima</span></div><div>🚗 Patente<span>2 mesi prima</span></div><div>💇 Parrucchiere<span>15 min prima</span></div><div>📞 Chiamare Luca<span>5 min prima</span></div></div>`, h: 'E dimenticatelo.', p: 'Ti avvisiamo noi, con il giusto anticipo per ogni cosa. Non prima del necessario.' }
   ];
   if (isIOS && !isStandalone()) slides.push({ art: `<div class="share-art"><span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg></span><svg width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6h17M14 1l5 5-5 5"/></svg><span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span></div>`, h: 'Mettila nella Home.', p: "In Safari tocca Condividi, poi «Aggiungi alla schermata Home». Si apre come un'app vera." });
@@ -1067,17 +1065,14 @@ function tick() {
   const nowD = new Date();
   for (const it of items) {
     const r = P.remindAt(it), key = it.id + '@' + r.getTime();
-    if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); haptic(); toast(`È ora: ${it.title}`, rowSub(it, P.statusOf(it, nowD))); }
+    if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); haptic(); toast(`Promemoria: ${it.title}`, rowSub(it, P.statusOf(it, nowD))); }
   }
   render();
 }
 
 // ================= Avvio =================
 (async function init() {
-  renderStarter();
   try { items = await DB.all(); } catch (e) { items = []; }
-  $('#viewLinea').hidden = view !== 'linea'; $('#viewCal').hidden = view !== 'cal';
-  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === view));
   render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if (isIOS && !isStandalone() && store.get('installHint') !== '1') $('#installHint').hidden = false;
