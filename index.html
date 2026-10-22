@@ -497,7 +497,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.23';
+const VERSION = '1.24';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1207,6 +1207,14 @@ function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove
 async function submitSpeech(text) {
   stopRec();
   const res = P.parseSpeech(text);
+  if (res.needTitle) {
+    // ho capito quando, ma non cosa: data e avviso sono già pronti, manca solo il titolo
+    const lead = res.leadMin != null ? `, con un avviso ${leadLabel(res.leadMin, !!res.time)}` : '';
+    const when = res.date ? whenText({ due: res.date, time: res.time }) : '';
+    openEditor({ type: 'altro', title: '', date: res.date || null, time: res.time || null, leadMin: res.leadMin ?? null },
+      { head: 'Manca solo una cosa', sub: when ? `Ho capito: ${when}${lead}. Dimmi solo cosa.` : 'Dimmi cosa e quando.', focus: '#eTitle' });
+    return;
+  }
   if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
   if (res.askTime && !res.time) { askTime(res, text); return; }
   saveSpoken(res, text);

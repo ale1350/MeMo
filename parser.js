@@ -324,6 +324,15 @@
     let tD = t;
     if (tm) { spans.push(tm.span); tD = t.slice(0, tm.span[0]) + ' '.repeat(tm.span[1] - tm.span[0]) + t.slice(tm.span[1]); }
 
+    // "il giorno prima del 22 novembre", "una settimana prima", "la sera prima": quanto prima avvisare
+    let leadDays = null, eveBefore = false;
+    { const lm = new RegExp(`\\b(?:per\\s+|con\\s+(?:un\\s+)?(?:avviso|anticipo)\\s+(?:di\\s+)?)?(?:(?:il|la|un|una|lo)\\s+)?(?:(\\d+|${NUMW})\\s+)?(giorn[oi]|sera|mattina|settiman[ae]|mes[ei])\\s+prima(?:\\s+(?:del|della|dello|dell'|dei|di|che))?\\b`).exec(tD);
+      if (lm) {
+        const k = lm[1] ? (/^\d+$/.test(lm[1]) ? +lm[1] : NUM_WORDS[lm[1]] || 1) : 1, u = lm[2];
+        leadDays = /^giorn/.test(u) ? k : /^settiman/.test(u) ? 7 * k : /^mes/.test(u) ? 30 * k : 1;
+        eveBefore = u === 'sera';
+        spans.push([lm.index, lm.index + lm[0].length]); tD = tD.slice(0, lm.index) + ' '.repeat(lm[0].length) + tD.slice(lm.index + lm[0].length);
+      } }
     const take = (re, fn) => {
       if (date) return;
       re.lastIndex = 0;
@@ -448,6 +457,11 @@
       if (s.length > 60) s = s.slice(0, 57).trim() + '…';
       const out = { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
       if (part && date && !time && TYPE_BY_ID[typeId].dateKind !== 'purchase') out.askTime = { part };
+      if (leadDays != null) {
+        if (time && eveBefore) { const [hh, mm] = time.split(':').map(Number); out.leadMin = hh * 60 + mm + 24 * 60 - 19 * 60; }
+        else out.leadMin = leadDays * 1440;
+        out.leadEve = eveBefore;
+      }
       return out;
     }
   }
@@ -507,7 +521,7 @@
   }
 
   // "…domani vado da Mattia alle 19, quindi ricordami di prendere il vino alle 18": il contesto prima, la cosa da fare dopo
-  const TRIGGER_RE = /(?:^|[\s,.;:!?]+)(?:(?:e|quindi|allora|poi|percio|cosi|ma)\s+)?(?:per\s+favore\s+)?(?:ricordami|ricordarmi|ricordamelo|ricordati|ricorda|non\s+(?:farmi\s+)?dimenticare|non\s+dimenticarti|fammi\s+ricordare|segnami|segnati|avvisami)\s*(di|che|:)?\s*/;
+  const TRIGGER_RE = /(?:^|[\s,.;:!?]+)(?:(?:e|quindi|allora|poi|percio|cosi|ma)\s+)?(?:per\s+favore\s+)?(?:ricordami|ricordarmi|ricordamelo|ricordati|ricorda|non\s+(?:farmi\s+)?dimenticare|non\s+dimenticarti|fammi\s+ricordare|segnami|segnati|avvisami|(?:(?:metti|mettimi|fammi|imposta|impostami|crea|creami|segna|segnami|aggiungi|programma|programmami)\s+)?(?:un|una)\s+(?:reminder|promemoria|memo|avviso|allarme|notifica))\s*(di|che|:)?\s*/;
   const DUTY_RE = /(?:[,.;:]\s*|\s+(?:quindi|allora|percio|cosi)\s+)(?:(?:e|quindi|allora|percio|cosi)\s+)?(?:devo|dovrei|dobbiamo|bisogna|mi\s+serve|ho\s+bisogno\s+di)\s+(?=\S+(?:are|ere|ire)\b)/;
   const LEAD_IN_RE = /^(?:\s*(?:ehi|ok|okay|ciao|senti|guarda|allora|dunque|niente|cioe|memo|per\s+favore|mi\s+raccomando)\b[\s,.!]*)*$/;
   function splitTask(src) {
@@ -515,6 +529,7 @@
     let m = TRIGGER_RE.exec(t), di = false;
     if (m) {
       di = m[1] === 'di' || (!m[1] && /^\s*(alle|all'|tra|fra|domani|oggi|stasera|il|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b[^]*?\bdi\s+\S+(?:are|ere|ire)\b/.test(t.slice(m.index + m[0].length)));
+      if (/reminder|promemoria|memo|avviso|allarme|notifica/.test(m[0])) di = true; // "mettimi un avviso alle 8": l'avviso è proprio alle 8
       const ctx = src.slice(0, m.index), task = src.slice(m.index + m[0].length);
       if (!task.trim()) return null;
       return { ctx: LEAD_IN_RE.test(norm(ctx)) ? '' : ctx.replace(/[\s,.;:!?]+$/, ''), task, di };
@@ -543,7 +558,7 @@
     const rm = REASON_RE.exec(norm(src));
     if (rm && rm.index > 3) { reason = src.slice(rm.index + rm[0].length); src = src.slice(0, rm.index); }
     const sp = splitTask(src);
-    if (!sp) { const r = parseOne(src, nowD, { ctx: src + ' ' + reason }); return r; }
+    if (!sp) { const r = parseOne(src, nowD, { ctx: src + ' ' + reason }); if (!r.title || r.title === 'MeMo') r.needTitle = true; return r; }
     const a = parseOne(sp.task, nowD, { noDefault: true, ctx: sp.ctx + ' ' + reason });
     const c = sp.ctx ? parseOne(sp.ctx, nowD, { noDefault: true }) : null;
     if (a.type === 'garanzia') return a.date ? a : parseOne(src, nowD);
@@ -555,6 +570,11 @@
       const onlyTime = !c.typeScore && (!c.title || c.title === 'MeMo'); // "tra un'ora ricordami di…": quello è proprio l'orario dell'avviso
       const pre = minutesBefore(norm(sp.task));
       if (onlyTime) { time = c.time; date = date || c.date; if (sp.di && !EVENT_TYPES.includes(a.type)) leadMin = 0; }
+      else if (a.leadMin != null) {                                                       // "…alle 10 dentista, avvisami la sera prima"
+        time = c.time; date = date || c.date;
+        const [hh, mm] = time.split(':').map(Number);
+        a.leadMin = a.leadEve ? hh * 60 + mm + 24 * 60 - 19 * 60 : a.leadMin;
+      }
       else if (pre != null && !date) { time = c.time; date = c.date; leadMin = pre; }       // "…un'ora prima": rispetto all'impegno
       else { date = date || c.date; if (!askTime) askTime = { part: a.askTime ? a.askTime.part : null, ctxTime: c.time }; } // altrimenti chiedo io l'ora
     } else if (!date && c) { date = c.date; if (c.askTime && !askTime) askTime = c.askTime; }
@@ -565,7 +585,9 @@
     let type = a.typeScore ? a.type : 'altro', title = a.title;
     if ((!title || title === 'MeMo') && c) { title = c.title; if (!a.typeScore) type = c.type; }
     const out = { type, title, date, time, purchase: null, confident: !!date, typeScore: a.typeScore };
-    if (leadMin != null && time) out.leadMin = leadMin;
+    if (a.leadMin != null) leadMin = a.leadMin; else if (leadMin == null && c && c.leadMin != null) leadMin = c.leadMin;
+    if (leadMin != null && (time || leadMin % 1440 === 0)) out.leadMin = leadMin;
+    if (!title || title === 'MeMo') out.needTitle = true;
     if (askTime && date && !time) out.askTime = askTime;
     return out;
   }
