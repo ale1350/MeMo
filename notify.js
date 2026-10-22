@@ -88,10 +88,15 @@
     ],
     abbonamento: [(c) => [`🔁 ${cap(c.t)}: si rinnova ${c.q}`, 'Lo usi ancora? Se no, disdici.']],
     garanzia: [(c) => [`🧾 ${cap(c.t)}: scade ${c.q}`, 'Fa i capricci? Ora o mai più.']],
+    commissione: [
+      (c) => [`${c.e} ${cap(c.t)} ${c.q}`, 'Borsa, portafoglio e via.'],
+      (c) => [J(c.hello, `${c.t} ${c.q}`), `${c.joke} Ma la spesa no.`],
+      (c) => [`${c.e} ${cap(c.t)} ${c.q}`, 'Te lo dico ora, così non torni a mani vuote.']
+    ],
     altro: [
       (c) => [J(c.hello, `${c.t} ${c.q}`), c.name ? 'Me l\'avevi chiesto tu.' : `${c.joke} Ma questa me la sono segnata.`],
-      (c) => [`📌 ${cap(c.t)} ${c.q}`, 'Memoria da pesce rosso? Ci sono io.'],
-      (c) => [`📌 ${cap(c.t)} ${c.q}`, 'Fatto il mio. Ora tocca a te.']
+      (c) => [`${c.e} ${cap(c.t)} ${c.q}`, 'Memoria da pesce rosso? Ci sono io.'],
+      (c) => [`${c.e} ${cap(c.t)} ${c.q}`, 'Fatto il mio. Ora tocca a te.']
     ]
   };
 
@@ -102,7 +107,7 @@
     const fake = pick(NAMES, seed >> 7), name = '';
     const c = {
       name, t: lc(item.title), q: when(item, at), a: ARTICLE[item.type] || lc(item.title),
-      hello: hello(fake, seed >> 3), joke: joke(fake, seed >> 5), e: opts.emoji || '⏰'
+      hello: hello(fake, seed >> 3), joke: joke(fake, seed >> 5), e: opts.emoji || (P.TYPE_BY_ID[item.type] || P.TYPE_BY_ID.altro).emoji
     };
     const list = L[item.type] || L.altro;
     const [title, body] = pick(list, seed)(c);

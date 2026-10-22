@@ -185,6 +185,22 @@ html{overflow-x:hidden}
 .setp .s-block{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7)}
 .setp .s-block .btn{background:rgba(255,255,255,.6)}
 .setp .s-block .btn.btn-main{background:var(--brand-grad);color:#fff}
+.g-steps{margin:0 0 18px;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:g}
+.g-steps li{counter-increment:g;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.g-steps li::before{content:counter(g);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--field);color:var(--brand-ink);font-weight:800;font-size:14px}
+.g-alt li::before{content:'•'}
+.g-steps li > b{display:block;font-size:16px;grid-column:2;grid-row:1}
+.g-steps li p{grid-column:2;margin:2px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.45}
+.g-steps li p b{color:var(--ink);font-weight:750}
+.g-steps code{font:600 13px ui-monospace,Menlo,monospace;background:var(--field);padding:1px 5px;border-radius:6px}
+.g-h{font-size:18px;margin:6px 0 12px}
+.s-row{display:flex;gap:14px;align-items:center;justify-content:space-between}
+.s-row p{margin-bottom:0}
+.sw{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:51px;height:31px;border-radius:16px;background:#D5DBE5;position:relative;cursor:pointer;transition:background .25s;margin:0}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.3,.9,.3,1.2)}
+.sw:checked{background:var(--brand-ink)}
+.sw:checked::after{transform:translateX(20px)}
+.sw:focus-visible{outline:3px solid var(--azure);outline-offset:2px}
 .ok-pill{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;background:rgba(47,205,190,.18);color:#118C80;font-size:12.5px;font-weight:800;vertical-align:2px}
 /* calendario leggero: vetro trasparente al posto del bianco pieno */
 .calp .cal{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(43,72,140,.07)}
@@ -499,7 +515,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.26';
+const VERSION = '1.27';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1152,7 +1168,7 @@ function joinResults(results) {
 }
 const joinText = (a, b) => [a, b].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 const MIC_SVG = '<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>';
-function openVoice() {
+function openVoice(opts = {}) {
   const examples = ['Domani alle 18 parrucchiere', 'Mi scade la patente a marzo 2028', 'Stasera vado da Luca alle 20: ricordami di prendere il vino'];
   openSheet(`<h2 style="text-align:center">Dimmi cosa ricordarti</h2>
     <button class="mic-big" id="vMic" aria-label="Parla">${MIC_SVG}</button>
@@ -1179,10 +1195,11 @@ function openVoice() {
       mic.classList.add('on'); mic.setAttribute('aria-label', 'Ho finito'); say(base ? 'Dimmi pure il resto…' : 'Parla pure, con calma: ti ascolto.');
       const ok = Ear.start({
         start: () => { started = true; },
-        result: txt => { if (!on) return; ta.value = joinText(base, txt); upd(); say('Ti ascolto… quando hai finito, fai una pausa.'); armQuiet(); },
+        result: txt => { if (!on) return; auto = false; ta.value = joinText(base, txt); upd(); say('Ti ascolto… quando hai finito, fai una pausa.'); armQuiet(); },
         error: code => {
           if (code === 'aborted' || code === 'no-speech') return;
           clear(); Ear.reset();
+          if (auto) { auto = false; idle('Tocca il microfono e parla.'); return; }
           if (code === 'not-allowed' || code === 'service-not-allowed') idle('Non riesco a usare il microfono: controlla che Safari possa usarlo e che la Dettatura sia attiva. Intanto puoi scrivere qui sotto.');
           else if (code === 'audio-capture') idle("Il microfono è occupato da un'altra app. Chiudila e tocca di nuovo qui.");
           else if (code === 'network') idle('Per capire la voce serve internet. Intanto puoi scrivere qui sotto.');
@@ -1193,12 +1210,15 @@ function openVoice() {
           if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(2500); }
           else { clear(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); } }
       });
-      if (!ok) { Ear.reset(); idle('Non riesco ad aprire il microfono. Tocca qui e riprova, oppure scrivi.'); return; }
-      armQuiet(9000); // se all'inizio non dici niente, aspetta un po' prima di arrendersi
-      watch = setTimeout(() => { if (on && !started) { Ear.reset(); idle('Il microfono non è partito. Toccalo e riprova.'); } }, 3500);
+      if (!ok) { Ear.reset(); idle(auto ? 'Tocca il microfono e parla.' : 'Non riesco ad aprire il microfono. Tocca qui e riprova, oppure scrivi.'); auto = false; return; }
+      if (auto) { // aperta da sola: se non dici niente, la scheda si chiude piano e resti sulla home
+        clearTimeout(quiet); quiet = setTimeout(() => { if (!ta.value.trim() && auto && !closed) { Ear.stop(); closeSheet(); } }, 7000);
+      } else armQuiet(9000); // se all'inizio non dici niente, aspetta un po' prima di arrendersi
+      watch = setTimeout(() => { if (on && !started) { Ear.reset(); idle(auto ? 'Tocca il microfono e parla.' : 'Il microfono non è partito. Toccalo e riprova.'); auto = false; } }, 3500);
     };
-    mic.onclick = () => { haptic(); if (on) { if (ta.value.trim()) send(); else { clear(); Ear.stop(); idle('Tocca il microfono quando vuoi parlare.'); } } else listen(); };
-    ta.addEventListener('input', () => { upd(); clearTimeout(sendT); });
+    let auto = !!opts.auto;
+    mic.onclick = () => { auto = false; haptic(); if (on) { if (ta.value.trim()) send(); else { clear(); Ear.stop(); idle('Tocca il microfono quando vuoi parlare.'); } } else listen(); };
+    ta.addEventListener('input', () => { auto = false; upd(); clearTimeout(sendT); });
     ta.addEventListener('focus', () => { if (on) { clear(); Ear.stop(); idle('Scrivi pure, poi tocca Ricordamelo.'); } else clearTimeout(quiet), clearTimeout(sendT); });
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (ta.value.trim()) { clear(); Ear.stop(); submitSpeech(ta.value); } } });
     body.querySelector('#vEx').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; clear(); Ear.stop(); idle('Tocca Ricordamelo, o il microfono per dirlo tu.'); ta.value = b.textContent; upd(); });
@@ -1463,6 +1483,7 @@ function renderSettings() {
   const nPhotos = items.filter(i => i.photoId).length;
   const body = $('#setBody');
   body.innerHTML = `
+    <div class="s-block"><div class="s-row"><div><h3>Apri e parla</h3><p>Quando apri MeMo ti ascolto subito: parli e basta. Se non dici niente, mi faccio da parte.</p></div><input type="checkbox" class="sw" id="sAuto" aria-label="Apri e parla" ${store.get('autoListen') !== '0' ? 'checked' : ''}></div></div>
     ${notifBlock()}
     <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo il momento giusto: mesi prima per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. E se non lo segni come fatto, te lo ricorda ancora.</p>
       <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button>
@@ -1478,11 +1499,43 @@ function renderSettings() {
     if (st === 'on') toast('Notifiche attive.', 'Da ora ti avviso anche ad app chiusa.');
     else if (st === 'error') toast('Non sono riuscito ad attivarle.', 'Controlla la connessione e riprova.');
   };
+  body.querySelector('#sAuto').onchange = e => { store.set('autoListen', e.target.checked ? '1' : '0'); haptic(); toast(e.target.checked ? 'Apri e parla: acceso.' : 'Apri e parla: spento.', e.target.checked ? 'Da ora, quando apri MeMo, ti ascolto subito.' : 'Per parlare, tocca Dimmi.'); };
+  const sg = body.querySelector('#sSiriGuide'); if (sg) { sg.onclick = openSiriGuide; body.querySelector('#sSiriCopy').onclick = e => copySiri(e.currentTarget); if (store.get('reg') !== '1') Push.register(); }
   body.querySelector('#sLeads').onclick = () => openLeads();
   body.querySelector('#sTest').onclick = () => testNotification();
   body.querySelector('#sExp').onclick = exportBackup;
   body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
   body.querySelector('#sIntro').onclick = () => { goPage('home'); setTimeout(showIntro, 450); };
+}
+function siriBlock() {
+  if (!MEMO_SERVER || true) return ''; // in pausa: da rivedere più semplice
+  return `<div class="s-block"><h3>Siri e Comandi Rapidi</h3><p>Aggiungi un MeMo senza aprire l'app, anche a telefono bloccato: «Ehi Siri, MeMo», un tasto sulla schermata di blocco o un doppio tocco sul retro del telefono.</p>
+    <button class="btn btn-main" id="sSiriGuide" style="margin-bottom:10px">Come si crea il comando</button>
+    <button class="btn btn-ghost" id="sSiriCopy">Copia il tuo indirizzo</button></div>`;
+}
+function copySiri(btn) {
+  const u = Push.siriUrl(), done = () => { if (btn) { btn.textContent = 'Copiato ✓'; setTimeout(() => btn.textContent = 'Copia il tuo indirizzo', 1800); } toast('Indirizzo copiato.', 'Incollalo nel comando, nel campo URL. È solo tuo: non condividerlo.'); };
+  try { navigator.clipboard.writeText(u).then(done, () => showCopyBox(u)); } catch (e) { showCopyBox(u); }
+}
+function showCopyBox(u) { openSheet(`<h2>Il tuo indirizzo</h2><p class="lead">Tieni premuto e copia. È solo tuo: non condividerlo.</p><div class="field"><textarea class="input" id="cBoxU" rows="4" readonly>${esc(u)}</textarea></div>`, b => { const t = b.querySelector('#cBoxU'); t.focus(); t.select(); }); }
+const SIRI_STEPS = [
+  ['Apri l\'app Comandi', 'È già sull\'iPhone (icona viola e blu). Tocca <b>+</b> in alto a destra e chiama il comando <b>MeMo</b>: sarà anche la parola per Siri.'],
+  ['Detta testo', 'Tocca <b>Aggiungi azione</b>, cerca <b>Detta testo</b> e aggiungila. Lingua: Italiano. «Interrompi l\'ascolto»: <b>Dopo una pausa</b>.'],
+  ['Mandalo a MeMo', 'Aggiungi <b>Ottieni contenuti dell\'URL</b>. Nel campo URL incolla il tuo indirizzo (il tasto blu qui sopra). Apri le opzioni: Metodo <b>POST</b>, Corpo richiesta <b>JSON</b>, aggiungi un campo Testo con chiave <code>text</code> e come valore la variabile <b>Testo dettato</b>.'],
+  ['Leggi la domanda', 'Aggiungi <b>Ottieni valore del dizionario</b>: chiave <code>ask</code>, da <b>Contenuti dell\'URL</b>.'],
+  ['Se c\'è una domanda', 'Aggiungi <b>Se</b>: «Valore del dizionario» <b>ha un valore</b>. Dentro il Se metti, in ordine: <b>Chiedi input</b> (testo della domanda: Valore del dizionario); <b>Ottieni contenuti dell\'URL</b> come al passo 3 ma con un secondo campo, chiave <code>answer</code> e valore <b>Input fornito</b>; <b>Ottieni valore del dizionario</b> chiave <code>say</code>; <b>Mostra risultato</b>.'],
+  ['Altrimenti', 'Nella parte <b>Altrimenti</b>: <b>Ottieni valore del dizionario</b> chiave <code>say</code> dai primi <b>Contenuti dell\'URL</b>, poi <b>Mostra risultato</b>. Fatto: prova con «Ehi Siri, MeMo».']
+];
+function openSiriGuide() {
+  openSheet(`<h2>«Ehi Siri, MeMo»</h2><p class="lead">Lo crei una volta sola, in due minuti. Poi detti un MeMo da dove vuoi: MeMo lo capisce, programma l'avviso e te lo ritrovi nell'app.</p>
+    <button class="btn btn-main" id="gCopy" style="margin-bottom:18px">Copia il tuo indirizzo</button>
+    <ol class="g-steps">${SIRI_STEPS.map(([h, t]) => `<li><b>${h}</b><p>${t}</p></li>`).join('')}</ol>
+    <h3 class="g-h">Mettilo a portata di mano</h3>
+    <ol class="g-steps g-alt">
+      <li><b>Schermata di blocco</b><p>Tieni premuta la schermata di blocco › <b>Personalizza</b> › tocca la torcia o la fotocamera in basso › <b>−</b> per toglierla › <b>+</b> › <b>Comandi Rapidi</b> › scegli <b>MeMo</b>.</p></li>
+      <li><b>Doppio tocco sul retro</b><p>Impostazioni › Accessibilità › Tocco › <b>Tocca il retro</b> › Doppio tocco › <b>MeMo</b>.</p></li>
+      <li><b>Siri a telefono bloccato</b><p>Impostazioni › Siri › attiva <b>Consenti Siri quando è bloccato</b>.</p></li>
+    </ol>`, b => { b.querySelector('#gCopy').onclick = e => copySiri(e.currentTarget); });
 }
 function notifBlock() {
   const st = Push.state();
@@ -1517,7 +1570,7 @@ $('#btnSettings').addEventListener('click', openSettings);
 function showIntro() {
   const slides = [
     { art: `<div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div>`, h: 'Fai una foto.', p: "Carta d'identità, patente, scontrino, bolletta: MeMo legge da solo cos'è e quando scade." },
-    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Tocca Dimmi e parla come faresti con un amico. Prenditi il tuo tempo: quando fai una pausa, ho capito. Per scrivere a mano c'è il +." },
+    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Appena apri MeMo ti ascolto: parla come faresti con un amico. Quando fai una pausa, ho capito. Per scrivere a mano c'è il +." },
     { art: `<div class="lead-list"><div>🛂 Passaporto<span>4 mesi prima</span></div><div>🚗 Patente<span>2 mesi prima</span></div><div>💇 Parrucchiere<span>15 min prima</span></div><div>📞 Chiamare Luca<span>5 min prima</span></div></div>`, h: 'E dimenticatelo.', p: 'Scelgo io il giusto anticipo per ogni cosa. E se non lo segni come fatto, te lo ricordo ancora.' },
     { art: `<div class="swipe-art"><div class="pg l">📅<span>Calendario</span></div><div class="pg c"><b>MeMo</b><i></i><i></i></div><div class="pg r">⚙️<span>Impostazioni</span></div><div class="hand">👆</div></div>`,
       h: 'Scorri di lato.', p: 'Verso destra trovi il calendario con tutti i tuoi MeMo. Verso sinistra, le impostazioni.' }
@@ -1545,7 +1598,7 @@ function showIntro() {
   const idx = () => Math.round(sc.scrollLeft / sc.clientWidth);
   sc.addEventListener('scroll', () => requestAnimationFrame(() => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); next.textContent = i === slides.length - 1 ? 'Inizia' : 'Avanti'; }), { passive: true });
   const close = () => { store.set('intro', '1'); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
-  next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
+  next.onclick = () => { const i = idx(); if (i >= slides.length - 1) { close(); if (store.get('autoListen') !== '0') setTimeout(() => openVoice({ auto: true }), 380); } else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
   const nb = el.querySelector('#iNotif');
   if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st; try { st = await Push.enable(); } catch (e) { st = 'error'; }
@@ -1666,8 +1719,27 @@ const Push = (() => {
       const j = await r.json(); return j && j.ok ? j.result : null;
     } finally { clearTimeout(t); }
   }
-  return { state, enable, sync, later, test, understand };
+  // Siri: il telefono si presenta al server una volta, poi il Comando Rapido usa il suo indirizzo personale
+  async function register() { if (!MEMO_SERVER) return; try { await post('/register', { tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome' }); store.set('reg', '1'); } catch (e) {} }
+  const siriUrl = () => { const m = me(); return `${MEMO_SERVER}/in/${m.device}.${m.token}`; };
+  async function take() { if (!MEMO_SERVER || store.get('reg') !== '1') return []; try { const j = await post('/inbox/take', {}); return j.items || []; } catch (e) { return []; } }
+  return { state, enable, sync, later, test, understand, register, siriUrl, take };
 })();
+function autoListen() {
+  if (store.get('autoListen') === '0' || navigator.webdriver) return;
+  if (document.querySelector('.intro') || !$('#sheetWrap').hidden || page !== 'home' || document.hidden) return;
+  openVoice({ auto: true });
+}
+// i MeMo detti a Siri arrivano dal server: si aggiungono alla lista
+let importing = false;
+async function importInbox() {
+  if (importing) return; importing = true;
+  try {
+    const got = await Push.take(), fresh = got.filter(it => it && it.id && !items.some(x => x.id === it.id));
+    for (const it of fresh) { await DB.put(it); items.push(it); }
+    if (fresh.length) { render(); toast(fresh.length === 1 ? `Da Siri: ${fresh[0].title}` : `Da Siri: ${fresh.length} MeMo nuovi`, fresh.length === 1 ? `${cap(whenText(fresh[0]))}. Ce l'ho io.` : fresh.map(x => x.title).slice(0, 3).join(', ') + '.'); }
+  } finally { importing = false; }
+}
 // aprendo una notifica si apre il MeMo giusto
 function openFromUrl(u) { try { const id = new URL(u, location.href).searchParams.get('memo'); if (id && items.some(i => i.id === id)) { goPage('home', 0, true); openDetail(id); } } catch (e) {} }
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'open') openFromUrl(e.data.url); });
@@ -1720,7 +1792,14 @@ function tick() {
   $('#installClose').onclick = () => { $('#installHint').hidden = true; store.set('installHint', '1'); };
   if (store.get('intro') !== '1' && !new URLSearchParams(location.search).has('nointro')) showIntro();
   openFromUrl(location.href);
-  Push.sync();
+  if (MEMO_SERVER && store.get('reg') !== '1') Push.register();
+  importInbox().finally(() => Push.sync());
+  window.addEventListener('online', () => Push.sync()); // tornata la connessione: aggiorno gli avvisi rimasti indietro
+  // apri e parla: appena apri MeMo (o ci torni dopo un po'), ti ascolto subito
+  if (!document.querySelector('.intro') && !new URLSearchParams(location.search).has('memo')) setTimeout(autoListen, 450);
+  let hiddenAt = 0;
+  document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 60000) setTimeout(autoListen, 350); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) importInbox().finally(() => Push.sync()); });
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
