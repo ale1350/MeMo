@@ -87,7 +87,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .hero h1 .h2l{display:block;white-space:nowrap}
 .hero h1 .brandw{background:linear-gradient(120deg,#2F6BF2,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{font-size:16.5px;line-height:1.45;color:var(--ink-2);margin:0 auto;max-width:30ch;text-wrap:pretty}
-.peek{position:fixed;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
+.peek{position:fixed;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
 .peek svg{animation:cue 2.4s ease-in-out infinite}
 @keyframes cue{50%{transform:translateY(4px)}}
 
@@ -192,7 +192,7 @@ html{overflow-x:hidden}
 .calp .chip{box-shadow:none}
 .calp .day:active{background:rgba(255,255,255,.5)}
 .calp .add-day{border-color:rgba(76,141,246,.35);background:rgba(255,255,255,.18)}
-.dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
+.dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
 .dock .rb{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:750;color:var(--ink-2)}
 .dock .c{display:grid;place-items:center;border-radius:50%;transition:transform .15s}
 .dock .photo .c{width:62px;height:62px;color:#fff;background:linear-gradient(135deg,#4C8DF6,#2FCDBE);box-shadow:0 10px 24px rgba(47,205,190,.35), inset 0 1px 0 rgba(255,255,255,.3)}
@@ -497,7 +497,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.22';
+const VERSION = '1.23';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1650,6 +1650,32 @@ function tick() {
   }
   render();
 }
+
+// ================= Tastiera chiusa: lo schermo torna intero =================
+// Sull'iPhone, nelle app sulla Home, quando la tastiera si chiude a volte la pagina resta "corta"
+// e i tasti in basso restano sollevati. Qui si costringe il telefono a ricalcolare tutto.
+(() => {
+  const vv = window.visualViewport;
+  const fixFixed = () => {
+    const y = window.scrollY;
+    window.scrollTo(0, y + 1); window.scrollTo(0, y);
+    for (const el of document.querySelectorAll('.dock, .peek, .bar')) { el.style.display = 'none'; void el.offsetHeight; el.style.display = ''; }
+    gapFix();
+  };
+  // rete di sicurezza: se lo schermo visibile è più alto della pagina, i tasti scendono della differenza
+  const gapFix = () => {
+    if (!vv) return;
+    const gap = Math.max(0, Math.round(vv.height + vv.offsetTop - window.innerHeight));
+    document.documentElement.style.setProperty('--kbfix', (gap > 2 ? gap : 0) + 'px');
+  };
+  let typing = false;
+  document.addEventListener('focusin', e => { if (e.target.matches('input, textarea')) typing = true; });
+  document.addEventListener('focusout', e => { if (!e.target.matches('input, textarea')) return; typing = false;
+    setTimeout(() => { if (!typing) fixFixed(); }, 80); setTimeout(() => { if (!typing) fixFixed(); }, 450); });
+  if (vv) { let h = vv.height; vv.addEventListener('resize', () => { if (vv.height - h > 120 && !typing) setTimeout(fixFixed, 60); h = vv.height; gapFix(); }); }
+  window.addEventListener('pageshow', fixFixed);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(fixFixed, 60); });
+})();
 
 // ================= Avvio =================
 (async function init() {
