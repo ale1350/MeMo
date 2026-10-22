@@ -27,7 +27,7 @@
   --dock:rgba(255,255,255,.8); --dock-stroke:rgba(18,24,38,.06); --dock-ink:#121826; --side:#EEF2F8;
   --cam:var(--brand-grad); --cam-ink:#fff; --cam-glow:0 0 0 6px rgba(76,141,246,.14), 0 12px 30px rgba(91,97,255,.38);
   --btn-bg:var(--brand-grad); --btn-ink:#fff; --toast-bg:#121826; --toast-ink:#fff;
-  --calm:#2FCDBE; --calm-2:#7B61FF; --soon:#4C8DF6; --soon-2:#7B61FF; --now:#7B61FF; --now-2:#4C8DF6; --empty:#7B61FF; --empty-2:#2FCDBE;
+  --calm:#5B8DF6; --calm-2:#8C7BFF; --soon:#4C8DF6; --soon-2:#7B61FF; --now:#7B61FF; --now-2:#4C8DF6; --empty:#7B61FF; --empty-2:#5BA4F7;
   --now-ink:#5B43E0; --soon-ink:#2F6FE0; --thread:#4C8DF6;
   --aurora:.38; --ring-track:rgba(18,24,38,.06); --ring-w:7; --num-w:850; --num-fill:linear-gradient(165deg,#121826 32%,var(--mood2) 70%,var(--mood1)); --glow:none;
   --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -75,7 +75,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .ring .num{font-size:clamp(70px,24vw,112px);line-height:.9;font-weight:var(--num-w);letter-spacing:-.06em;background:var(--num-fill);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
 .ring .unit{font-size:14.5px;font-weight:700;color:var(--ink-2);margin-top:10px}
-.ring .knot{width:46%;color:var(--mood1)}
+.ring .knot{width:64%;filter:drop-shadow(0 10px 18px rgba(242,87,58,.22));animation:swim 5s ease-in-out infinite}
+@keyframes swim{50%{transform:translate(4px,-5px) rotate(-3deg)}}
 .hero h1{font-size:clamp(25px,7vw,32px);line-height:1.08;font-weight:800;letter-spacing:-.025em;margin:0 0 10px;text-wrap:balance}
 .hero h1 .h2l{display:block;white-space:nowrap}
 .hero h1 .brandw{background:linear-gradient(120deg,#7B61FF,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -162,6 +163,23 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .top-actions{display:flex;align-items:center}
 
+/* ---------- calendario: pagina affiancata a sinistra, stesso sfondo ---------- */
+:root{--hx:0px}
+.hero,.list-sec,.peek,.bar{translate:var(--hx) 0}
+.calp{position:fixed;inset:0;z-index:11;background:transparent;overflow-y:auto;overscroll-behavior:contain;translate:calc(var(--hx) - 100vw) 0;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(170px + env(safe-area-inset-bottom));pointer-events:none}
+.calp.open{pointer-events:auto}
+body.slide .hero,body.slide .list-sec,body.slide .peek,body.slide .bar,body.slide .calp{transition:translate .5s cubic-bezier(.22,.9,.22,1)}
+html,body{overflow-x:clip}
+html{overflow-x:hidden}
+.calp-head{display:flex;align-items:center;justify-content:space-between;max-width:620px;margin:0 auto 10px;min-height:44px}
+.calp-head h2{margin:0;font-size:27px;font-weight:800;letter-spacing:-.025em}
+.calp-head .icon-btn{margin-right:-10px;color:var(--ink)}
+/* calendario leggero: vetro trasparente al posto del bianco pieno */
+.calp .cal{background:rgba(255,255,255,.38);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(43,72,140,.07)}
+.calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
+.calp .chip{box-shadow:none}
+.calp .day:active{background:rgba(255,255,255,.5)}
+.calp .add-day{border-color:rgba(76,141,246,.35);background:rgba(255,255,255,.18)}
 .dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
 .dock .rb{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:750;color:var(--ink-2)}
 .dock .c{display:grid;place-items:center;border-radius:50%;transition:transform .15s}
@@ -274,7 +292,8 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 #toastActions{flex:1 0 100%;display:flex;gap:8px;justify-content:flex-end}
 #toastActions:empty{display:none}
 .toast button{color:inherit;font-weight:800;padding:9px 14px;border-radius:14px;font-size:15px;background:color-mix(in srgb, currentColor 10%, transparent)}
-.toast svg{flex:0 0 46px;height:27px;width:46px;color:#5FE0D3}
+.toast .tie{flex:0 0 34px;height:34px;border-radius:9px;overflow:hidden}
+.toast .tie svg{width:34px;height:34px;display:block}
 .tie use{stroke-dasharray:240;stroke-dashoffset:240}
 .toast.show .tie use{animation:tie .9s .1s cubic-bezier(.6,0,.2,1) forwards}
 @keyframes tie{to{stroke-dashoffset:0}}
@@ -322,12 +341,19 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </svg>
 
 <header class="bar">
-  <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="url(#lg)"/><g transform="translate(50 50) translate(-49 -51)"><path d="M30 51 L13 38 Q11 51 13 64 Z" fill="#FF8A5B" stroke="#FF8A5B" stroke-width="4" stroke-linejoin="round"/>
-<ellipse cx="50" cy="51" rx="25" ry="18" fill="#FF8A5B"/>
-<path d="M44 34 Q52 26 60 35" fill="#FF8A5B"/>
-<circle cx="62" cy="47" r="5.5" fill="#fff"/><circle cx="63.5" cy="47" r="2.8" fill="#2A2F66"/>
-<circle cx="81" cy="34" r="3.5" fill="none" stroke="#fff" stroke-width="2.6"/>
-<circle cx="86" cy="21" r="5" fill="none" stroke="#fff" stroke-width="2.6"/></g></svg>MeMo</div>
+  <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+<g class="fishbody" transform="rotate(-16 54 54)">
+  <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
+  <g clip-path="url(#lbody)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
+  <circle cx="67.5" cy="48.5" r="7" fill="#fff"/>
+  <circle cx="69.2" cy="46.4" r="3.7" fill="#1F2552"/>
+  <circle cx="70.6" cy="45" r="1.3" fill="#fff"/>
+  <ellipse cx="73" cy="58" rx="3.2" ry="2.1" fill="#FF5E7E" opacity=".4"/>
+</g>
+<circle cx="80" cy="25" r="4.2" fill="none" stroke="#fff" stroke-width="2.4"/>
+<circle cx="87" cy="15" r="2.6" fill="none" stroke="#fff" stroke-width="2.2"/></g></g></svg>MeMo</div>
   <div class="mini" aria-hidden="true"><span class="dot"></span><span id="miniTxt"></span></div>
   <div class="top-actions"><button class="icon-btn" id="btnCal" aria-label="Calendario">
     <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/></svg>
@@ -346,7 +372,19 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
         <circle class="arc" id="ringArc" cx="100" cy="100" r="92" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 100 100)"/>
       </svg>
       <div class="center"><div class="num" id="heroNum"></div><div class="unit" id="heroUnit"></div>
-        <svg class="knot" id="heroKnot" viewBox="0 0 68 40" aria-hidden="true" hidden><use href="#knotPath" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <svg class="knot fish" id="heroKnot" hidden viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50 50) scale(0.9937158028566798) translate(-50.43 -56.67)"><defs><clipPath id="hbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+<g class="fishbody" transform="rotate(-16 54 54)">
+  <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
+  <g clip-path="url(#hbody)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
+  <circle cx="67.5" cy="48.5" r="7" fill="#fff"/>
+  <circle cx="69.2" cy="46.4" r="3.7" fill="#1F2552"/>
+  <circle cx="70.6" cy="45" r="1.3" fill="#fff"/>
+  <ellipse cx="73" cy="58" rx="3.2" ry="2.1" fill="#FF5E7E" opacity=".4"/>
+</g>
+<circle cx="80" cy="25" r="4.2" fill="none" stroke="#8DA6F5" stroke-width="2.4"/>
+<circle cx="87" cy="15" r="2.6" fill="none" stroke="#8DA6F5" stroke-width="2.2"/></g></svg></div>
     </div>
     <h1 id="heroTitle"></h1>
     <p id="heroSub"></p>
@@ -366,6 +404,10 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
   </div>
 </section>
 
+<section class="calp" id="calPanel" aria-hidden="true" aria-label="Calendario">
+  <div class="calp-head"><h2>Calendario</h2><button class="icon-btn" id="calBack" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="wrap" id="viewCal"></div>
+</section>
 <nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
   <button class="rb voice" id="btnVoice"><span class="c"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
@@ -383,7 +425,19 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 
 <button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
 <div class="toast" id="toast" role="status" aria-live="polite">
-  <svg class="tie" viewBox="0 0 68 40" aria-hidden="true"><use href="#knotPath" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="tie"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+<g class="fishbody" transform="rotate(-16 54 54)">
+  <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
+  <g clip-path="url(#lbody)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
+  <circle cx="67.5" cy="48.5" r="7" fill="#fff"/>
+  <circle cx="69.2" cy="46.4" r="3.7" fill="#1F2552"/>
+  <circle cx="70.6" cy="45" r="1.3" fill="#fff"/>
+  <ellipse cx="73" cy="58" rx="3.2" ry="2.1" fill="#FF5E7E" opacity=".4"/>
+</g>
+<circle cx="80" cy="25" r="4.2" fill="none" stroke="#fff" stroke-width="2.4"/>
+<circle cx="87" cy="15" r="2.6" fill="none" stroke="#fff" stroke-width="2.2"/></g></g></svg></span>
   <div class="msg" id="toastMsg"></div>
   <div id="toastActions"></div>
 </div>
@@ -394,7 +448,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.9';
+const VERSION = '1.15';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -485,7 +539,7 @@ function countParts(it, st) {
 }
 function rowSub(it, st) {
   if (st.key === 'now') {
-    if (it.time) return st.minutesLeft >= 0 ? `${cap(whenText(it))}, ${inWords(st.minutesLeft)}` : `Era ${whenText(it)}`;
+    if (it.time) return st.minutesLeft >= 0 ? cap(whenText(it)) : `Era ${whenText(it)}`;
     const exp = ['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'abbonamento', 'bolletta', 'garanzia'].includes(it.type);
     if (st.left < 0) return exp ? `Scaduto il ${fmtDay(it.due)}` : `Era il ${fmtDay(it.due)}`;
     if (st.left <= 1) return exp ? `Scade ${dayWord(it.due)}` : cap(dayWord(it.due));
@@ -503,6 +557,8 @@ function countUp(el, to) {
   requestAnimationFrame(step);
 }
 let rowObserver = null;
+const CALM_LINES = ['Tutto sotto controllo.', 'Ho tutto sotto pinna.', 'Me lo sono segnato io.', 'Tranquillo, ce l\'ho io.', 'Lascia fare a me.', 'Tu vivi, io ricordo.', 'Nessun pensiero: ci sono io.'];
+const CALM_LINE = CALM_LINES[Math.floor(Math.random() * CALM_LINES.length)];
 function render() {
   const nowD = new Date();
   const active = items.map(i => ({ i, s: P.statusOf(i, nowD) })).sort((a, b) => P.dueAt(a.i) - P.dueAt(b.i));
@@ -525,26 +581,29 @@ function render() {
     showNum(true); fill = 100; countUp(num, n);
     unit.textContent = allToday ? 'MeMo per oggi' : (n === 1 ? 'MeMo da ricordare' : 'MeMo da ricordare');
     h.textContent = n === 1 ? first.i.title : `${first.i.title} e ${n === 2 ? "un'altra cosa" : (n - 1) + ' altre cose'}`;
-    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Al resto penso io.` : 'Li trovi qui sotto. Al resto penso io.';
+    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Ci penso io.` : 'Li trovi qui sotto. Ci penso io.';
     mini.textContent = `${n} MeMo ${allToday ? 'per oggi' : 'da ricordare'}`;
   } else {
-    const next = active.slice().sort((a, b) => a.s.remind - b.s.remind)[0];
-    const mins = Math.max(0, Math.round((next.s.remind - nowD) / 60000));
-    showNum(true);
-    if (mins < 24 * 60) {
-      const hrs = Math.floor(mins / 60);
-      if (hrs >= 1) { countUp(num, hrs); unit.textContent = hrs === 1 ? 'ora tranquilla' : 'ore tranquille'; }
-      else { countUp(num, mins); unit.textContent = 'minuti tranquilli'; }
-      fill = Math.max(6, mins / (24 * 60) * 100);
-      mini.textContent = `Tranquillo fino alle ${hm(next.s.remind)}`;
+    // quanti MeMo ci sono nel prossimo giorno che ne ha: oggi, domani, oppure tra qualche giorno
+    const today = P.todayISO(), next = active[0], day = next.i.due;
+    const sameDay = active.filter(x => x.i.due === day), n = sameDay.length;
+    const days = P.diffDays(today, day);
+    fill = 100;
+    if (days > 183) {
+      showNum(false);
+      h.textContent = 'Troppo in là anche solo per ricordartelo.';
+      p.textContent = `Il prossimo MeMo è a ${fmtMonth(day)}. Ci penso io.`;
+      mini.textContent = 'Niente in vista';
     } else {
-      const d = P.diffDays(P.todayISO(), P.toISO(next.s.remind));
-      countUp(num, d); unit.textContent = d === 1 ? 'giorno tranquillo' : 'giorni tranquilli';
-      fill = Math.max(8, Math.min(100, d / 90 * 100));
-      mini.textContent = d === 1 ? 'Tranquillo fino a domani' : `Tranquillo per ${d} giorni`;
+      showNum(true); countUp(num, n);
+      const when = days <= 0 ? 'per oggi' : days === 1 ? 'per domani' : days < 45 ? `tra ${days} giorni` : `tra ${Math.round(days / 30.44)} mesi`;
+      unit.textContent = `MeMo ${when}`;
+      h.textContent = CALM_LINE;
+      const t = sameDay.map(x => `«${x.i.title}»`);
+      const names = n <= 3 ? (n === 1 ? t[0] : t.slice(0, -1).join(', ') + ' e ' + t[n - 1]) : `${t[0]}, ${t[1]} e altri ${n - 2}`;
+      p.textContent = `${names}. ${n === 1 ? 'Te lo ricordo' : 'Te li ricordo'} io, al momento giusto.`;
+      mini.textContent = `${n} MeMo ${when}`;
     }
-    h.textContent = 'Puoi dimenticarti tutto.';
-    p.textContent = `Il prossimo avviso è per «${next.i.title}», ${remindText(next.s.remind, !!next.i.time)}.`;
   }
   requestAnimationFrame(() => arc.style.strokeDashoffset = String(100 - fill));
 
@@ -575,7 +634,7 @@ function render() {
   } else list.querySelectorAll('.row-wrap').forEach(el => el.classList.add('in'));
   $('#swipeTip').hidden = !active.length || store.get('swiped') === '1';
   try { if ('setAppBadge' in navigator) groups.now.length ? navigator.setAppBadge(groups.now.length) : navigator.clearAppBadge(); } catch (e) {}
-  if ($('#viewCal')) renderCal();
+  if (calOpen) renderCal();
   onScroll();
 }
 
@@ -624,10 +683,56 @@ $('#peek').addEventListener('click', () => window.memoGlideToList());
 let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
 let calSel = P.todayISO();
 const monthKey = (y, m) => `${y}-${pad(m + 1)}`;
+let calOpen = false;
 function openCalendar() {
   const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO();
-  openSheet('<h2>Calendario</h2><div id="viewCal"></div>', () => renderCal());
+  renderCal(); setCal(true);
 }
+// la home e il calendario sono due pagine affiancate: --hx sposta entrambe insieme
+const setHX = px => document.documentElement.style.setProperty('--hx', px + 'px');
+let slideT;
+function setCal(open) {
+  calOpen = open; const el = $('#calPanel');
+  document.body.classList.add('slide'); clearTimeout(slideT); slideT = setTimeout(() => document.body.classList.remove('slide'), 520);
+  setHX(open ? window.innerWidth : 0);
+  el.classList.toggle('open', open); el.setAttribute('aria-hidden', String(!open));
+  document.body.classList.toggle('cal-on', open);
+  if (open) { el.scrollTop = 0; haptic(); }
+}
+window.addEventListener('resize', () => { if (calOpen) setHX(window.innerWidth); });
+// swipe verso destra dalla home: la home scivola a destra e il calendario entra da sinistra; swipe verso sinistra per tornare
+(() => {
+  let x0 = null, y0 = 0, mode = null, dx = 0, from = null, lastX = 0, lastT = 0, vx = 0;
+  const W = () => window.innerWidth;
+  const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; };
+  const move = e => {
+    if (x0 == null) return; const t = e.touches[0]; const mx = t.clientX - x0, my = t.clientY - y0;
+    if (!mode && (Math.abs(mx) > 8 || Math.abs(my) > 8)) {
+      mode = Math.abs(mx) > Math.abs(my) * 1.2 && ((from === 'home' && mx > 0) || (from === 'cal' && mx < 0)) ? 'x' : 'y';
+      if (mode === 'x' && from === 'home') { const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO(); renderCal(); $('#calPanel').scrollTop = 0; }
+    }
+    if (mode !== 'x') return;
+    const now = performance.now(); vx = (t.clientX - lastX) / Math.max(1, now - lastT); lastX = t.clientX; lastT = now;
+    dx = mx; document.body.classList.remove('slide');
+    setHX(Math.max(0, Math.min(W(), from === 'home' ? dx : W() + dx)));
+  };
+  const end = () => {
+    if (x0 == null) return; x0 = null;
+    if (mode !== 'x') return;
+    // decide in base a quanto e quanto in fretta hai spostato il dito
+    if (from === 'home') setCal(dx > W() * 0.3 || vx > 0.45); else setCal(!(dx < -W() * 0.3 || vx < -0.45));
+  };
+  document.addEventListener('touchstart', e => {
+    if (calOpen || !$('#sheetWrap').hidden || document.querySelector('.intro')) return;
+    if (e.target.closest('.dock, .chips.scroll, .nb, #calPanel')) return;
+    start(e, 'home');
+  }, { passive: true });
+  $('#calPanel').addEventListener('touchstart', e => { if (!calOpen || e.target.closest('#cBox, .chips.scroll')) return; start(e, 'cal'); }, { passive: true });
+  document.addEventListener('touchmove', move, { passive: true });
+  document.addEventListener('touchend', end, { passive: true });
+  document.addEventListener('touchcancel', end, { passive: true });
+  $('#calBack').addEventListener('click', () => setCal(false));
+})();
 // le scadenze che si ripetono (bollo, compleanno...) compaiono in tutti gli anni
 function occurrencesIn(it, y, m) {
   const rec = T(it.type).recur, start = `${monthKey(y, m)}-01`, end = `${monthKey(y, m)}-${pad(P.lastDay(y, m + 1))}`, out = [];
@@ -924,7 +1029,10 @@ function openVoice() {
     try {
       rec = new SR(); rec.lang = 'it-IT'; rec.interimResults = true; rec.continuous = false;
       let gotAny = false;
-      rec.onresult = e => { gotAny = true; let t = ''; for (const r of e.results) t += r[0].transcript; ta.value = t.trim(); upd(); };
+      let quiet = null;
+      // quando smetti di parlare per un attimo, MeMo chiude il microfono e crea il MeMo
+      rec.onresult = e => { gotAny = true; let t = ''; for (const r of e.results) t += r[0].transcript; ta.value = t.trim(); upd();
+        clearTimeout(quiet); quiet = setTimeout(() => { if (!rec) return; stopRec(); mic.classList.remove('on'); if (ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 350); } }, 1600); };
       rec.onerror = () => { rec = null; fallback(); };
       rec.onend = () => { mic.classList.remove('on'); const r = rec; rec = null;
         if (r && gotAny && ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 500); }
@@ -933,8 +1041,9 @@ function openVoice() {
     } catch (e) { fallback(); }
   });
 }
-function stopRec() { if (rec) { const r = rec; rec = null; try { r.abort(); } catch (e) {} } }
+function stopRec() { if (rec) { const r = rec; rec = null; r.onresult = r.onend = r.onerror = null; try { r.stop(); } catch (e) {} try { r.abort(); } catch (e) {} } const m = $('#vMic'); if (m) m.classList.remove('on'); }
 async function submitSpeech(text) {
+  stopRec();
   const res = P.parseSpeech(text);
   if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
   const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };

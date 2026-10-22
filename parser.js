@@ -77,7 +77,7 @@
       ask: 'Quando si rinnova?',
       todo: "Se non lo usi più, disdicilo prima del rinnovo. Se lo usi, non devi fare niente.",
       link: null,
-      kw: [[/abboname/, 5], [/rinnovo\s*automatic/, 5], [/netflix|spotify|disney|dazn|icloud|amazon\s*prime|youtube\s*premium|palestra/, 5], [/\bdisdett|\bdisdir/, 3]] },
+      kw: [[/abboname/, 5], [/rinnovo\s*automatic/, 5], [/netflix|spotify|disney|dazn|icloud|amazon\s*prime|youtube\s*premium/, 5], [/\bdisdett|\bdisdir/, 3]] },
     { id: 'bolletta', label: 'Pagamento', emoji: '💡', lead: 3, recur: null, dateKind: 'expiry', done: 'archive',
       ask: 'Entro quando va pagato?',
       todo: "Pagalo o controlla che l'addebito automatico sia attivo.",
