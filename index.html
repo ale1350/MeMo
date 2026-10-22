@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MeMo</title>
 <meta name="description" content="Fai una foto, detta una scadenza e dimenticatela: ti avvisa MeMo quando è il momento.">
-<meta name="theme-color" content="#F3F6FA">
+<meta name="theme-color" content="#CFDCF1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MeMo">
@@ -50,7 +50,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 /* ---------- luce di sfondo ---------- */
 .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:calc(var(--aurora) * (1 - var(--p, 0) * .55))}
 .aurora i{position:absolute;width:95vmax;height:95vmax;border-radius:50%}
-.aurora i:nth-child(1){background:radial-gradient(circle, var(--mood1) 0%, transparent 58%);top:-48vmax;left:-38vmax;animation:drift1 19s ease-in-out infinite alternate}
+.aurora i:nth-child(1){background:radial-gradient(circle, var(--mood1) 0%, transparent 62%);top:-50vmax;left:-38vmax;animation:drift1 19s ease-in-out infinite alternate}
 .aurora i:nth-child(2){background:radial-gradient(circle, var(--mood2) 0%, transparent 58%);top:-18vmax;right:-55vmax;animation:drift2 23s ease-in-out infinite alternate;opacity:.75}
 /* ogni tanto un pesciolino passa lontano, sullo sfondo */
 .swimmer{position:fixed;left:0;top:0;z-index:0;pointer-events:none;opacity:0;width:40px;height:40px;margin:-20px 0 0 -20px;will-change:transform}
@@ -58,12 +58,10 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .swimmer svg{width:100%;height:100%;overflow:visible}
 .swimmer .tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .22s ease-in-out infinite alternate}
 @keyframes swTail{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
-@keyframes drift1{to{transform:translate(18vmax,14vmax) scale(1.12)}}
+@keyframes drift1{to{transform:translate(18vmax,7vmax) scale(1.12)}}
 @keyframes drift2{to{transform:translate(-14vmax,18vmax) scale(.92)}}
 
 /* ---------- barra in alto ---------- */
-/* l'iPhone colora da sé la fascia dell'orologio: qui la si raccorda al cielo di MeMo, senza stacco */
-.topfade{position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 96px);z-index:9;pointer-events:none;background:linear-gradient(180deg,#D8DFEC 0%,rgba(216,223,236,.78) 28%,rgba(216,223,236,.32) 62%,rgba(216,223,236,0) 100%)}
 .bar{position:fixed;top:0;left:0;right:0;z-index:10;height:calc(env(safe-area-inset-top) + 54px);padding:env(safe-area-inset-top) 10px 0 18px;display:flex;align-items:center;justify-content:space-between}
 .bar::before{content:"";position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 72%, transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);opacity:var(--p2, 0)}
 .brand{position:relative;display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;letter-spacing:-.01em;opacity:calc(1 - var(--p2, 0))}
@@ -400,7 +398,6 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </head>
 <body data-mood="empty">
 <div class="aurora" aria-hidden="true"><i></i><i></i></div>
-<div class="topfade" aria-hidden="true"></div>
 <div class="swimmer" id="swimmer" aria-hidden="true"><div class="bob"><svg viewBox="8 26 80 52"><defs><clipPath id="swb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
 <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
