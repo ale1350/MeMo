@@ -21,7 +21,8 @@
     const due = P.dueAt(item), min = Math.round((due - at) / 60000);
     const today = P.toISO(at), d = P.diffDays(today, item.due);
     const t = item.time ? item.time.replace(/^0/, '') : '';
-    if (item.time && min >= 0 && min < 60) return min <= 1 ? 'tra un minuto' : `tra ${min} min`;
+    if (item.time && min <= 0 && min > -30) return 'adesso';
+    if (item.time && min > 0 && min < 60) return min === 1 ? 'tra un minuto' : `tra ${min} min`;
     if (item.time && min >= 60 && min < 180) { const h = Math.round(min / 60); return h === 1 ? "tra un'ora" : `tra ${h} ore`; }
     if (d === 0) return item.time ? `oggi alle ${t}` : 'oggi';
     if (d === 1) return item.time ? `domani alle ${t}` : 'domani';

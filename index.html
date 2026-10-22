@@ -184,6 +184,8 @@ html{overflow-x:hidden}
 .setp{translate:calc(var(--hx) + 100vw) 0}
 .setp .s-block{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7)}
 .setp .s-block .btn{background:rgba(255,255,255,.6)}
+.setp .s-block .btn.btn-main{background:var(--brand-grad);color:#fff}
+.ok-pill{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;background:rgba(47,205,190,.18);color:#118C80;font-size:12.5px;font-weight:800;vertical-align:2px}
 /* calendario leggero: vetro trasparente al posto del bianco pieno */
 .calp .cal{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(43,72,140,.07)}
 .calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
@@ -483,7 +485,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.20';
+const VERSION = '1.21';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -682,6 +684,7 @@ function render() {
   try { if ('setAppBadge' in navigator) groups.now.length ? navigator.setAppBadge(groups.now.length) : navigator.clearAppBadge(); } catch (e) {}
   if (calOpen) renderCal();
   onScroll();
+  Push.later();
 }
 
 // ---------- scorrendo: lo stato svanisce piano e la linea delle scadenze sale ----------
@@ -1424,6 +1427,7 @@ function renderSettings() {
   const nPhotos = items.filter(i => i.photoId).length;
   const body = $('#setBody');
   body.innerHTML = `
+    ${notifBlock()}
     <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo il momento giusto: mesi prima per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. E se non lo segni come fatto, te lo ricorda ancora.</p>
       <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button>
       <button class="btn btn-ghost" id="sTest">Prova una notifica</button></div>
@@ -1431,11 +1435,30 @@ function renderSettings() {
     <div class="s-block"><h3>Backup</h3><p>Salva una copia ogni tanto, foto comprese, e tienila su iCloud Drive.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
     <button class="btn btn-ghost" id="sIntro" style="background:rgba(255,255,255,.5)">Rivedi come funziona</button><p class="fine">MeMo · versione ${VERSION}</p>`;
+  const nb = body.querySelector('#sNotif');
+  if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st;
+    try { st = await Push.enable(); } catch (e) { st = 'error'; }
+    renderSettings();
+    if (st === 'on') toast('Notifiche attive.', 'Da ora ti avviso anche ad app chiusa.');
+    else if (st === 'error') toast('Non sono riuscito ad attivarle.', 'Controlla la connessione e riprova.');
+  };
   body.querySelector('#sLeads').onclick = () => openLeads();
   body.querySelector('#sTest').onclick = () => testNotification();
   body.querySelector('#sExp').onclick = exportBackup;
   body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
   body.querySelector('#sIntro').onclick = () => { goPage('home'); setTimeout(showIntro, 450); };
+}
+function notifBlock() {
+  const st = Push.state();
+  if (st === 'noserver') return '';
+  const txt = {
+    on: 'Ti avviso anche quando MeMo è chiusa, sulla schermata di blocco.',
+    off: 'Attivale per ricevere gli avvisi anche ad app chiusa, sulla schermata di blocco.',
+    install: 'Per riceverle, aggiungi MeMo alla schermata Home (Condividi › «Aggiungi alla schermata Home») e aprila da lì.',
+    denied: "Sono bloccate. Riattivale da Impostazioni dell'iPhone › Notifiche › MeMo.",
+    nosupport: 'Questo telefono non le supporta. Serve iOS 16.4 o più recente.'
+  }[st];
+  return `<div class="s-block"><h3>Notifiche${st === 'on' ? ' <span class="ok-pill">attive</span>' : ''}</h3><p>${txt}</p>${st === 'off' ? '<button class="btn btn-main" id="sNotif">Attiva le notifiche</button>' : ''}</div>`;
 }
 function openSettings() { renderSettings(); goPage('set'); }
 async function exportBackup() {
@@ -1519,11 +1542,74 @@ function sampleItem() {
   const d = new Date(Date.now() + 15 * 60000);
   return { id: 'prova', type: 'appuntamento', title: 'Parrucchiere', due: P.toISO(d), time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
 }
-function testNotification() {
+async function testNotification() {
   const it = sampleItem(); const at = new Date();
   const n = N.make(it, { name: userName(), emoji: emojiOf(it), salt: String(Date.now()), at: it.id === 'prova' ? at : undefined });
+  if (Push.state() === 'on') {
+    try { const r = await Push.test({ ...n, url: it.id === 'prova' ? './' : n.url }); toast(r.ok ? 'Mandata. Arriva tra un attimo.' : 'Il server non è riuscito a mandarla.', r.ok ? 'Se l\'app è aperta, la vedi in alto.' : 'Riprova tra poco.'); }
+    catch (e) { toast('Non riesco a parlare con il server.', 'Controlla la connessione e riprova.'); }
+    return;
+  }
   setTimeout(() => showBanner(n, it.id === 'prova' ? null : it), 150);
 }
+
+// ================= Notifiche vere (anche ad app chiusa) =================
+// L'indirizzo del tuo server su Cloudflare. Vuoto = notifiche solo ad app aperta.
+const MEMO_SERVER_URL = 'https://memo.alessandro-ferrari97.workers.dev'; // ← l'indirizzo del Worker su Cloudflare
+const MEMO_SERVER = (store.get('server') || MEMO_SERVER_URL).replace(/\/+$/, '');
+const Push = (() => {
+  const rnd = n => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); };
+  const me = () => { let d = store.get('dev'), t = store.get('devtok'); if (!d || !t) { d = 'd' + rnd(12); t = rnd(24); store.set('dev', d); store.set('devtok', t); } return { device: d, token: t }; };
+  const supported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  const keyBytes = b64 => { const s = atob(b64.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((b64.length + 3) % 4)); return Uint8Array.from(s, c => c.charCodeAt(0)); };
+  async function post(path, body) {
+    const r = await fetch(MEMO_SERVER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...me(), ...body }) });
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    return j;
+  }
+  function state() {
+    if (!MEMO_SERVER) return 'noserver';
+    if (isIOS && !isStandalone()) return 'install';
+    if (!supported()) return 'nosupport';
+    if (Notification.permission === 'denied') return 'denied';
+    return Notification.permission === 'granted' && store.get('push') === '1' ? 'on' : 'off';
+  }
+  async function enable() {
+    const perm = await Notification.requestPermission(); // va chiesto subito, nel tocco
+    if (perm !== 'granted') return state();
+    const reg = await navigator.serviceWorker.ready;
+    const { key } = await (await fetch(MEMO_SERVER + '/vapid')).json();
+    let sub = await reg.pushManager.getSubscription();
+    try { if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }); }
+    catch (e) { if (sub) await sub.unsubscribe(); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }); }
+    await post('/subscribe', { sub: sub.toJSON(), subject: location.origin + location.pathname });
+    store.set('push', '1'); await sync();
+    return state();
+  }
+  // tutti gli avvisi futuri di tutti i MeMo, con i testi già pronti: il server li manda all'ora giusta
+  function plan() {
+    const now = Date.now(), max = now + 400 * 86400000, out = [];
+    for (const it of items) for (const r of P.remindersOf(it)) {
+      const t = r.getTime(); if (t <= now || t > max) continue;
+      const n = N.make(it, { name: userName(), emoji: emojiOf(it), at: r });
+      out.push({ k: `${it.id}@${t}`, at: t, title: n.title, body: n.body, url: n.url, tag: it.id });
+    }
+    return out;
+  }
+  let timer = null, last = '';
+  async function sync() {
+    if (state() !== 'on') return;
+    const reminders = plan(), sig = JSON.stringify(reminders.map(r => r.k));
+    try { await post('/sync', { reminders }); last = sig; } catch (e) { last = ''; }
+  }
+  const later = () => { if (state() !== 'on') return; clearTimeout(timer); timer = setTimeout(sync, 1500); };
+  async function test(n) { return post('/test', { message: n }); }
+  return { state, enable, sync, later, test };
+})();
+// aprendo una notifica si apre il MeMo giusto
+function openFromUrl(u) { try { const id = new URL(u, location.href).searchParams.get('memo'); if (id && items.some(i => i.id === id)) { goPage('home', 0, true); openDetail(id); } } catch (e) {} }
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'open') openFromUrl(e.data.url); });
 
 // ================= Avvisi mentre l'app è aperta =================
 const alerted = new Set();
@@ -1532,7 +1618,7 @@ function tick() {
   for (const it of items) {
     for (const r of P.remindersOf(it)) {
       const key = it.id + '@' + r.getTime();
-      if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); showBanner(N.make(it, { name: userName(), emoji: emojiOf(it), at: r }), it); }
+      if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); if (Push.state() !== 'on') showBanner(N.make(it, { name: userName(), emoji: emojiOf(it), at: r }), it); }
     }
   }
   render();
@@ -1546,6 +1632,8 @@ function tick() {
   if (isIOS && !isStandalone() && store.get('installHint') !== '1') $('#installHint').hidden = false;
   $('#installClose').onclick = () => { $('#installHint').hidden = true; store.set('installHint', '1'); };
   if (store.get('intro') !== '1' && !new URLSearchParams(location.search).has('nointro')) showIntro();
+  openFromUrl(location.href);
+  Push.sync();
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
