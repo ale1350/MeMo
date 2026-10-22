@@ -236,6 +236,14 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .s-block h3{font-size:17px;margin:0 0 6px}
 .s-block p{margin:0 0 12px;color:var(--ink-2);font-size:15px;line-height:1.45}
 .s-block .btn{height:48px;font-size:15.5px;background:var(--card)}
+.lg{font-size:14px;font-weight:750;color:var(--ink-3);margin:18px 4px 8px}
+.lrows{background:var(--card);border-radius:20px;box-shadow:var(--card-shadow);overflow:hidden}
+.lrow+.lrow{border-top:1px solid var(--stroke)}
+.lhead{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;text-align:left}
+.le{font-size:20px;width:26px;text-align:center}
+.ln{flex:1;font-size:16px;font-weight:650}
+.lv{font-size:14.5px;color:var(--brand-ink);font-weight:700}
+.lopts{padding:0 14px 14px}
 .themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .themes button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
 .themes .sw{width:100%;aspect-ratio:.62;border-radius:14px;border:2px solid transparent;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(127,127,127,.25)}
@@ -245,6 +253,17 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .viewer{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.94);display:grid;place-items:center}
 .viewer img{max-width:100%;max-height:100%;object-fit:contain}
 .viewer button{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;border-radius:22px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+
+/* ---------- banner notifica, stile iPhone ---------- */
+.nb{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);z-index:60;max-width:520px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:24px;background:rgba(246,246,248,.82);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);box-shadow:0 12px 40px rgba(18,24,38,.22);transform:translateY(-140%);transition:transform .5s cubic-bezier(.2,.9,.25,1.15);text-align:left;color:#111}
+.nb.show{transform:none}
+.nb .ni{flex:0 0 40px;height:40px;border-radius:10px;overflow:hidden}
+.nb .ni svg{width:40px;height:40px;display:block}
+.nb .nt{flex:1;min-width:0;display:block}
+.nb .nh{display:flex;justify-content:space-between;font-size:13px;color:rgba(0,0,0,.5);font-weight:600;margin-bottom:1px}
+.nb .nh b{color:rgba(0,0,0,.8);font-weight:700}
+.nb .nti{display:block;font-size:15.5px;font-weight:700;line-height:1.25}
+.nb .nbo{display:block;font-size:15px;line-height:1.32;color:rgba(0,0,0,.85)}
 
 /* ---------- toast col nodo ---------- */
 .toast{position:fixed;left:14px;right:14px;bottom:calc(100px + env(safe-area-inset-bottom));z-index:30;max-width:560px;margin:0 auto;background:var(--toast-bg);color:var(--toast-ink);border-radius:22px;padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;font-size:15.5px;line-height:1.35;transform:translateY(24px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1.2),opacity .25s;pointer-events:none;box-shadow:0 20px 50px rgba(0,0,0,.3)}
@@ -303,7 +322,12 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </svg>
 
 <header class="bar">
-  <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset="1" stop-color="#3BD6C6"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="url(#lg)"/><path d="M24 28 Q24 20 32 20 L68 20 Q76 20 76 28 L76 58 Q76 66 68 66 L44 66 L30 78 L32 66 Q24 66 24 58 Z" fill="#fff"/><g transform="translate(29 30) scale(.62)"><use href="#knotPath" fill="none" stroke="#7B61FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g></svg>MeMo</div>
+  <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="url(#lg)"/><g transform="translate(50 50) translate(-49 -51)"><path d="M30 51 L13 38 Q11 51 13 64 Z" fill="#FF8A5B" stroke="#FF8A5B" stroke-width="4" stroke-linejoin="round"/>
+<ellipse cx="50" cy="51" rx="25" ry="18" fill="#FF8A5B"/>
+<path d="M44 34 Q52 26 60 35" fill="#FF8A5B"/>
+<circle cx="62" cy="47" r="5.5" fill="#fff"/><circle cx="63.5" cy="47" r="2.8" fill="#2A2F66"/>
+<circle cx="81" cy="34" r="3.5" fill="none" stroke="#fff" stroke-width="2.6"/>
+<circle cx="86" cy="21" r="5" fill="none" stroke="#fff" stroke-width="2.6"/></g></svg>MeMo</div>
   <div class="mini" aria-hidden="true"><span class="dot"></span><span id="miniTxt"></span></div>
   <div class="top-actions"><button class="icon-btn" id="btnCal" aria-label="Calendario">
     <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/></svg>
@@ -332,7 +356,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 
 <section class="list-sec" id="listSec">
   <div class="wrap">
-    <div class="list-head"><h2 class="list-title" id="listTitle">I tuoi promemoria</h2></div>
+    <div class="list-head"><h2 class="list-title" id="listTitle">I tuoi MeMo</h2></div>
     <div class="thread" id="list"></div>
     <p class="tip" id="swipeTip" hidden>Scorri una scadenza verso sinistra per segnarla come fatta.</p>
     <div class="install" id="installHint" hidden>
@@ -342,7 +366,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
   </div>
 </section>
 
-<nav class="dock" aria-label="Aggiungi un promemoria">
+<nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
   <button class="rb voice" id="btnVoice"><span class="c"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
   <button class="rb add" id="btnAdd"><span class="c"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
@@ -357,6 +381,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
   <div class="sheet" role="dialog" aria-modal="true" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
 </div>
 
+<button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg class="tie" viewBox="0 0 68 40" aria-hidden="true"><use href="#knotPath" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <div class="msg" id="toastMsg"></div>
@@ -364,11 +389,12 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </div>
 
 <script src="parser.js"></script>
+<script src="notify.js"></script>
 <script>
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.5';
+const VERSION = '1.9';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -495,10 +521,12 @@ function render() {
     mini.textContent = 'Nessuna scadenza';
   } else if (groups.now.length) {
     const n = groups.now.length, first = groups.now[0];
-    showNum(true); fill = 100; countUp(num, n); unit.textContent = n === 1 ? 'promemoria per te' : 'promemoria per te';
+    const today = P.todayISO(), allToday = groups.now.every(x => x.i.due === today);
+    showNum(true); fill = 100; countUp(num, n);
+    unit.textContent = allToday ? 'MeMo per oggi' : (n === 1 ? 'MeMo da ricordare' : 'MeMo da ricordare');
     h.textContent = n === 1 ? first.i.title : `${first.i.title} e ${n === 2 ? "un'altra cosa" : (n - 1) + ' altre cose'}`;
-    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Al resto penso io.` : 'Le trovi qui sotto. Al resto penso io.';
-    mini.textContent = n === 1 ? '1 promemoria per te' : `${n} promemoria per te`;
+    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Al resto penso io.` : 'Li trovi qui sotto. Al resto penso io.';
+    mini.textContent = `${n} MeMo ${allToday ? 'per oggi' : 'da ricordare'}`;
   } else {
     const next = active.slice().sort((a, b) => a.s.remind - b.s.remind)[0];
     const mins = Math.max(0, Math.round((next.s.remind - nowD) / 60000));
@@ -520,7 +548,7 @@ function render() {
   }
   requestAnimationFrame(() => arc.style.strokeDashoffset = String(100 - fill));
 
-  $('#peekTxt').textContent = active.length === 1 ? 'Il tuo promemoria' : `I tuoi ${active.length} promemoria`;
+  $('#peekTxt').textContent = active.length === 1 ? 'Il tuo MeMo' : `I tuoi ${active.length} MeMo`;
   $('#peek').hidden = !active.length; $('#listSec').hidden = !active.length;
   const names = { now: 'Adesso', soon: 'Prossimamente', calm: 'Più avanti' };
   const list = $('#list');
@@ -667,7 +695,7 @@ function renderCal(anim) {
     const sel = jump.querySelector('[aria-pressed="true"]'); if (sel) jump.scrollLeft = sel.offsetLeft - 20;
   }
   box.querySelectorAll('.cal-day .row').forEach(r => r.onclick = () => openDetail(r.dataset.id));
-  const add = box.querySelector('#cAdd'); if (add) add.onclick = () => openEditor({ type: 'altro', title: '', date: calSel }, { head: 'Nuova memo', sub: `Per ${selLabel}.`, focus: '#eTitle' });
+  const add = box.querySelector('#cAdd'); if (add) add.onclick = () => openEditor({ type: 'altro', title: '', date: calSel }, { head: 'Nuovo MeMo', sub: `Per ${selLabel}.`, focus: '#eTitle' });
   // scorri a destra o sinistra per cambiare mese
   const cb = box.querySelector('#cBox'); let x0 = null, y0 = null;
   cb.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
@@ -775,7 +803,7 @@ function openEditor(draft, opts = {}) {
   state.autoTitle = !state.title || state.title === T(state.type).label || /^Garanzia acquisto$/.test(state.title);
   let showLeads = false;
   openSheet(`
-    <h2>${esc(opts.head || 'Nuova memo')}</h2>${opts.sub ? `<p class="lead">${esc(opts.sub)}</p>` : ''}
+    <h2>${esc(opts.head || 'Nuovo MeMo')}</h2>${opts.sub ? `<p class="lead">${esc(opts.sub)}</p>` : ''}
     <div class="field"><label for="eTitle">Cosa devo ricordarti?</label>
       <input class="input" id="eTitle" autocomplete="off" autocapitalize="sentences" enterkeyhint="next" placeholder="Per esempio: passaporto, parrucchiere, chiamare Luca" value="${esc(state.title || '')}"></div>
     <div class="field"><span class="lbl" id="eDateLbl"></span>
@@ -833,7 +861,8 @@ function openEditor(draft, opts = {}) {
         const rem = P.remindAt(it), timed = !!it.time;
         const lead = state.leadMin != null ? state.leadMin : P.defaultLeadMin(it);
         const pre = ty.dateKind === 'purchase' ? `Garanzia valida fino al ${fmtLong(state.due)}. ` : '';
-        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(rem, timed)}, ${leadLabel(lead, timed)}.`);
+        const fol = followText(it);
+        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(rem, timed)}, ${leadLabel(lead, timed)}.`) + (fol ? ' ' + fol : '');
         const leads = body.querySelector('#eLeads'); leads.hidden = !showLeads;
         leads.innerHTML = (timed ? LEADS_TIMED : LEADS_DAYS).map(([m, l]) => `<button class="chip" data-m="${m}" aria-pressed="${m === lead}">${l}</button>`).join('');
       }
@@ -843,7 +872,7 @@ function openEditor(draft, opts = {}) {
       const prevKind = T(state.type).dateKind; state.type = id; const kind = T(id).dateKind; state.leadMin = null;
       if (prevKind !== kind) { if (kind === 'purchase') { state.purchase = state.date && state.date <= P.todayISO() ? state.date : null; state.date = null; } else { state.date = state.purchase ? P.addMonths(state.purchase, 24) : state.date; state.purchase = null; } }
     };
-    body.querySelector('#eTypes').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.typeManual = true; setType(c.dataset.type); if (state.autoTitle) titleEl.value = T(state.type).label; sync(); });
+    body.querySelector('#eTypes').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.typeManual = true; setType(c.dataset.type); if (state.autoTitle && state.type !== 'altro') titleEl.value = T(state.type).label; sync(); });
     titleEl.addEventListener('input', () => {
       state.autoTitle = false;
       if (!state.typeManual) { const d = P.detectType(titleEl.value); const id = d.score ? d.type : 'altro'; if (id !== state.type) { setType(id); const sel = body.querySelector(`#eTypes .chip[data-type="${id}"]`); if (sel) sel.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } }
@@ -871,7 +900,7 @@ function openEditor(draft, opts = {}) {
     if (opts.focus) setTimeout(() => body.querySelector(opts.focus).focus(), 440);
   });
 }
-$('#btnAdd').addEventListener('click', () => openEditor({ type: 'altro', title: '', date: null }, { head: 'Nuova memo', focus: '#eTitle' }));
+$('#btnAdd').addEventListener('click', () => openEditor({ type: 'altro', title: '', date: null }, { head: 'Nuovo MeMo', focus: '#eTitle' }));
 
 // ================= Voce =================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -963,12 +992,14 @@ async function openDetail(id) {
   const past = it.time ? st.minutesLeft < 0 : st.left < 0;
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
     : it.time ? `<b>${esc(cap(whenText(it)))}</b>, ${inWords(st.minutesLeft)}.` : `Scade <b>${esc(whenText(it))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
+  const nextList = allRemindText(it);
   const remind = st.key === 'now' ? ' Te lo sto ricordando adesso.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
   const doneSub = ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
     ${photo ? `<img class="thumb" id="dPhoto" src="${photo}" alt="Foto salvata, tocca per ingrandire">` : ''}
     ${ty.todo ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(ty.todo)}</p>${ty.link ? `<a class="link" href="${ty.link.url}" target="_blank" rel="noopener">${esc(ty.link.label)}</a>` : ''}</div>` : ''}
+    ${nextList ? `<div class="d-card"><span class="lbl">I prossimi avvisi</span><p class="todo" style="margin:0">${esc(nextList)}</p></div>` : ''}
     ${it.said ? `<div class="d-card"><span class="lbl">Mi avevi detto</span><p class="todo" style="margin:0">«${esc(it.said)}»</p></div>` : ''}
     <button class="btn btn-main" id="dDone">${doneLabel}</button>${doneSub ? `<p class="fine">${doneSub}</p>` : ''}
     <div class="btn-row"><button class="btn btn-ghost" id="dEdit">Modifica</button><button class="btn btn-ghost" id="dCal">Al Calendario</button></div>
@@ -989,14 +1020,16 @@ function icsText(list) {
   const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MeMo//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
   for (const it of list) {
     const ty = T(it.type), d = it.due.replace(/-/g, '');
-    const lead = Math.max(0, Math.round((P.dueAt(it) - P.remindAt(it)) / 60000));
     L.push('BEGIN:VEVENT', `UID:${it.id}@memo`, `DTSTAMP:${stamp}`);
     if (it.time) L.push(`DTSTART:${d}T${it.time.replace(':', '')}00`, 'DURATION:PT30M');
     else L.push(`DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${P.addDays(it.due, 1).replace(/-/g, '')}`);
-    L.push(`SUMMARY:${e(it.title)}`, `DESCRIPTION:${e(ty.todo || 'Promemoria di MeMo')}`, 'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e(it.title)}`);
-    if (it.time) L.push(`TRIGGER:-PT${lead}M`);
-    else { const days = Math.round((P.parseISO(it.due) - P.parseISO(P.toISO(P.remindAt(it)))) / 86400000); L.push(days >= 1 ? `TRIGGER:-P${days - 1}DT15H` : 'TRIGGER:PT9H'); }
-    L.push('END:VALARM', 'END:VEVENT');
+    L.push(`SUMMARY:${e(it.title)}`, `DESCRIPTION:${e(ty.todo || 'Un MeMo per te')}`);
+    const start = it.time ? P.dueAt(it) : P.parseISO(it.due);
+    for (const r of P.remindersOf(it)) {
+      const m = Math.round((r - start) / 60000);
+      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e(it.title)}`, `TRIGGER:${m < 0 ? '-' : ''}PT${Math.abs(m)}M`, 'END:VALARM');
+    }
+    L.push('END:VEVENT');
   }
   L.push('END:VCALENDAR'); return L.join('\r\n');
 }
@@ -1007,16 +1040,66 @@ function addToCalendar(list) {
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
+// ================= Anticipi degli avvisi (modificabili) =================
+const LEAD_DEFAULTS = {}; P.TYPES.forEach(t => LEAD_DEFAULTS[t.id] = { lead: t.lead, leadMin: t.leadMin });
+function applyLeadPrefs() {
+  let pref = {}; try { pref = JSON.parse(store.get('leads') || '{}'); } catch (e) {}
+  P.TYPES.forEach(t => { const d = LEAD_DEFAULTS[t.id], o = pref[t.id] || {};
+    t.lead = o.lead != null ? o.lead : d.lead; t.leadMin = o.leadMin != null ? o.leadMin : d.leadMin; });
+}
+function saveLeadPref(id, key, val) {
+  let pref = {}; try { pref = JSON.parse(store.get('leads') || '{}'); } catch (e) {}
+  pref[id] = Object.assign(pref[id] || {}, { [key]: val }); store.set('leads', JSON.stringify(pref)); applyLeadPrefs();
+}
+applyLeadPrefs();
+const LEAD_GROUPS = [
+  ['Documenti', ['cie', 'passaporto', 'patente', 'tessera']],
+  ['Auto', ['bollo', 'revisione', 'assicurazione']],
+  ['Casa e conti', ['bolletta', 'abbonamento', 'caldaia', 'garanzia']],
+  ['Agenda', ['appuntamento', 'chiamata', 'salute', 'viaggio', 'compleanno', 'altro']]
+];
+const DAY_OPTS = [[0, 'La mattina stessa'], [1, 'Il giorno prima'], [3, '3 giorni prima'], [7, 'Una settimana prima'], [15, '15 giorni prima'], [30, 'Un mese prima'], [60, '2 mesi prima'], [90, '3 mesi prima'], [120, '4 mesi prima'], [180, '6 mesi prima']];
+const MIN_OPTS = [[5, '5 min prima'], [10, '10 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [180, '3 ore prima'], [1440, 'Il giorno prima']];
+function leadShort(t) {
+  if (t.leadMin != null) return leadLabel(t.leadMin, true);
+  return leadLabel(t.lead * 1440, false);
+}
+function openLeads() {
+  let open = null;
+  const draw = body => {
+    body.querySelector('#lList').innerHTML = LEAD_GROUPS.map(([g, ids]) => `<h4 class="lg">${g}</h4><div class="lrows">${ids.map(id => { const t = T(id); return `
+      <div class="lrow${open === id ? ' open' : ''}"><button class="lhead" data-id="${id}"><span class="le" aria-hidden="true">${t.emoji}</span><span class="ln">${esc(t.label)}</span><span class="lv">${cap(leadShort(t))}</span></button>
+      ${open === id ? `<div class="chips lopts">${(t.leadMin != null ? MIN_OPTS : DAY_OPTS).map(([v, l]) => `<button class="chip" data-v="${v}" aria-pressed="${v === (t.leadMin != null ? t.leadMin : t.lead)}">${l}</button>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`).join('');
+  };
+  openSheet(`<h2>Quando ti avviso</h2><p class="lead">MeMo sceglie da solo il momento giusto. Se preferisci, cambialo qui: vale per tutti i MeMo di quel tipo.</p>
+    <div id="lList"></div><button class="btn btn-ghost" id="lReset" style="margin-top:16px">Torna alle scelte di MeMo</button>`, body => {
+    draw(body);
+    body.querySelector('#lList').addEventListener('click', e => {
+      const h = e.target.closest('.lhead'); if (h) { open = open === h.dataset.id ? null : h.dataset.id; draw(body); return; }
+      const c = e.target.closest('.lopts .chip'); if (!c) return;
+      const t = T(open); saveLeadPref(open, t.leadMin != null ? 'leadMin' : 'lead', +c.dataset.v); haptic(); draw(body); render();
+    });
+    body.querySelector('#lReset').onclick = () => { store.set('leads', '{}'); applyLeadPrefs(); open = null; draw(body); render(); toast('Fatto.', 'MeMo torna a scegliere da solo.'); };
+  });
+}
+
 // ================= Impostazioni =================
 function openSettings() {
   const nPhotos = items.filter(i => i.photoId).length;
   openSheet(`<h2>MeMo</h2><p class="lead">Fai una foto, detta una scadenza e dimenticatela.</p>
+    <div class="s-block"><h3>Come ti chiami?</h3><p>Così le notifiche ti chiamano per nome. Se lo lasci vuoto, MeMo ti chiamerà Mario.</p>
+      <input class="input" id="sName" autocomplete="given-name" autocapitalize="words" enterkeyhint="done" placeholder="Il tuo nome" value="${esc(userName())}" style="background:var(--card);margin-bottom:10px">
+      <button class="btn btn-ghost" id="sTest">Prova una notifica</button></div>
     <div class="s-block"><h3>Le tue foto</h3><p>Ogni foto viene salvata solo su questo telefono, insieme alla scadenza, così puoi riguardare il documento quando serve.${nPhotos ? ` Ora ne hai ${nPhotos}.` : ''}</p></div>
-    <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo l'anticipo: mesi per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. Le notifiche sul telefono arrivano con il prossimo aggiornamento; intanto puoi mettere tutto nel Calendario, con gli stessi avvisi.</p>
+    <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo l'anticipo: mesi per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata.</p>
+      <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button><p> Le notifiche sul telefono arrivano con il prossimo aggiornamento; intanto puoi mettere tutto nel Calendario, con gli stessi avvisi.</p>
       <button class="btn btn-ghost" id="sCal">Aggiungi tutto al Calendario</button></div>
     <div class="s-block"><h3>Backup</h3><p>Salva una copia ogni tanto, foto comprese, e tienila su iCloud Drive.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
     <button class="btn btn-ghost" id="sIntro">Rivedi come funziona</button><p class="fine">Versione ${VERSION}</p>`, body => {
+    body.querySelector('#sLeads').onclick = () => openLeads();
+    const nm = body.querySelector('#sName'); nm.addEventListener('change', () => store.set('name', nm.value.trim())); nm.addEventListener('keydown', e => { if (e.key === 'Enter') nm.blur(); });
+    body.querySelector('#sTest').onclick = () => { store.set('name', nm.value.trim()); testNotification(); };
     body.querySelector('#sCal').onclick = () => addToCalendar(items);
     body.querySelector('#sExp').onclick = exportBackup;
     body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
@@ -1059,13 +1142,61 @@ function showIntro() {
   el.querySelector('.skip').onclick = close;
 }
 
+// ================= Richiami in parole =================
+function followText(it) {
+  const all = P.remindersOf(it), first = P.remindAt(it), due = P.dueAt(it);
+  const rest = all.filter(r => r > first);
+  if (!rest.length) return '';
+  const parts = rest.map(r => {
+    if (it.time) return P.toISO(r) === it.due ? 'la mattina stessa' : 'la sera prima';
+    const d = P.diffDays(P.toISO(r), it.due);
+    return d === 0 ? 'il giorno stesso' : d === 1 ? 'il giorno prima' : d === 7 ? 'una settimana prima' : d === 30 ? 'un mese prima' : `${d} giorni prima`;
+  });
+  const list = parts.length === 1 ? parts[0] : parts.slice(0, -1).join(', ') + ' e ' + parts[parts.length - 1];
+  return `Poi te lo ricordo ancora ${list}, finché non lo segni come fatto.`;
+}
+function allRemindText(it) {
+  const now = new Date(), next = P.remindersOf(it).filter(r => r > now);
+  return next.map(r => remindText(r, !!it.time).replace(/^il /, '').replace(/^alle /, 'oggi alle ')).join(' · ');
+}
+
+// ================= Notifiche: la voce di MeMo =================
+const N = window.MeMoNotify;
+const userName = () => (store.get('name') || '').trim();
+let nbTimer, nbItem = null;
+function notifyText(it, salt) { return N.make(it, { name: userName(), emoji: emojiOf(it), salt }); }
+function showBanner(n, it) {
+  const el = $('#nb'); nbItem = it || null;
+  $('#nbIcon').innerHTML = document.querySelector('.brand svg').outerHTML;
+  $('#nbT').textContent = n.title; $('#nbB').textContent = n.body;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); haptic();
+  clearTimeout(nbTimer); nbTimer = setTimeout(() => el.classList.remove('show'), 6500);
+}
+$('#nb').addEventListener('click', () => { $('#nb').classList.remove('show'); if (nbItem && items.includes(nbItem)) openDetail(nbItem.id); });
+(() => { let y0 = null; const el = $('#nb');
+  el.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
+  el.addEventListener('touchmove', e => { if (y0 != null && e.touches[0].clientY - y0 < -20) { el.classList.remove('show'); y0 = null; } }, { passive: true });
+})();
+function sampleItem() {
+  if (items.length) return items[Math.floor(Math.random() * items.length)];
+  const d = new Date(Date.now() + 15 * 60000);
+  return { id: 'prova', type: 'appuntamento', title: 'Parrucchiere', due: P.toISO(d), time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
+}
+function testNotification() {
+  const it = sampleItem(); const at = new Date();
+  const n = N.make(it, { name: userName(), emoji: emojiOf(it), salt: String(Date.now()), at: it.id === 'prova' ? at : undefined });
+  closeSheet(); setTimeout(() => showBanner(n, it.id === 'prova' ? null : it), 450);
+}
+
 // ================= Avvisi mentre l'app è aperta =================
 const alerted = new Set();
 function tick() {
   const nowD = new Date();
   for (const it of items) {
-    const r = P.remindAt(it), key = it.id + '@' + r.getTime();
-    if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); haptic(); toast(`Promemoria: ${it.title}`, rowSub(it, P.statusOf(it, nowD))); }
+    for (const r of P.remindersOf(it)) {
+      const key = it.id + '@' + r.getTime();
+      if (r <= nowD && nowD - r < 3 * 60000 && !alerted.has(key)) { alerted.add(key); showBanner(N.make(it, { name: userName(), emoji: emojiOf(it), at: r }), it); }
+    }
   }
   render();
 }

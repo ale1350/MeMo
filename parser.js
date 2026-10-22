@@ -88,7 +88,7 @@
       todo: "Se qualcosa non funziona, portalo al negozio con lo scontrino prima che scada la garanzia: hai diritto a riparazione o sostituzione.",
       link: null,
       kw: [[/garanzi/, 6], [/scontrin/, 5], [/documento\s*commerciale/, 6], [/\btotale\b/, 1], [/\biva\b/, 1], [/pagamento\s*elettronico|contanti|\bresto\b/, 1], [/\bcomprat[oaie]\b|\bacquistat[oaie]\b|\bpres[oaie]\s+(oggi|ieri)/, 3]] },
-    { id: 'altro', label: 'Promemoria', emoji: '📌', lead: 0, leadMin: 10, recur: null, dateKind: 'expiry', done: 'archive',
+    { id: 'altro', label: 'Altro', emoji: '📌', lead: 0, leadMin: 10, recur: null, dateKind: 'expiry', done: 'archive',
       ask: 'Quando?',
       todo: '',
       link: null,
@@ -415,7 +415,7 @@
       s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
       const T2 = TYPE_BY_ID[typeId];
       if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:il|lo|la|i|gli|le)\s+|l')/i, '');
-      if (!s || s.length < 2) s = T2.label;
+      if (!s || s.length < 2) s = typeId === 'altro' ? 'MeMo' : T2.label;
       s = s.charAt(0).toUpperCase() + s.slice(1);
       if (s.length > 60) s = s.slice(0, 57).trim() + '…';
       return { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
@@ -443,6 +443,21 @@
   // anticipo predefinito in minuti, per mostrarlo e per cambiarlo
   function defaultLeadMin(item) { const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro; return item.time && T.leadMin != null ? T.leadMin : T.lead * 1440; }
   function remindDate(item) { return toISO(remindAt(item)); }
+  // Tutti gli avvisi di un MeMo: il primo (con l'anticipo scelto) e i richiami sempre più vicini alla scadenza.
+  // Senza orario: un mese prima, una settimana prima, il giorno prima e la mattina stessa (solo quelli dopo il primo).
+  // Con orario: per visite e viaggi anche la sera prima. Si fermano quando il MeMo è segnato come fatto.
+  function remindersOf(item) {
+    const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
+    const first = remindAt(item), due = dueAt(item), out = [first];
+    const at = (iso, h, m) => { const d = parseISO(iso); d.setHours(h, m || 0, 0, 0); return d; };
+    if (!item.time) {
+      for (const d of [30, 7, 1, 0]) { const r = at(addDays(item.due, -d), 9); if (r > first) out.push(r); }
+    } else if (T.lead >= 1) {
+      const r = at(addDays(item.due, -1), 19); if (r < due && due - r > 3 * 3600000) out.push(r);
+    }
+    const seen = new Set();
+    return out.filter(d => { const k = d.getTime(); if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a - b);
+  }
   function statusOf(item, now) {
     const nowD = now || new Date();
     const today = todayISO(nowD);
@@ -456,6 +471,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, dueAt, defaultLeadMin, statusOf, lastDay };
+    todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);
