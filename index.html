@@ -212,6 +212,8 @@ html.locked,html.locked body{overflow:hidden}
 button.mic-big{border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
 button.mic-big:active{transform:scale(.94)}
 button.mic-big:not(.on){opacity:.92}
+.mic-big.think{animation:thinkP 1s ease-in-out infinite}
+@keyframes thinkP{50%{transform:scale(.93);opacity:.75}}
 .sheet-wrap.open .sheet{transform:none}
 .grab{width:42px;height:5px;border-radius:3px;background:color-mix(in srgb, var(--ink) 20%, transparent);margin:0 auto 16px}
 .sheet h2{font-size:27px;line-height:1.12;font-weight:800;letter-spacing:-.022em;margin:2px 0 8px;text-wrap:balance}
@@ -497,7 +499,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.24';
+const VERSION = '1.25';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1163,9 +1165,9 @@ function openVoice() {
     const say = t => { hint.textContent = t; };
     const clear = () => { clearTimeout(quiet); clearTimeout(watch); clearTimeout(sendT); };
     const idle = msg => { on = false; mic.classList.remove('on'); mic.setAttribute('aria-label', 'Parla'); if (msg) say(msg); };
-    const send = () => { clear(); if (closed || !ta.value.trim()) return; Ear.stop(); idle('Ho capito.'); sendT = setTimeout(() => { if (!closed && $('#vText') === ta) submitSpeech(ta.value); }, 350); };
-    // dopo che hai parlato, aspetta 3 secondi e mezzo di silenzio prima di creare il MeMo
-    const armQuiet = (ms = 3500) => { clearTimeout(quiet); quiet = setTimeout(() => {
+    const send = () => { clear(); if (closed || !ta.value.trim()) return; Ear.stop(); idle('Ho capito.'); sendT = setTimeout(() => { if (!closed && $('#vText') === ta) submitSpeech(ta.value); }, 150); };
+    // dopo che hai parlato, aspetta 2 secondi e mezzo di silenzio prima di creare il MeMo
+    const armQuiet = (ms = 2500) => { clearTimeout(quiet); quiet = setTimeout(() => {
       if (ta.value.trim()) send();
       else { Ear.stop(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); }
     }, ms); };
@@ -1186,7 +1188,7 @@ function openVoice() {
         },
         // il telefono ha chiuso il microfono da solo: quello che hai detto resta, puoi aggiungere altro
         end: () => { if (!on || closed) return;
-          if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(3000); }
+          if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(2500); }
           else { clear(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); } }
       });
       if (!ok) { Ear.reset(); idle('Non riesco ad aprire il microfono. Tocca qui e riprova, oppure scrivi.'); return; }
@@ -1204,9 +1206,21 @@ function openVoice() {
   });
 }
 function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove('on'); }
+let aiOff = false, thinking = false;
+async function think(text) {
+  if (aiOff || !MEMO_SERVER || navigator.onLine === false) return null;
+  const h = $('#vHint'), go = $('#vGo'), mic = $('#vMic');
+  if (h) h.textContent = 'Ci penso un attimo…'; if (go) { go.disabled = true; go.textContent = 'Ci penso…'; } if (mic) mic.classList.add('think');
+  try { return await Push.understand(text); }
+  catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
+  finally { if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+}
 async function submitSpeech(text) {
   stopRec();
-  const res = P.parseSpeech(text);
+  if (thinking || !String(text || '').trim()) return; thinking = true;
+  let ai = null; try { ai = await think(text); } finally { thinking = false; }
+  let res; try { res = ai ? P.fromAI(ai, text) : P.parseSpeech(text); } catch (e) { res = P.parseSpeech(text); }
+  if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(text); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
   if (res.needTitle) {
     // ho capito quando, ma non cosa: data e avviso sono già pronti, manca solo il titolo
     const lead = res.leadMin != null ? `, con un avviso ${leadLabel(res.leadMin, !!res.time)}` : '';
@@ -1640,7 +1654,17 @@ const Push = (() => {
   }
   const later = () => { if (state() !== 'on') return; clearTimeout(timer); timer = setTimeout(sync, 1500); };
   async function test(n) { return post('/test', { message: n }); }
-  return { state, enable, sync, later, test };
+  // l'AI del server capisce la frase; se non risponde in pochi secondi, si va avanti senza
+  async function understand(text) {
+    const now = new Date().toLocaleString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
+    try {
+      const r = await fetch(MEMO_SERVER + '/understand', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...me(), text, now }), signal: ctl.signal });
+      if (r.status === 501) throw new Error('no ai');
+      const j = await r.json(); return j && j.ok ? j.result : null;
+    } finally { clearTimeout(t); }
+  }
+  return { state, enable, sync, later, test, understand };
 })();
 // aprendo una notifica si apre il MeMo giusto
 function openFromUrl(u) { try { const id = new URL(u, location.href).searchParams.get('memo'); if (id && items.some(i => i.id === id)) { goPage('home', 0, true); openDetail(id); } } catch (e) {} }

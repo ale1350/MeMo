@@ -304,7 +304,7 @@
       let min = 0, hasMin = false;
       if (m[2]) { hasMin = true; min = /^\d+$/.test(m[2]) ? +m[2] : /mezz/.test(m[2]) ? 30 : /tre\s+quarti/.test(m[2]) ? 45 : 15; }
       if (h > 23 || min > 59) return null;
-      return { h, min, hasMin, qual: m[3] || '', span: [m.index, m.index + m[0].length] };
+      return { h, min, hasMin, qual: m[3] || '', zero: /^0\d$/.test(m[1]) || h >= 13, span: [m.index, m.index + m[0].length] };
     }
     return null;
   }
@@ -371,7 +371,7 @@
       return addDays(today, w === 'dopodomani' ? 2 : /^(domani|domattina)$/.test(w) ? 1 : 0);
     });
     // 4b) relative: oggi, domani, dopodomani, fine mese, fine anno
-    take(/\b(?:per\s+|entro\s+)?(dopodomani|domani|oggi|stasera|stamattina|stamani|stanotte|stasera)\b/, mm => addDays(today, mm[1] === 'dopodomani' ? 2 : mm[1] === 'domani' ? 1 : 0));
+    take(/\b(?:per\s+|entro\s+)?(dopodomani|domani|oggi|stasera|stamattina|stamani|stanotte|altro\s*ieri|ieri)\b/, mm => addDays(today, mm[1] === 'dopodomani' ? 2 : mm[1] === 'domani' ? 1 : mm[1] === 'ieri' ? -1 : /altro/.test(mm[1]) ? -2 : 0));
     take(/\b(?:a\s+|entro\s+(?:la\s+)?)?fine\s+(mese|anno)\b/, mm => {
       const y = +today.slice(0, 4), mo = +today.slice(5, 7);
       return mm[1] === 'mese' ? iso(y, mo, lastDay(y, mo)) : iso(y, 12, 31);
@@ -410,7 +410,7 @@
         let h = tm.h;
         const pm = /sera|pomeriggio/.test(tm.qual) || part === 'sera' || part === 'pomeriggio' || /\b(stasera|sera|pomeriggio|stanotte)\b/.test(t);
         const am = /mattin/.test(tm.qual) || /\b(stamattina|stamani|mattina|mattino)\b/.test(t);
-        if (!tm.fixed) {
+        if (!tm.fixed && !(tm.zero && tm.hasMin)) { // "alle 07:00" è già chiaro: niente da indovinare
           if (pm && h < 12) h += 12;
           else if (!am && h >= 1 && h <= 7 && !(tm.hasMin && type === 'viaggio')) h += 12;
         }
@@ -592,6 +592,45 @@
     return out;
   }
 
+  // ---------- Dall'AI al MeMo ----------
+  // L'AI dice cosa, quando e quanto prima avvisare (a parole); qui si calcolano date e orari con il nostro motore.
+  function leadFrom(text, item, now) {
+    if (!text) return null;
+    const nowD = now || new Date(), t = norm(text);
+    const r = parseOne(text, nowD, { noDefault: true });
+    if (r.leadMin != null) {
+      if (r.leadEve && item.time) { const [hh, mm] = item.time.split(':').map(Number); return hh * 60 + mm + 24 * 60 - 19 * 60; }
+      return r.leadMin;
+    }
+    const mb = minutesBefore(t); if (mb != null && item.time) return mb;
+    if (r.date) { // "domattina alle 8", "il 21 alle 18": un momento preciso
+      const rem = parseISO(r.date); if (r.time) { const [hh, mm] = r.time.split(':').map(Number); rem.setHours(hh, mm, 0, 0); } else rem.setHours(9, 0, 0, 0);
+      const diff = Math.round((dueAt(item) - rem) / 60000);
+      if (diff >= 0) return item.time ? diff : Math.max(0, Math.round(diff / 1440)) * 1440;
+    }
+    return null;
+  }
+  function fromAI(ai, said, now) {
+    const nowD = now || new Date(), today = todayISO(nowD);
+    const type = TYPE_BY_ID[ai.type] ? ai.type : 'altro';
+    const w = ai.when ? parseSpeech(ai.when, nowD) : null;
+    let date = w && w.date || null, time = w && w.time || null, purchase = null, askTime = null, leadMin = null;
+    if (!date && ai.when) { const all = parseSpeech(said, nowD); date = all.date; time = time || all.time; } // l'AI ha scritto il quando in un modo che non conosco: provo con la frase intera
+    if (type === 'garanzia') { purchase = date && date <= today ? date : today; date = addMonths(purchase, 24); time = null; }
+    if (!time && w && w.askTime) askTime = w.askTime;
+    if (!time && ai.ask === 'time' && !askTime) askTime = { part: null };
+    if (time && ai.exact) leadMin = 0;
+    if (ai.remind && date) { const lm = leadFrom(ai.remind, { due: date, time, type }, nowD); if (lm != null) { leadMin = lm; askTime = null; } }
+    let title = String(ai.title || '').trim();
+    const dt = docTitle(type, said); if (dt) title = dt;
+    if (title) title = title.charAt(0).toUpperCase() + title.slice(1);
+    const out = { type, title: title || 'MeMo', date, time, purchase, confident: !!date, typeScore: 9, ai: true };
+    if (leadMin != null && (time || leadMin % 1440 === 0)) out.leadMin = leadMin;
+    if (!title || ai.ask === 'title') out.needTitle = true;
+    if (askTime && date && !time) out.askTime = askTime;
+    return out;
+  }
+
   // ---------- Come dirlo a parole: "di comprare il pane", "del dentista", "di rinnovare la patente" ----------
   const DOC_DO = { cie: "di rinnovare la carta d'identità", passaporto: 'di rinnovare il passaporto', patente: 'di rinnovare la patente', tessera: 'di rinnovare la tessera sanitaria',
     bollo: 'di pagare il bollo auto', assicurazione: "di rinnovare l'assicurazione", revisione: "di fare la revisione dell'auto", caldaia: 'di far controllare la caldaia' };
@@ -670,6 +709,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    phraseOf, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
+    phraseOf, fromAI, leadFrom, docTitle, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);
