@@ -72,7 +72,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .icon-btn:active{background:var(--card-press)}
 
 /* ---------- schermata principale a pieno schermo ---------- */
-.hero{position:sticky;top:0;height:100svh;z-index:1;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 40px) 28px calc(170px + env(safe-area-inset-bottom));scroll-snap-align:start;scroll-snap-stop:always}
+.hero{position:sticky;top:0;height:100svh;z-index:1;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 34px) 28px calc(210px + env(safe-area-inset-bottom));scroll-snap-align:start;scroll-snap-stop:always}
 .hero-inner{text-align:center;transform-origin:50% 40%;will-change:transform,opacity;max-width:430px}
 .ring{position:relative;width:min(64vw,260px,36svh);aspect-ratio:1;margin:0 auto 26px}
 .ring svg.r{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -87,7 +87,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .hero h1 .h2l{display:block;white-space:nowrap}
 .hero h1 .brandw{background:linear-gradient(120deg,#2F6BF2,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{font-size:16.5px;line-height:1.45;color:var(--ink-2);margin:0 auto;max-width:30ch;text-wrap:pretty}
-.peek{position:fixed;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
+.peek{position:fixed;left:0;right:0;bottom:calc(168px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
 .peek svg{animation:cue 2.4s ease-in-out infinite}
 @keyframes cue{50%{transform:translateY(4px)}}
 
@@ -515,7 +515,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.27';
+const VERSION = '1.26 bis';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1483,7 +1483,6 @@ function renderSettings() {
   const nPhotos = items.filter(i => i.photoId).length;
   const body = $('#setBody');
   body.innerHTML = `
-    <div class="s-block"><div class="s-row"><div><h3>Apri e parla</h3><p>Quando apri MeMo ti ascolto subito: parli e basta. Se non dici niente, mi faccio da parte.</p></div><input type="checkbox" class="sw" id="sAuto" aria-label="Apri e parla" ${store.get('autoListen') !== '0' ? 'checked' : ''}></div></div>
     ${notifBlock()}
     <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo il momento giusto: mesi prima per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. E se non lo segni come fatto, te lo ricorda ancora.</p>
       <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button>
@@ -1499,7 +1498,6 @@ function renderSettings() {
     if (st === 'on') toast('Notifiche attive.', 'Da ora ti avviso anche ad app chiusa.');
     else if (st === 'error') toast('Non sono riuscito ad attivarle.', 'Controlla la connessione e riprova.');
   };
-  body.querySelector('#sAuto').onchange = e => { store.set('autoListen', e.target.checked ? '1' : '0'); haptic(); toast(e.target.checked ? 'Apri e parla: acceso.' : 'Apri e parla: spento.', e.target.checked ? 'Da ora, quando apri MeMo, ti ascolto subito.' : 'Per parlare, tocca Dimmi.'); };
   const sg = body.querySelector('#sSiriGuide'); if (sg) { sg.onclick = openSiriGuide; body.querySelector('#sSiriCopy').onclick = e => copySiri(e.currentTarget); if (store.get('reg') !== '1') Push.register(); }
   body.querySelector('#sLeads').onclick = () => openLeads();
   body.querySelector('#sTest').onclick = () => testNotification();
@@ -1570,7 +1568,7 @@ $('#btnSettings').addEventListener('click', openSettings);
 function showIntro() {
   const slides = [
     { art: `<div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div>`, h: 'Fai una foto.', p: "Carta d'identità, patente, scontrino, bolletta: MeMo legge da solo cos'è e quando scade." },
-    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Appena apri MeMo ti ascolto: parla come faresti con un amico. Quando fai una pausa, ho capito. Per scrivere a mano c'è il +." },
+    { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Tocca Dimmi e parla come faresti con un amico. Prenditi il tuo tempo: quando fai una pausa, ho capito. Per scrivere a mano c'è il +." },
     { art: `<div class="lead-list"><div>🛂 Passaporto<span>4 mesi prima</span></div><div>🚗 Patente<span>2 mesi prima</span></div><div>💇 Parrucchiere<span>15 min prima</span></div><div>📞 Chiamare Luca<span>5 min prima</span></div></div>`, h: 'E dimenticatelo.', p: 'Scelgo io il giusto anticipo per ogni cosa. E se non lo segni come fatto, te lo ricordo ancora.' },
     { art: `<div class="swipe-art"><div class="pg l">📅<span>Calendario</span></div><div class="pg c"><b>MeMo</b><i></i><i></i></div><div class="pg r">⚙️<span>Impostazioni</span></div><div class="hand">👆</div></div>`,
       h: 'Scorri di lato.', p: 'Verso destra trovi il calendario con tutti i tuoi MeMo. Verso sinistra, le impostazioni.' }
@@ -1598,7 +1596,7 @@ function showIntro() {
   const idx = () => Math.round(sc.scrollLeft / sc.clientWidth);
   sc.addEventListener('scroll', () => requestAnimationFrame(() => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); next.textContent = i === slides.length - 1 ? 'Inizia' : 'Avanti'; }), { passive: true });
   const close = () => { store.set('intro', '1'); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
-  next.onclick = () => { const i = idx(); if (i >= slides.length - 1) { close(); if (store.get('autoListen') !== '0') setTimeout(() => openVoice({ auto: true }), 380); } else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
+  next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
   const nb = el.querySelector('#iNotif');
   if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st; try { st = await Push.enable(); } catch (e) { st = 'error'; }
@@ -1795,10 +1793,7 @@ function tick() {
   if (MEMO_SERVER && store.get('reg') !== '1') Push.register();
   importInbox().finally(() => Push.sync());
   window.addEventListener('online', () => Push.sync()); // tornata la connessione: aggiorno gli avvisi rimasti indietro
-  // apri e parla: appena apri MeMo (o ci torni dopo un po'), ti ascolto subito
-  if (!document.querySelector('.intro') && !new URLSearchParams(location.search).has('memo')) setTimeout(autoListen, 450);
-  let hiddenAt = 0;
-  document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 60000) setTimeout(autoListen, 350); });
+
   document.addEventListener('visibilitychange', () => { if (!document.hidden) importInbox().finally(() => Push.sync()); });
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
