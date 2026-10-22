@@ -530,8 +530,12 @@
     if (m) {
       di = m[1] === 'di' || (!m[1] && /^\s*(alle|all'|tra|fra|domani|oggi|stasera|il|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b[^]*?\bdi\s+\S+(?:are|ere|ire)\b/.test(t.slice(m.index + m[0].length)));
       if (/reminder|promemoria|memo|avviso|allarme|notifica/.test(m[0])) di = true; // "mettimi un avviso alle 8": l'avviso è proprio alle 8
-      const ctx = src.slice(0, m.index), task = src.slice(m.index + m[0].length);
-      if (!task.trim()) return null;
+      const ctx = src.slice(0, m.index); let task = src.slice(m.index + m[0].length);
+      for (let k = 0; k < 3; k++) { // "ricordamelo o mettimi un reminder il giorno prima": una richiesta sola, detta in due modi
+        const m2 = new RegExp('^\\s*(?:o|oppure|anzi|cioe)\\s+' + TRIGGER_RE.source.replace(/^\(\?:\^\|\[\\s,\.;:!\?\]\+\)/, '')).exec(norm(task));
+        if (!m2) break; if (/reminder|promemoria|memo|avviso|allarme|notifica/.test(m2[0])) di = true; task = task.slice(m2[0].length);
+      }
+      if (!task.trim()) return { ctx: '', task: ctx, di };
       return { ctx: LEAD_IN_RE.test(norm(ctx)) ? '' : ctx.replace(/[\s,.;:!?]+$/, ''), task, di };
     }
     m = DUTY_RE.exec(t);
@@ -612,7 +616,8 @@
   }
   function fromAI(ai, said, now) {
     const nowD = now || new Date(), today = todayISO(nowD);
-    const type = TYPE_BY_ID[ai.type] ? ai.type : 'altro';
+    let type = TYPE_BY_ID[ai.type] ? ai.type : 'altro';
+    if (type === 'altro') { const d = detectType(said + ' ' + (ai.title || '')); if (d.score >= 3) type = d.type; }
     const w = ai.when ? parseSpeech(ai.when, nowD) : null;
     let date = w && w.date || null, time = w && w.time || null, purchase = null, askTime = null, leadMin = null;
     if (!date && ai.when) { const all = parseSpeech(said, nowD); date = all.date; time = time || all.time; } // l'AI ha scritto il quando in un modo che non conosco: provo con la frase intera
@@ -621,6 +626,13 @@
     if (!time && ai.ask === 'time' && !askTime) askTime = { part: null };
     if (time && ai.exact) leadMin = 0;
     if (ai.remind && date) { const lm = leadFrom(ai.remind, { due: date, time, type }, nowD); if (lm != null) { leadMin = lm; askTime = null; } }
+    // rete di sicurezza: se l'AI si è persa un "il giorno prima" o il tipo, li prendo dalla frase intera
+    if (leadMin == null && !ai.remind && date) {
+      const loc = parseOne(said, nowD, { noDefault: true });
+      if (loc.leadMin != null) leadMin = loc.leadEve && time ? (() => { const [hh, mm] = time.split(':').map(Number); return hh * 60 + mm + 24 * 60 - 19 * 60; })() : loc.leadMin;
+      else { const mb = minutesBefore(norm(said)); if (mb != null && time) leadMin = mb; }
+      if (leadMin != null) askTime = null;
+    }
     let title = String(ai.title || '').trim();
     const dt = docTitle(type, said); if (dt) title = dt;
     if (title) title = title.charAt(0).toUpperCase() + title.slice(1);

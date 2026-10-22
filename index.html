@@ -499,7 +499,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.25';
+const VERSION = '1.26';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -568,6 +568,8 @@ function remindText(d, timed) {
   if (P.diffDays(P.todayISO(), iso) > 300) return `a ${fmtMonth(iso)}`;
   return nine ? `il ${fmtDay(iso)}` : `il ${fmtDay(iso)} alle ${hm(d)}`;
 }
+// solo le vere scadenze "scadono": un parrucchiere o una commissione no
+const DEADLINE = new Set(['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'caldaia', 'abbonamento', 'bolletta', 'garanzia']);
 function inWords(min) {
   if (min < 0) return '';
   if (min < 60) return min <= 1 ? 'tra un minuto' : `tra ${min} minuti`;
@@ -1366,7 +1368,7 @@ async function openDetail(id) {
   const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
   const past = it.time ? st.minutesLeft < 0 : st.left < 0;
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
-    : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `Scade <b>${esc(whenText(it))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
+    : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `${DEADLINE.has(it.type) ? 'Scade ' : ''}<b>${esc(DEADLINE.has(it.type) ? whenText(it) : cap(whenText(it)))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
   const nextList = allRemindText(it);
   const remind = st.key === 'now' ? ' Te lo sto ricordando adesso.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
