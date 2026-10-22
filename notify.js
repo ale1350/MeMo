@@ -33,8 +33,10 @@
   }
 
   // apertura: con il nome, oppure la gag di "Mario"
-  function hello(name, seed) { return name ? pick([`Ehi ${name}!`, `We ${name}!`, `${name}!`], seed) : pick(['We Mario!', 'Ehi Mario!'], seed); }
-  function joke(seed) { return pick(['Non sei Mario? Vabbè.', 'Non ti chiami Mario? Dettagli.'], seed); }
+  // MeMo non ricorda mai come ti chiami (ma ricorda tutto il resto): ogni volta un nome diverso
+  const NAMES = ['Mario', 'Franca', 'Gigi', 'Teresa', 'Pino', 'Carla', 'Ugo', 'Rita', 'Tonino', 'Gina', 'Fabrizio', 'Nives'];
+  function hello(name, seed) { return pick([`We ${name}!`, `Ehi ${name}!`, `Ciao ${name}!`], seed); }
+  function joke(name, seed) { return pick([`Non sei ${name}? Vabbè.`, `Non ti chiami ${name}? Dettagli.`, `Ah, non sei ${name}? Pazienza.`], seed); }
 
   // testi brevi: titolo corto, una riga di testo
   const L = {
@@ -95,11 +97,11 @@
   /** Titolo e testo della notifica per un MeMo. `at` = quando arriva la notifica. */
   function make(item, opts = {}) {
     const at = opts.at || P.remindAt(item);
-    const name = (opts.name || '').trim();
     const seed = hash(item.id + '|' + at.getTime() + '|' + (opts.salt || ''));
+    const fake = pick(NAMES, seed >> 7), name = '';
     const c = {
       name, t: lc(item.title), q: when(item, at), a: ARTICLE[item.type] || lc(item.title),
-      hello: hello(name, seed >> 3), joke: joke(seed >> 5), e: opts.emoji || '⏰'
+      hello: hello(fake, seed >> 3), joke: joke(fake, seed >> 5), e: opts.emoji || '⏰'
     };
     const list = L[item.type] || L.altro;
     const [title, body] = pick(list, seed)(c);

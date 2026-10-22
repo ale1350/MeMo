@@ -136,6 +136,19 @@
   function stripAccents(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
   function norm(s) { return stripAccents(String(s || '')).toLowerCase().replace(/[’`´]/g, "'"); }
 
+  // ---------- Titoli puliti per le cose che scadono ----------
+  const DOC_TITLE = { cie: "Scadenza carta d'identità", passaporto: 'Scadenza passaporto', patente: 'Scadenza patente', tessera: 'Scadenza tessera sanitaria',
+    bollo: 'Scadenza bollo auto', assicurazione: 'Scadenza assicurazione', revisione: 'Revisione auto' };
+  const DOC_WORD = { cie: /carta\s*d.?\s*identit\S*|carta\s*di\s*identit\S*|\bcie\b/, passaporto: /passaport\S*/, patente: /patent\S*/, tessera: /tessera\s*sanitaria/,
+    bollo: /bollo(\s+(dell[a']?\s*)?(auto|macchina|moto))?/, assicurazione: /assicurazion\S*(\s+(dell[a']?\s*)?(auto|macchina|moto|casa))?/, revisione: /revision\S*(\s+(dell[a']?\s*)?(auto|macchina|moto))?/ };
+  function docTitle(typeId, said) {
+    if (!DOC_TITLE[typeId]) return null;
+    const t = norm(said), m = DOC_WORD[typeId].exec(t);
+    let extra = '';
+    if (m) { const after = said.slice(m.index + m[0].length).match(/^\s+(di|del|della|dello|dei|delle)\s+([A-ZÀ-Ý][\wà-ÿ']+|mi[ao]\s+\w+|tu[ao]\s+\w+)/i); if (after) extra = ` ${after[1].toLowerCase()} ${after[2]}`; }
+    return DOC_TITLE[typeId] + extra;
+  }
+
   // ---------- Riconoscimento del tipo ----------
   function detectType(text) {
     const t = norm(text);
@@ -238,7 +251,7 @@
       }
     }
 
-    let title = T.label;
+    let title = DOC_TITLE[type] || T.label;
     if (type === 'garanzia') { const s = guessStore(text); title = s ? `Garanzia ${s}` : 'Garanzia acquisto'; }
     return { type, title, date, purchase, confident: confident && score > 0, typeScore: score };
   }
@@ -407,13 +420,14 @@
       const fillers = [
         /^\s*(ehi|ok|ciao)?\s*,?\s*memo\s*,?\s*/i,
         /^\s*(per\s+favore\s+)?(ricordami|ricordarmi|ricorda|ricordati|segnami|segna|segnati|aggiungi|metti|memorizza|promemoria|nota|devo|dovrei|bisogna|ho)\b\s*(di|che|per|:)?\s*/i,
-        /^\s*(che|di|per|il|lo|la|i|gli|le|l'|un|uno|una|mio|mia|miei|mie|sera|mattina|pomeriggio|notte)\s+/i,
+        /^\s*(che|di|per|il|lo|la|i|gli|le|l'|un|uno|una|mio|mia|miei|mie|mi|ti|ci|sera|mattina|pomeriggio|notte)\s+/i,
         /^\s*(ho|abbiamo|l'ho|l'abbiamo)\s+(comprat[oaie]|acquistat[oaie]|pres[oaie]|preso)\s+/i,
         /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto)\s*$/i
       ];
       for (let i = 0; i < 6; i++) { for (const f of fillers) s = s.replace(f, ' ').trim(); }
       s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
       const T2 = TYPE_BY_ID[typeId];
+      const dt = docTitle(typeId, src); if (dt) s = dt;
       if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:il|lo|la|i|gli|le)\s+|l')/i, '');
       if (!s || s.length < 2) s = typeId === 'altro' ? 'MeMo' : T2.label;
       s = s.charAt(0).toUpperCase() + s.slice(1);

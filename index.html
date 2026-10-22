@@ -15,20 +15,20 @@
 <link rel="manifest" href="manifest.json">
 <style>
 @property --mood1 { syntax: '<color>'; inherits: true; initial-value: #4ADBA2; }
-@property --mood2 { syntax: '<color>'; inherits: true; initial-value: #C9A7FF; }
+@property --mood2 { syntax: '<color>'; inherits: true; initial-value: #6FC3F3; }
 
 /* ================= COLORI: Giorno, tarato sull'icona ================= */
 :root{
   --bg:#F3F6FA; --ink:#121826; --ink-2:rgba(18,24,38,.62); --ink-3:rgba(18,24,38,.42);
-  --violet:#7B61FF; --azure:#4C8DF6; --teal:#2FCDBE;
-  --brand:#4C8DF6; --brand-ink:#2F6FE0; --brand-grad:linear-gradient(135deg,#7B61FF 0%,#4C8DF6 52%,#2FCDBE 100%);
+  --violet:#2F6BF2; --azure:#4C8DF6; --teal:#2FCDBE;
+  --brand:#4C8DF6; --brand-ink:#2F6FE0; --brand-grad:linear-gradient(135deg,#2F6BF2 0%,#4C8DF6 52%,#2FCDBE 100%);
   --card:#FFFFFF; --card-press:#F6F8FC; --stroke:rgba(18,24,38,.06); --card-shadow:0 1px 2px rgba(18,24,38,.04), 0 10px 30px rgba(43,72,140,.06);
   --orb:#F1F4FA; --sheet:rgba(255,255,255,.97); --field:#F1F4F9;
   --dock:rgba(255,255,255,.8); --dock-stroke:rgba(18,24,38,.06); --dock-ink:#121826; --side:#EEF2F8;
-  --cam:var(--brand-grad); --cam-ink:#fff; --cam-glow:0 0 0 6px rgba(76,141,246,.14), 0 12px 30px rgba(91,97,255,.38);
+  --cam:var(--brand-grad); --cam-ink:#fff; --cam-glow:0 0 0 6px rgba(76,141,246,.14), 0 12px 30px rgba(47,107,242,.38);
   --btn-bg:var(--brand-grad); --btn-ink:#fff; --toast-bg:#121826; --toast-ink:#fff;
-  --calm:#5B8DF6; --calm-2:#8C7BFF; --soon:#4C8DF6; --soon-2:#7B61FF; --now:#7B61FF; --now-2:#4C8DF6; --empty:#7B61FF; --empty-2:#5BA4F7;
-  --now-ink:#5B43E0; --soon-ink:#2F6FE0; --thread:#4C8DF6;
+  --calm:#4C9AF6; --calm-2:#4FD0C6; --soon:#4C8DF6; --soon-2:#35B6E8; --now:#2F6BF2; --now-2:#35B6E8; --empty:#3D86F4; --empty-2:#4FD0C6;
+  --now-ink:#2559D6; --soon-ink:#2F6FE0; --thread:#4C8DF6;
   --aurora:.38; --ring-track:rgba(18,24,38,.06); --ring-w:7; --num-w:850; --num-fill:linear-gradient(165deg,#121826 32%,var(--mood2) 70%,var(--mood1)); --glow:none;
   --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --scheme:light;
@@ -79,7 +79,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 @keyframes swim{50%{transform:translate(4px,-5px) rotate(-3deg)}}
 .hero h1{font-size:clamp(25px,7vw,32px);line-height:1.08;font-weight:800;letter-spacing:-.025em;margin:0 0 10px;text-wrap:balance}
 .hero h1 .h2l{display:block;white-space:nowrap}
-.hero h1 .brandw{background:linear-gradient(120deg,#7B61FF,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .brandw{background:linear-gradient(120deg,#2F6BF2,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{font-size:16.5px;line-height:1.45;color:var(--ink-2);margin:0 auto;max-width:30ch;text-wrap:pretty}
 .peek{position:fixed;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom));z-index:3;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:700;color:var(--ink-3);opacity:calc(1 - var(--p, 0) * 3)}
 .peek svg{animation:cue 2.4s ease-in-out infinite}
@@ -174,6 +174,11 @@ html{overflow-x:hidden}
 .calp-head{display:flex;align-items:center;justify-content:space-between;max-width:620px;margin:0 auto 10px;min-height:44px}
 .calp-head h2{margin:0;font-size:27px;font-weight:800;letter-spacing:-.025em}
 .calp-head .icon-btn{margin-right:-10px;color:var(--ink)}
+.calp-head .icon-btn.back{margin:0 0 0 -10px}
+.setp{translate:calc(var(--hx) + 100vw) 0}
+body.slide .setp{transition:translate .5s cubic-bezier(.22,.9,.22,1)}
+.setp .s-block{background:rgba(255,255,255,.4);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6)}
+.setp .s-block .btn{background:rgba(255,255,255,.6)}
 /* calendario leggero: vetro trasparente al posto del bianco pieno */
 .calp .cal{background:rgba(255,255,255,.38);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(43,72,140,.07)}
 .calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
@@ -184,7 +189,7 @@ html{overflow-x:hidden}
 .dock .rb{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:750;color:var(--ink-2)}
 .dock .c{display:grid;place-items:center;border-radius:50%;transition:transform .15s}
 .dock .photo .c{width:62px;height:62px;color:#fff;background:linear-gradient(135deg,#4C8DF6,#2FCDBE);box-shadow:0 10px 24px rgba(47,205,190,.35), inset 0 1px 0 rgba(255,255,255,.3)}
-.dock .voice .c{width:88px;height:88px;color:#fff;background:linear-gradient(135deg,#7B61FF,#4C8DF6 60%,#2FCDBE);box-shadow:0 0 0 8px rgba(123,97,255,.12), 0 16px 34px rgba(91,97,255,.42), inset 0 1px 0 rgba(255,255,255,.3)}
+.dock .voice .c{width:100px;height:100px;color:#fff;background:linear-gradient(135deg,#2F6BF2,#4C8DF6 60%,#2FCDBE);box-shadow:0 0 0 8px rgba(47,107,242,.12), 0 16px 34px rgba(47,107,242,.42), inset 0 1px 0 rgba(255,255,255,.3)}
 .dock .add .c{width:62px;height:62px;color:var(--ink);background:#fff;box-shadow:0 8px 22px rgba(43,72,140,.14);border:1px solid rgba(18,24,38,.06)}
 .dock button:active .c{transform:scale(.93)}
 .dock::before{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(150px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 45%,transparent);z-index:-1}
@@ -318,6 +323,16 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .lead-list div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--stroke);box-shadow:var(--card-shadow);border-radius:14px;padding:10px 14px;font-weight:700;font-size:15px}
 .lead-list span{color:var(--ink-3);font-weight:700;font-size:13.5px;white-space:nowrap}
 .share-art{display:flex;gap:14px;align-items:center;font-weight:750}
+.swipe-art{position:relative;width:260px;height:190px;display:flex;align-items:center;justify-content:center;gap:10px}
+.swipe-art .pg{width:78px;height:150px;border-radius:18px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:24px;box-shadow:0 10px 30px rgba(43,72,140,.1)}
+.swipe-art .pg span{font-size:10.5px;font-weight:750;color:var(--ink-2)}
+.swipe-art .pg.c{width:92px;height:170px;background:#fff;z-index:1;font-size:13px;gap:10px}
+.swipe-art .pg.c i{display:block;width:60px;height:9px;border-radius:5px;background:rgba(76,141,246,.25)}
+.swipe-art .pg.l,.swipe-art .pg.r{opacity:.85}
+.swipe-art .hand{position:absolute;z-index:3;bottom:-14px;left:50%;font-size:34px;animation:swipeHint 2.6s ease-in-out infinite}
+@keyframes swipeHint{0%,100%{transform:translateX(-50%)}30%{transform:translateX(10%)}65%{transform:translateX(-110%)}}
+.start-art{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:330px;margin-bottom:14px}
+.start-art span{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);font-weight:700;font-size:13.5px;box-shadow:0 6px 18px rgba(43,72,140,.08)}
 .share-art span{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:var(--card);border:1px solid var(--stroke)}
 .intro-foot{padding:10px 24px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:18px}
 .dots{display:flex;gap:8px}
@@ -341,7 +356,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </svg>
 
 <header class="bar">
-  <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+  <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F6BF2"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <g class="fishbody" transform="rotate(-16 54 54)">
   <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
   <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
@@ -355,10 +370,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <circle cx="80" cy="25" r="4.2" fill="none" stroke="#fff" stroke-width="2.4"/>
 <circle cx="87" cy="15" r="2.6" fill="none" stroke="#fff" stroke-width="2.2"/></g></g></svg>MeMo</div>
   <div class="mini" aria-hidden="true"><span class="dot"></span><span id="miniTxt"></span></div>
-  <div class="top-actions"><button class="icon-btn" id="btnCal" aria-label="Calendario">
-    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/></svg>
-  </button>
-  <button class="icon-btn" id="btnSettings" aria-label="Impostazioni">
+  <div class="top-actions"><button class="icon-btn" id="btnSettings" aria-label="Impostazioni">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
   </button></div>
 </header>
@@ -408,9 +420,13 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
   <div class="calp-head"><h2>Calendario</h2><button class="icon-btn" id="calBack" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
   <div class="wrap" id="viewCal"></div>
 </section>
+<section class="calp setp" id="setPanel" aria-hidden="true" aria-label="Impostazioni">
+  <div class="calp-head"><button class="icon-btn back" id="setBack" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Impostazioni</h2><span style="width:34px"></span></div>
+  <div class="wrap" id="setBody"></div>
+</section>
 <nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
-  <button class="rb voice" id="btnVoice"><span class="c"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
+  <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
   <button class="rb add" id="btnAdd"><span class="c"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
 </nav>
 
@@ -425,7 +441,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 
 <button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
 <div class="toast" id="toast" role="status" aria-live="polite">
-  <span class="tie"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B61FF"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+  <span class="tie"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F6BF2"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(50 50) scale(0.9463960027206474) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <g class="fishbody" transform="rotate(-16 54 54)">
   <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
   <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
@@ -448,7 +464,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.15';
+const VERSION = '1.16';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -688,50 +704,57 @@ function openCalendar() {
   const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO();
   renderCal(); setCal(true);
 }
-// la home e il calendario sono due pagine affiancate: --hx sposta entrambe insieme
+// tre pagine affiancate: calendario | home | impostazioni. --hx sposta tutto insieme
 const setHX = px => document.documentElement.style.setProperty('--hx', px + 'px');
-let slideT;
-function setCal(open) {
-  calOpen = open; const el = $('#calPanel');
+let slideT, page = 'home', setOpen = false;
+function goPage(to) {
+  page = to; calOpen = to === 'cal'; setOpen = to === 'set';
   document.body.classList.add('slide'); clearTimeout(slideT); slideT = setTimeout(() => document.body.classList.remove('slide'), 520);
-  setHX(open ? window.innerWidth : 0);
-  el.classList.toggle('open', open); el.setAttribute('aria-hidden', String(!open));
-  document.body.classList.toggle('cal-on', open);
-  if (open) { el.scrollTop = 0; haptic(); }
+  setHX(to === 'cal' ? window.innerWidth : to === 'set' ? -window.innerWidth : 0);
+  for (const [id, on] of [['#calPanel', calOpen], ['#setPanel', setOpen]]) { const el = $(id); el.classList.toggle('open', on); el.setAttribute('aria-hidden', String(!on)); if (on) el.scrollTop = 0; }
+  document.body.classList.toggle('cal-on', to !== 'home');
+  if (to !== 'home') haptic();
 }
-window.addEventListener('resize', () => { if (calOpen) setHX(window.innerWidth); });
-// swipe verso destra dalla home: la home scivola a destra e il calendario entra da sinistra; swipe verso sinistra per tornare
+const setCal = open => goPage(open ? 'cal' : 'home');
+window.addEventListener('resize', () => goPage(page));
+// swipe: verso destra si apre il calendario, verso sinistra le impostazioni; il gesto opposto riporta alla home
 (() => {
-  let x0 = null, y0 = 0, mode = null, dx = 0, from = null, lastX = 0, lastT = 0, vx = 0;
+  let x0 = null, y0 = 0, mode = null, dx = 0, from = null, onRow = false, lastX = 0, lastT = 0, vx = 0;
   const W = () => window.innerWidth;
-  const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; };
+  const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; onRow = !!e.target.closest('#list .row'); };
+  const allowed = mx => from === 'home' ? (mx > 0 || !onRow) : from === 'cal' ? mx < 0 : mx > 0;
   const move = e => {
     if (x0 == null) return; const t = e.touches[0]; const mx = t.clientX - x0, my = t.clientY - y0;
     if (!mode && (Math.abs(mx) > 8 || Math.abs(my) > 8)) {
-      mode = Math.abs(mx) > Math.abs(my) * 1.2 && ((from === 'home' && mx > 0) || (from === 'cal' && mx < 0)) ? 'x' : 'y';
-      if (mode === 'x' && from === 'home') { const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO(); renderCal(); $('#calPanel').scrollTop = 0; }
+      mode = Math.abs(mx) > Math.abs(my) * 1.2 && allowed(mx) ? 'x' : 'y';
+      if (mode === 'x' && from === 'home' && mx > 0) { const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO(); renderCal(); $('#calPanel').scrollTop = 0; }
+      if (mode === 'x' && from === 'home' && mx < 0) { renderSettings(); $('#setPanel').scrollTop = 0; }
     }
     if (mode !== 'x') return;
     const now = performance.now(); vx = (t.clientX - lastX) / Math.max(1, now - lastT); lastX = t.clientX; lastT = now;
     dx = mx; document.body.classList.remove('slide');
-    setHX(Math.max(0, Math.min(W(), from === 'home' ? dx : W() + dx)));
+    const base = from === 'cal' ? W() : from === 'set' ? -W() : 0;
+    setHX(Math.max(-W(), Math.min(W(), base + dx)));
   };
   const end = () => {
     if (x0 == null) return; x0 = null;
     if (mode !== 'x') return;
-    // decide in base a quanto e quanto in fretta hai spostato il dito
-    if (from === 'home') setCal(dx > W() * 0.3 || vx > 0.45); else setCal(!(dx < -W() * 0.3 || vx < -0.45));
+    const far = Math.abs(dx) > W() * 0.3 || Math.abs(vx) > 0.45;
+    if (from === 'home') goPage(far ? (dx > 0 ? 'cal' : 'set') : 'home');
+    else goPage(far ? 'home' : from);
   };
   document.addEventListener('touchstart', e => {
-    if (calOpen || !$('#sheetWrap').hidden || document.querySelector('.intro')) return;
-    if (e.target.closest('.dock, .chips.scroll, .nb, #calPanel')) return;
+    if (page !== 'home' || !$('#sheetWrap').hidden || document.querySelector('.intro')) return;
+    if (e.target.closest('.dock, .chips.scroll, .nb, .calp')) return;
     start(e, 'home');
   }, { passive: true });
-  $('#calPanel').addEventListener('touchstart', e => { if (!calOpen || e.target.closest('#cBox, .chips.scroll')) return; start(e, 'cal'); }, { passive: true });
+  $('#calPanel').addEventListener('touchstart', e => { if (page !== 'cal' || e.target.closest('#cBox, .chips.scroll')) return; start(e, 'cal'); }, { passive: true });
+  $('#setPanel').addEventListener('touchstart', e => { if (page !== 'set' || e.target.closest('.chips.scroll, input')) return; start(e, 'set'); }, { passive: true });
   document.addEventListener('touchmove', move, { passive: true });
   document.addEventListener('touchend', end, { passive: true });
   document.addEventListener('touchcancel', end, { passive: true });
-  $('#calBack').addEventListener('click', () => setCal(false));
+  $('#calBack').addEventListener('click', () => goPage('home'));
+  $('#setBack').addEventListener('click', () => goPage('home'));
 })();
 // le scadenze che si ripetono (bollo, compleanno...) compaiono in tutti gli anni
 function occurrencesIn(it, y, m) {
@@ -807,7 +830,6 @@ function renderCal(anim) {
   cb.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) goMonth(dx < 0 ? 1 : -1, dx < 0 ? 'slide-l' : 'slide-r'); });
 }
-$('#btnCal').addEventListener('click', () => { haptic(); openCalendar(); });
 
 // ================= Fogli =================
 let onSheetClose = null;
@@ -836,7 +858,7 @@ function toast(title, sub, actions = []) {
   const box = $('#toastActions'); box.innerHTML = '';
   actions.forEach(a => { const b = document.createElement('button'); b.textContent = a.label; b.onclick = () => { hideToast(); a.fn(); }; box.appendChild(b); });
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, actions.length ? 6500 : 3600);
+  clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, actions.length ? 3800 : 2200);
 }
 function hideToast() { $('#toast').classList.remove('show'); }
 function savedToast(it) {
@@ -919,7 +941,8 @@ function openEditor(draft, opts = {}) {
       <div class="chips scroll" id="eTypes">${P.TYPES.map(t => `<button class="chip" data-type="${t.id}"><span aria-hidden="true">${t.emoji}</span>${esc(t.label)}</button>`).join('')}</div></div>
     <div class="field"><span class="lbl">Foto <span style="font-weight:600;color:var(--ink-3)">(facoltativa)</span></span><div id="ePhoto"></div></div>
     <div class="summary" id="eSum" hidden><div class="row1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2.2 2.2 0 0 0 4 0"/></svg><p id="eSumTxt"></p><button class="chg" id="eChg">Cambia</button></div><div class="chips" id="eLeads" hidden></div></div>
-    <button class="btn btn-main" id="eSave">Ricordamelo</button>`, body => {
+    <button class="btn btn-main" id="eSave">Ricordamelo</button>
+    ${opts.renew ? '<button class="btn btn-ghost" id="eDrop" style="margin-top:10px">Non serve più, toglilo</button>' : ''}`, body => {
     const dateEl = body.querySelector('#eDate'), timeEl = body.querySelector('#eTime'), titleEl = body.querySelector('#eTitle');
     if (state.time) timeEl.value = state.time;
     let reading = false;
@@ -989,6 +1012,8 @@ function openEditor(draft, opts = {}) {
     body.querySelector('#eQuick').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; if (T(state.type).dateKind === 'purchase') state.purchase = c.dataset.d; else state.date = c.dataset.d; sync(); });
     body.querySelector('#eChg').onclick = () => { showLeads = !showLeads; sync(); };
     body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; sync(); });
+    const drop = body.querySelector('#eDrop');
+    if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); if (calOpen) renderCal(); toast('Tolto. Una cosa in meno.'); };
     body.querySelector('#eSave').onclick = async () => {
       const it = items.find(x => x.id === state.id) || { id: uid(), createdAt: new Date().toISOString() };
       const kindP = T(state.type).dateKind === 'purchase';
@@ -1014,7 +1039,7 @@ function openVoice() {
   const examples = ['Oggi alle 18 parrucchiere', "Il bollo dell'auto scade a fine novembre", "Tra mezz'ora chiamare la mamma", 'Ho comprato la lavatrice oggi'];
   openSheet(`<h2 style="text-align:center">Dimmi cosa ricordarti</h2>
     <div class="mic-big" id="vMic" aria-hidden="true"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>
-    <p class="hint" id="vHint">Parla pure, ti ascolto.</p>
+    <p class="hint" id="vHint">Parla pure, con calma: ti ascolto.</p>
     <div class="field"><textarea class="input" id="vText" rows="3" enterkeyhint="done" placeholder="Per esempio: domani alle 9 e mezza dentista"></textarea></div>
     <div class="examples" id="vEx">${examples.map(x => `<button>${esc(x)}</button>`).join('')}</div>
     <button class="btn btn-main" id="vGo" disabled>Ricordamelo</button>`, body => {
@@ -1026,19 +1051,23 @@ function openVoice() {
     go.onclick = () => { stopRec(); submitSpeech(ta.value); };
     const fallback = () => { mic.classList.remove('on'); hint.textContent = 'Tocca il microfono sulla tastiera e parla, oppure scrivi.'; ta.focus(); };
     if (!SR) { fallback(); return; }
-    try {
-      rec = new SR(); rec.lang = 'it-IT'; rec.interimResults = true; rec.continuous = false;
-      let gotAny = false;
-      let quiet = null;
-      // quando smetti di parlare per un attimo, MeMo chiude il microfono e crea il MeMo
-      rec.onresult = e => { gotAny = true; let t = ''; for (const r of e.results) t += r[0].transcript; ta.value = t.trim(); upd();
-        clearTimeout(quiet); quiet = setTimeout(() => { if (!rec) return; stopRec(); mic.classList.remove('on'); if (ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 350); } }, 1600); };
-      rec.onerror = () => { rec = null; fallback(); };
-      rec.onend = () => { mic.classList.remove('on'); const r = rec; rec = null;
-        if (r && gotAny && ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 500); }
-        else if (r && !gotAny) fallback(); };
-      mic.classList.add('on'); rec.start(); onSheetClose = stopRec;
-    } catch (e) { fallback(); }
+    // ascolta con calma: crea il MeMo solo dopo 3,5 secondi di silenzio, così puoi pensare mentre parli
+    let base = '', gotAny = false, quiet = null, done = false, restarts = 0;
+    const finish = () => { if (done) return; done = true; clearTimeout(quiet); stopRec(); mic.classList.remove('on');
+      if (ta.value.trim()) { hint.textContent = 'Ho capito.'; setTimeout(() => { if ($('#vText') === ta) submitSpeech(ta.value); }, 300); } else fallback(); };
+    const arm = () => { clearTimeout(quiet); quiet = setTimeout(finish, 3500); };
+    const listen = () => {
+      try {
+        rec = new SR(); rec.lang = 'it-IT'; rec.interimResults = true; rec.continuous = true;
+        rec.onresult = e => { gotAny = true; let t = ''; for (const r of e.results) t += r[0].transcript; ta.value = (base + ' ' + t).replace(/\s+/g, ' ').trim(); upd(); hint.textContent = 'Ti ascolto… quando hai finito, fai una pausa.'; arm(); };
+        rec.onerror = ev => { if (done) return; if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) { rec = null; done = true; fallback(); } };
+        // iPhone a volte chiude il microfono da solo: se stavi ancora parlando, lo riapre e continua
+        rec.onend = () => { if (done) return; rec = null; base = ta.value; if (restarts++ < 6) listen(); else finish(); };
+        rec.start();
+      } catch (e) { done = true; fallback(); }
+    };
+    mic.classList.add('on'); listen(); arm(); onSheetClose = () => { done = true; clearTimeout(quiet); stopRec(); };
+    ta.addEventListener('focus', () => { if (!done) { done = true; clearTimeout(quiet); stopRec(); mic.classList.remove('on'); hint.textContent = 'Scrivi pure, poi tocca Ricordamelo.'; } });
   });
 }
 function stopRec() { if (rec) { const r = rec; rec = null; r.onresult = r.onend = r.onerror = null; try { r.stop(); } catch (e) {} try { r.abort(); } catch (e) {} } const m = $('#vMic'); if (m) m.classList.remove('on'); }
@@ -1059,7 +1088,7 @@ $('#btnVoice').addEventListener('click', openVoice);
 // ================= Fatto =================
 async function doneItem(it) {
   const ty = T(it.type);
-  if (ty.done === 'renew') { openEditor({ id: it.id, type: it.type, title: it.title, date: null }, { head: 'Ottimo. Quando scade il nuovo?', sub: 'Aggiungi la foto del nuovo documento o inserisci la data.', typeLocked: true, markMissing: true }); return false; }
+  if (ty.done === 'renew') { openEditor({ id: it.id, type: it.type, title: it.title, date: null }, { head: 'Ottimo. Quando scade il nuovo?', sub: 'Inserisci la nuova scadenza e te la ricordo io. Se non ti serve più, toglilo.', typeLocked: true, markMissing: true, renew: true }); return false; }
   haptic();
   if (ty.done === 'reschedule') {
     const old = it.due; it.due = P.addMonths(it.due, ty.recur); await DB.put(it); render();
@@ -1111,11 +1140,9 @@ async function openDetail(id) {
     ${nextList ? `<div class="d-card"><span class="lbl">I prossimi avvisi</span><p class="todo" style="margin:0">${esc(nextList)}</p></div>` : ''}
     ${it.said ? `<div class="d-card"><span class="lbl">Mi avevi detto</span><p class="todo" style="margin:0">«${esc(it.said)}»</p></div>` : ''}
     <button class="btn btn-main" id="dDone">${doneLabel}</button>${doneSub ? `<p class="fine">${doneSub}</p>` : ''}
-    <div class="btn-row"><button class="btn btn-ghost" id="dEdit">Modifica</button><button class="btn btn-ghost" id="dCal">Al Calendario</button></div>
-    <div class="btn-row"><button class="btn btn-ghost btn-danger" id="dDel">Elimina</button></div>`, body => {
+    <div class="btn-row"><button class="btn btn-ghost" id="dEdit">Modifica</button><button class="btn btn-ghost btn-danger" id="dDel">Elimina</button></div>`, body => {
     const ph = body.querySelector('#dPhoto'); if (ph) ph.onclick = () => openViewer(photo);
     body.querySelector('#dEdit').onclick = () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase, photo }, { head: 'Modifica', typeLocked: true });
-    body.querySelector('#dCal').onclick = () => addToCalendar([it]);
     body.querySelector('#dDel').onclick = async () => { if (!confirm(`Elimino «${it.title}»?`)) return; await removeItem(it); closeSheet(); render(); toast('Eliminato.'); };
     body.querySelector('#dDone').onclick = async () => { if (ty.done !== 'renew') closeSheet(); await doneItem(it); };
   });
@@ -1193,28 +1220,24 @@ function openLeads() {
 }
 
 // ================= Impostazioni =================
-function openSettings() {
+function renderSettings() {
   const nPhotos = items.filter(i => i.photoId).length;
-  openSheet(`<h2>MeMo</h2><p class="lead">Fai una foto, detta una scadenza e dimenticatela.</p>
-    <div class="s-block"><h3>Come ti chiami?</h3><p>Così le notifiche ti chiamano per nome. Se lo lasci vuoto, MeMo ti chiamerà Mario.</p>
-      <input class="input" id="sName" autocomplete="given-name" autocapitalize="words" enterkeyhint="done" placeholder="Il tuo nome" value="${esc(userName())}" style="background:var(--card);margin-bottom:10px">
+  const body = $('#setBody');
+  body.innerHTML = `
+    <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo il momento giusto: mesi prima per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. E se non lo segni come fatto, te lo ricorda ancora.</p>
+      <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button>
       <button class="btn btn-ghost" id="sTest">Prova una notifica</button></div>
-    <div class="s-block"><h3>Le tue foto</h3><p>Ogni foto viene salvata solo su questo telefono, insieme alla scadenza, così puoi riguardare il documento quando serve.${nPhotos ? ` Ora ne hai ${nPhotos}.` : ''}</p></div>
-    <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo l'anticipo: mesi per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata.</p>
-      <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button><p> Le notifiche sul telefono arrivano con il prossimo aggiornamento; intanto puoi mettere tutto nel Calendario, con gli stessi avvisi.</p>
-      <button class="btn btn-ghost" id="sCal">Aggiungi tutto al Calendario</button></div>
+    <div class="s-block"><h3>Le tue foto</h3><p>Ogni foto resta solo su questo telefono, insieme al suo MeMo, così puoi riguardare il documento quando serve.${nPhotos ? ` Ora ne hai ${nPhotos}.` : ''}</p></div>
     <div class="s-block"><h3>Backup</h3><p>Salva una copia ogni tanto, foto comprese, e tienila su iCloud Drive.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
-    <button class="btn btn-ghost" id="sIntro">Rivedi come funziona</button><p class="fine">Versione ${VERSION}</p>`, body => {
-    body.querySelector('#sLeads').onclick = () => openLeads();
-    const nm = body.querySelector('#sName'); nm.addEventListener('change', () => store.set('name', nm.value.trim())); nm.addEventListener('keydown', e => { if (e.key === 'Enter') nm.blur(); });
-    body.querySelector('#sTest').onclick = () => { store.set('name', nm.value.trim()); testNotification(); };
-    body.querySelector('#sCal').onclick = () => addToCalendar(items);
-    body.querySelector('#sExp').onclick = exportBackup;
-    body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
-    body.querySelector('#sIntro').onclick = () => { closeSheet(); setTimeout(showIntro, 300); };
-  });
+    <button class="btn btn-ghost" id="sIntro" style="background:rgba(255,255,255,.5)">Rivedi come funziona</button><p class="fine">MeMo · versione ${VERSION}</p>`;
+  body.querySelector('#sLeads').onclick = () => openLeads();
+  body.querySelector('#sTest').onclick = () => testNotification();
+  body.querySelector('#sExp').onclick = exportBackup;
+  body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
+  body.querySelector('#sIntro').onclick = () => { goPage('home'); setTimeout(showIntro, 450); };
 }
+function openSettings() { renderSettings(); goPage('set'); }
 async function exportBackup() {
   const photos = {}; for (const it of items) if (it.photoId) photos[it.photoId] = await DB.photoGet(it.photoId);
   const blob = new Blob([JSON.stringify({ app: 'memo', v: 1, at: new Date().toISOString(), items, photos })], { type: 'application/json' });
@@ -1226,7 +1249,7 @@ $('#fileBackup').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const data = JSON.parse(await f.text()); if (data.app !== 'memo' || !Array.isArray(data.items)) throw 0; let n = 0;
     for (const it of data.items) { if (!it.id || !it.due) continue; await DB.put(it); n++; if (it.photoId && data.photos && data.photos[it.photoId]) await DB.photoPut(it.photoId, data.photos[it.photoId]); }
-    items = await DB.all(); closeSheet(); render(); toast(`Ripristinate ${n} scadenze.`);
+    items = await DB.all(); closeSheet(); render(); if (setOpen) renderSettings(); toast(`Ripristinati ${n} MeMo.`);
   } catch (err) { toast('Questo file non è un backup di MeMo.', 'Scegli il file memo-backup che hai salvato.'); }
 });
 $('#btnSettings').addEventListener('click', openSettings);
@@ -1236,9 +1259,14 @@ function showIntro() {
   const slides = [
     { art: `<div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div>`, h: 'Fai una foto.', p: "Carta d'identità, patente, scontrino, bolletta: MeMo legge da solo cos'è e quando scade." },
     { art: `<span class="bubble">Oggi alle 18 parrucchiere</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`, h: 'Oppure dillo.', p: "Tocca Dimmi e parla come faresti con un amico. Per scrivere a mano c'è il piccolo +." },
-    { art: `<div class="lead-list"><div>🛂 Passaporto<span>4 mesi prima</span></div><div>🚗 Patente<span>2 mesi prima</span></div><div>💇 Parrucchiere<span>15 min prima</span></div><div>📞 Chiamare Luca<span>5 min prima</span></div></div>`, h: 'E dimenticatelo.', p: 'Ti avvisiamo noi, con il giusto anticipo per ogni cosa. Non prima del necessario.' }
+    { art: `<div class="lead-list"><div>🛂 Passaporto<span>4 mesi prima</span></div><div>🚗 Patente<span>2 mesi prima</span></div><div>💇 Parrucchiere<span>15 min prima</span></div><div>📞 Chiamare Luca<span>5 min prima</span></div></div>`, h: 'E dimenticatelo.', p: 'Ti avviso io, con il giusto anticipo per ogni cosa. E se serve, te lo ricordo ancora.' },
+    { art: `<div class="swipe-art"><div class="pg l">📅<span>Calendario</span></div><div class="pg c"><b>MeMo</b><i></i><i></i></div><div class="pg r">⚙️<span>Impostazioni</span></div><div class="hand">👆</div></div>`,
+      h: 'Scorri di lato.', p: 'Verso destra trovi il calendario con tutti i tuoi MeMo. Verso sinistra, le impostazioni.' }
   ];
+  const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '🛡️ Assicurazione', '💡 Bollette', '🎂 Compleanni', '🔁 Abbonamenti', '🧾 Garanzie'].map(x => `<span>${x}</span>`).join('')}</div>`,
+    h: 'Svuota la testa.', p: 'Per partire alla grande, dimmi subito tutto quello che è importante ricordare. Lo fai una volta sola: da lì in poi non ci pensi più, ci penso io.' };
   if (isIOS && !isStandalone()) slides.push({ art: `<div class="share-art"><span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg></span><svg width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6h17M14 1l5 5-5 5"/></svg><span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span></div>`, h: 'Mettila nella Home.', p: "In Safari tocca Condividi, poi «Aggiungi alla schermata Home». Si apre come un'app vera." });
+  slides.push(lastSlide);
   const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Come funziona MeMo');
   el.innerHTML = `<button class="skip">Salta</button><div class="slides">${slides.map(s => `<section class="slide"><div class="art">${s.art}</div><h2>${s.h}</h2><p>${s.p}</p></section>`).join('')}</div>
     <div class="intro-foot"><div class="dots">${slides.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div><button class="btn btn-main" id="iNext">Avanti</button></div>`;
@@ -1271,7 +1299,7 @@ function allRemindText(it) {
 
 // ================= Notifiche: la voce di MeMo =================
 const N = window.MeMoNotify;
-const userName = () => (store.get('name') || '').trim();
+const userName = () => '';
 let nbTimer, nbItem = null;
 function notifyText(it, salt) { return N.make(it, { name: userName(), emoji: emojiOf(it), salt }); }
 function showBanner(n, it) {
@@ -1294,7 +1322,7 @@ function sampleItem() {
 function testNotification() {
   const it = sampleItem(); const at = new Date();
   const n = N.make(it, { name: userName(), emoji: emojiOf(it), salt: String(Date.now()), at: it.id === 'prova' ? at : undefined });
-  closeSheet(); setTimeout(() => showBanner(n, it.id === 'prova' ? null : it), 450);
+  setTimeout(() => showBanner(n, it.id === 'prova' ? null : it), 150);
 }
 
 // ================= Avvisi mentre l'app è aperta =================
