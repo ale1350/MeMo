@@ -1,0 +1,461 @@
+/* MeMo — motore "smart": capisce cosa scade e quando, da una foto (testo OCR) o da una frase detta a voce.
+   Funziona sia nel browser (window.MeMoParser) sia in Node (module.exports) per i test. */
+(function (root) {
+  'use strict';
+
+  // ---------- Catalogo dei tipi di scadenza ----------
+  // lead: giorni di anticipo con cui avvisare. recur: mesi dopo cui si ripete (null = non si ripete).
+  // dateKind: 'expiry' = la data è la scadenza; 'purchase' = la data è l'acquisto (garanzia: +24 mesi).
+  // done: cosa succede quando tocchi "Fatto": 'reschedule' (riprogramma), 'renew' (nuovo documento), 'archive'.
+  const TYPES = [
+    { id: 'passaporto', label: 'Passaporto', emoji: '🛂', lead: 120, recur: null, dateKind: 'expiry', done: 'renew',
+      ask: 'Quando scade?',
+      todo: 'Prenota un appuntamento in Questura dal sito della Polizia di Stato. I tempi di attesa possono essere lunghi, per questo ti avviso con largo anticipo. Servono foto tessera, ricevuta del contributo e marca da bollo.',
+      link: { label: 'Prenota il passaporto', url: 'https://passaportonline.poliziadistato.it/' },
+      kw: [[/\bpassaport/, 5], [/\bpassport\b/, 5], [/p<ita/, 6]] },
+    { id: 'cie', label: "Carta d'identità", emoji: '🪪', lead: 90, recur: null, dateKind: 'expiry', done: 'renew',
+      ask: 'Quando scade?',
+      todo: "Prenota il rinnovo in Comune: puoi farlo già da 6 mesi prima della scadenza. Porta una fototessera recente, la tessera sanitaria e la vecchia carta.",
+      link: { label: 'Prenota la carta d\'identità', url: 'https://www.prenotazionicie.interno.gov.it/' },
+      kw: [[/carta\s*d.?\s*identit/, 6], [/carta\s*di\s*identit/, 6], [/identity\s*card/, 5], [/\bcie\b/, 4], [/\bc[i1]?<ita/, 6], [/\bdocumento\s*d.?\s*identit/, 4], [/\bcarta\s*identit/, 5]] },
+    { id: 'patente', label: 'Patente', emoji: '🚗', lead: 60, recur: null, dateKind: 'expiry', done: 'renew',
+      ask: 'Quando scade?',
+      todo: "Prenota la visita medica per il rinnovo: in autoscuola, in un'agenzia di pratiche auto o all'ASL. Dopo la visita la nuova patente arriva a casa per posta.",
+      link: { label: 'Portale dell\'automobilista', url: 'https://www.ilportaledellautomobilista.it/' },
+      kw: [[/\bpatent[ei]\b/, 6], [/driving\s*licen/, 5], [/permis\s*de\s*conduire/, 5], [/\b4b\b/, 1]] },
+    { id: 'tessera', label: 'Tessera sanitaria', emoji: '💳', lead: 60, recur: null, dateKind: 'expiry', done: 'renew',
+      ask: 'Quando scade?',
+      todo: "Di solito la nuova tessera arriva a casa da sola. Se manca un mese alla scadenza e non è arrivata, richiedila all'Agenzia delle Entrate o alla tua ASL.",
+      link: { label: 'Agenzia delle Entrate', url: 'https://www.agenziaentrate.gov.it/' },
+      kw: [[/tessera\s*sanitaria/, 6], [/\bteam\b/, 2], [/carta\s*nazionale\s*dei\s*servizi/, 5], [/codice\s*fiscale/, 2]] },
+    { id: 'revisione', label: 'Revisione auto', emoji: '🔧', lead: 30, recur: 24, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Entro quando va fatta?',
+      todo: "Prenota in un centro revisioni: va fatta entro la fine del mese di scadenza. Dopo la prima, si rifà ogni 2 anni.",
+      link: { label: 'Verifica l\'ultima revisione', url: 'https://www.ilportaledellautomobilista.it/' },
+      kw: [[/\brevision[ei]\b/, 6]] },
+    { id: 'bollo', label: 'Bollo auto', emoji: '🚙', lead: 15, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Quando scade?',
+      todo: "Pagalo online con pagoPA (app IO o home banking), in tabaccheria o in una delegazione ACI. Si paga entro la fine del mese successivo alla scadenza.",
+      link: { label: 'Paga il bollo', url: 'https://www.aci.it/' },
+      kw: [[/\bbollo\b(?!\s*(da|virtuale))/, 5], [/tassa\s*automobilistic/, 6]] },
+    { id: 'assicurazione', label: 'Assicurazione', emoji: '🛡️', lead: 30, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Quando scade?',
+      todo: "Prima del rinnovo confronta qualche preventivo: spesso si risparmia. Per l'RC auto hai 15 giorni di tolleranza dopo la scadenza, ma non contarci.",
+      link: null,
+      kw: [[/assicura/, 5], [/\bpolizz/, 5], [/\brc\s*auto\b/, 6], [/\brca\b/, 4]] },
+    { id: 'caldaia', label: 'Controllo caldaia', emoji: '🔥', lead: 30, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Entro quando va fatto?',
+      todo: "Chiama il tecnico per il controllo e fatti aggiornare il libretto d'impianto.",
+      link: null,
+      kw: [[/caldaia/, 6], [/condizionator/, 4], [/climatizzator/, 4], [/\bfiltri\b/, 2]] },
+    { id: 'viaggio', label: 'Viaggio', emoji: '✈️', lead: 1, leadMin: 180, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando parti?',
+      todo: 'Controlla documenti, biglietti e orari. Se voli, fai il check-in online appena apre.',
+      link: null,
+      kw: [[/\bvol[oi]\b/, 5], [/\baereo\b|\baeroporto\b/, 5], [/\btren[oi]\b|\bstazione\b/, 4], [/\bpartenz|\bpart[oi]\b|\bparte\b/, 2], [/check.?in|\bimbarco\b/, 5], [/\bvaligi/, 4]] },
+    { id: 'compleanno', label: 'Compleanno', emoji: '🎂', lead: 1, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Quando?',
+      todo: "Fai gli auguri. Se vuoi fare un regalo, hai ancora un giorno.",
+      link: null,
+      kw: [[/compleann/, 7], [/anniversari/, 6], [/onomastic/, 6]] },
+    { id: 'chiamata', label: 'Chiamata', emoji: '📞', lead: 0, leadMin: 5, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando?',
+      todo: '',
+      link: null,
+      kw: [[/\b(chiamar|telefonar|richiamar|videochiamat)/, 7], [/\bscrivere\s+a\b|\bmandare\s+un\s+messaggio|\bwhatsapp\b|\bsentire\b/, 4]] },
+    { id: 'appuntamento', label: 'Appuntamento', emoji: '⏰', lead: 0, leadMin: 15, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando?',
+      todo: '',
+      link: null,
+      kw: [[/parrucchier|barbier|estetist|manicure|massagg/, 6], [/appuntament/, 4], [/riunion|\bmeeting\b|\bcall\b|colloquio/, 5], [/\bcena\b|\bpranzo\b|aperitiv|\bcolazione\s+con/, 4], [/\bincontr/, 3], [/\bandare\s+(da|dal|dalla|al|alla)\b/, 2]] },
+    { id: 'salute', label: 'Visita', emoji: '🩺', lead: 1, leadMin: 60, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando?',
+      todo: "Prenota per tempo e segnati l'orario.",
+      link: null,
+      kw: [[/\bmedic[oa]\b/, 4], [/dentist/, 5], [/\bvisit[ae]\b/, 4], [/vaccin/, 5], [/\besami\b/, 3], [/\banalisi\b/, 3], [/oculist/, 5], [/\bigienista\b/, 5], [/\bcontroll[oi]\s*(dal|medic)/, 3]] },
+    { id: 'abbonamento', label: 'Abbonamento', emoji: '🔁', lead: 7, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Quando si rinnova?',
+      todo: "Se non lo usi più, disdicilo prima del rinnovo. Se lo usi, non devi fare niente.",
+      link: null,
+      kw: [[/abboname/, 5], [/rinnovo\s*automatic/, 5], [/netflix|spotify|disney|dazn|icloud|amazon\s*prime|youtube\s*premium|palestra/, 5], [/\bdisdett|\bdisdir/, 3]] },
+    { id: 'bolletta', label: 'Pagamento', emoji: '💡', lead: 3, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Entro quando va pagato?',
+      todo: "Pagalo o controlla che l'addebito automatico sia attivo.",
+      link: null,
+      kw: [[/bollett/, 6], [/\bluce\b|\bgas\b|\bacqua\b/, 2], [/\benel\b|\ba2a\b|\biren\b|\bhera\b|\bedison\b|\bsorgenia\b/, 3], [/\bpagar[ei]\b|\bpagament/, 2], [/\brata\b/, 3], [/\bf24\b|\btari\b|\bimu\b|\bcanone\b/, 4], [/scadenza\s*(di\s*)?pagament/, 4], [/importo\s*da\s*pagare/, 4]] },
+    { id: 'garanzia', label: 'Garanzia', emoji: '🧾', lead: 30, recur: null, dateKind: 'purchase', done: 'archive',
+      ask: "Quando l'hai comprato?",
+      todo: "Se qualcosa non funziona, portalo al negozio con lo scontrino prima che scada la garanzia: hai diritto a riparazione o sostituzione.",
+      link: null,
+      kw: [[/garanzi/, 6], [/scontrin/, 5], [/documento\s*commerciale/, 6], [/\btotale\b/, 1], [/\biva\b/, 1], [/pagamento\s*elettronico|contanti|\bresto\b/, 1], [/\bcomprat[oaie]\b|\bacquistat[oaie]\b|\bpres[oaie]\s+(oggi|ieri)/, 3]] },
+    { id: 'altro', label: 'Promemoria', emoji: '📌', lead: 0, leadMin: 10, recur: null, dateKind: 'expiry', done: 'archive',
+      ask: 'Quando?',
+      todo: '',
+      link: null,
+      kw: [] }
+  ];
+  const TYPE_BY_ID = Object.fromEntries(TYPES.map(t => [t.id, t]));
+
+  // ---------- Utilità sulle date (sempre stringhe 'YYYY-MM-DD', ora locale) ----------
+  const pad = n => String(n).padStart(2, '0');
+  const iso = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+  function todayISO(now) { const d = now || new Date(); return iso(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
+  function parseISO(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+  function toISO(dt) { return iso(dt.getFullYear(), dt.getMonth() + 1, dt.getDate()); }
+  function valid(y, m, d) {
+    if (!(y >= 1900 && y <= 2100 && m >= 1 && m <= 12 && d >= 1 && d <= 31)) return false;
+    const dt = new Date(y, m - 1, d);
+    return dt.getMonth() === m - 1 && dt.getDate() === d;
+  }
+  function lastDay(y, m) { return new Date(y, m, 0).getDate(); }
+  function addDays(s, n) { const d = parseISO(s); d.setDate(d.getDate() + n); return toISO(d); }
+  function addMonths(s, n) {
+    const [y, m, d] = s.split('-').map(Number);
+    const tot = (y * 12 + (m - 1)) + n; const ny = Math.floor(tot / 12), nm = tot % 12 + 1;
+    return iso(ny, nm, Math.min(d, lastDay(ny, nm)));
+  }
+  function diffDays(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 86400000); } // b - a
+  function fullYear(y) { y = Number(y); if (y < 100) y += 2000; return y; }
+
+  const MONTHS = {
+    gen: 1, genn: 1, gennaio: 1, jan: 1, january: 1, janvier: 1,
+    feb: 2, febb: 2, febbraio: 2, february: 2, fev: 2,
+    mar: 3, marzo: 3, march: 3, mars: 3,
+    apr: 4, aprile: 4, april: 4, avr: 4,
+    mag: 5, maggio: 5, may: 5, mai: 5,
+    giu: 6, giugno: 6, jun: 6, june: 6, juin: 6,
+    lug: 7, luglio: 7, jul: 7, july: 7, juil: 7,
+    ago: 8, agosto: 8, aug: 8, august: 8, aou: 8,
+    set: 9, sett: 9, settembre: 9, sep: 9, sept: 9, september: 9,
+    ott: 10, ottobre: 10, oct: 10, october: 10,
+    nov: 11, novembre: 11, november: 11,
+    dic: 12, dicembre: 12, dec: 12, december: 12
+  };
+  const MONTH_RE = Object.keys(MONTHS).sort((a, b) => b.length - a.length).join('|');
+
+  function stripAccents(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function norm(s) { return stripAccents(String(s || '')).toLowerCase().replace(/[’`´]/g, "'"); }
+
+  // ---------- Riconoscimento del tipo ----------
+  function detectType(text) {
+    const t = norm(text);
+    let best = null, bestScore = 0;
+    for (const ty of TYPES) {
+      let s = 0;
+      for (const [re, w] of ty.kw) if (re.test(t)) s += w;
+      if (s > bestScore) { best = ty; bestScore = s; }
+    }
+    return { type: best ? best.id : 'altro', score: bestScore };
+  }
+
+  // ---------- Date nel testo di una foto (OCR) ----------
+  // Corregge errori tipici dell'OCR dentro gruppi che sembrano date: O→0, I/l/|→1, S→5, B→8.
+  function fixOcrDigits(text) {
+    return text.replace(/[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{2,4}/g, m =>
+      m.replace(/[Oo]/g, '0').replace(/[Il|]/g, '1').replace(/S/g, '5').replace(/B/g, '8'));
+  }
+
+  function findDates(text) {
+    const out = [];
+    const t = fixOcrDigits(text);
+    const low = norm(t);
+    let m;
+    const reNum = /(?<!\d)(\d{1,2})\s?[\/.\-]\s?(\d{1,2})\s?[\/.\-]\s?(\d{4}|\d{2})(?!\d)/g;
+    while ((m = reNum.exec(t))) {
+      const d = +m[1], mo = +m[2], y = fullYear(m[3]);
+      if (valid(y, mo, d)) out.push({ date: iso(y, mo, d), index: m.index, len: m[0].length });
+    }
+    const reIso = /(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)/g;
+    while ((m = reIso.exec(t))) {
+      const y = +m[1], mo = +m[2], d = +m[3];
+      if (valid(y, mo, d)) out.push({ date: iso(y, mo, d), index: m.index, len: m[0].length });
+    }
+    const reTxt = new RegExp(`(?<!\\d)(\\d{1,2})\\s*(?:°|º)?\\s*(?:/\\s*)?(${MONTH_RE})\\.?(?:\\s*/\\s*[a-z]{3,5}\\.?)?\\s*(?:/\\s*)?(\\d{4}|\\d{2})(?!\\d)`, 'g');
+    while ((m = reTxt.exec(low))) {
+      const d = +m[1], mo = MONTHS[m[2]], y = fullYear(m[3]);
+      if (valid(y, mo, d)) out.push({ date: iso(y, mo, d), index: m.index, len: m[0].length });
+    }
+    return out;
+  }
+
+  // Zona leggibile dalla macchina (MRZ) di passaporti e carte d'identità: ...AAMMGG<cifra><sesso>AAMMGG...
+  function findMrzExpiry(text) {
+    const lines = text.toUpperCase().split(/\n/).map(l => l.replace(/\s/g, ''));
+    for (const l of lines) {
+      if ((l.match(/</g) || []).length < 3) continue;
+      const fixed = l.replace(/O/g, '0');
+      const m = fixed.match(/(\d{6})\d?[MF<](\d{6})/);
+      if (m) {
+        const e = m[2]; const y = 2000 + +e.slice(0, 2), mo = +e.slice(2, 4), d = +e.slice(4, 6);
+        if (valid(y, mo, d)) return iso(y, mo, d);
+      }
+    }
+    return null;
+  }
+
+  const EXPIRY_LABEL = /(scad|expir|valid|fino\s*al|until|4b|date\s*of\s*expiry|data\s*di\s*scadenza|entro\s*il|pagare\s*entro|rinnov)/;
+  const ISSUE_LABEL = /(emission|rilasci|issue|nascita|birth|nato|nata|4a\b|\b3\.|data\s*di\s*nascita)/;
+
+  function labelBefore(text, idx) {
+    const before = norm(text.slice(Math.max(0, idx - 45), idx));
+    const lastLine = before.split('\n').slice(-2).join(' ');
+    return { expiry: EXPIRY_LABEL.test(lastLine), issue: ISSUE_LABEL.test(lastLine) };
+  }
+
+  function guessStore(text) {
+    const lines = String(text).split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4);
+    for (const l of lines) {
+      const letters = (l.match(/[A-Za-zÀ-ÿ]/g) || []).length;
+      if (l.length >= 3 && l.length <= 26 && letters / l.length > 0.75 && !/scontrino|documento|commerciale|fattura|ricevuta/i.test(l)) {
+        return l.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()).replace(/\s+/g, ' ');
+      }
+    }
+    return null;
+  }
+
+  /** Analizza il testo letto da una foto. */
+  function parseOcr(text, now) {
+    const today = todayISO(now);
+    const { type, score } = detectType(text);
+    const T = TYPE_BY_ID[type];
+    const dates = findDates(text);
+    const mrz = findMrzExpiry(text);
+    let date = null, purchase = null, confident = false;
+
+    if (T.dateKind === 'purchase') {
+      // Scontrino: la data è l'acquisto. Prendo la più recente non nel futuro.
+      const past = dates.map(d => d.date).filter(d => d <= addDays(today, 1)).sort();
+      purchase = past.length ? past[past.length - 1] : null;
+      if (purchase) { date = addMonths(purchase, 24); confident = true; }
+    } else {
+      const labelled = dates.filter(d => { const l = labelBefore(text, d.index); return l.expiry && !l.issue; });
+      if (labelled.length) { date = labelled.map(d => d.date).sort().pop(); confident = true; }
+      else if (mrz) { date = mrz; confident = true; }
+      else if (dates.length) {
+        const sorted = dates.map(d => d.date).sort();
+        date = sorted[sorted.length - 1]; // la scadenza è quasi sempre la data più lontana
+        confident = dates.length === 1 || date > today;
+      }
+    }
+
+    let title = T.label;
+    if (type === 'garanzia') { const s = guessStore(text); title = s ? `Garanzia ${s}` : 'Garanzia acquisto'; }
+    return { type, title, date, purchase, confident: confident && score > 0, typeScore: score };
+  }
+
+  // ---------- Frasi dette a voce ----------
+  const NUM_WORDS = { un: 1, uno: 1, una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10,
+    undici: 11, dodici: 12, quindici: 15, venti: 20, venticinque: 25, trenta: 30, quaranta: 40, quarantacinque: 45, cinquanta: 50, sessanta: 60, novanta: 90 };
+  const HOUR_WORDS = { una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, undici: 11, dodici: 12,
+    tredici: 13, quattordici: 14, quindici: 15, sedici: 16, diciassette: 17, diciotto: 18, diciannove: 19, venti: 20, ventuno: 21, ventidue: 22, ventitre: 23 };
+  const WEEKDAYS = { domenica: 0, lunedi: 1, martedi: 2, mercoledi: 3, giovedi: 4, venerdi: 5, sabato: 6 };
+  const NUMW = Object.keys(NUM_WORDS).sort((a, b) => b.length - a.length).join('|');
+  const HOURW = Object.keys(HOUR_WORDS).sort((a, b) => b.length - a.length).join('|');
+  const hhmm = (h, m) => `${pad(h)}:${pad(m)}`;
+
+  function nextOccurrence(today, mo, d) {
+    const y = +today.slice(0, 4);
+    let cand = iso(y, mo, Math.min(d, lastDay(y, mo)));
+    if (cand < today) cand = iso(y + 1, mo, Math.min(d, lastDay(y + 1, mo)));
+    return cand;
+  }
+
+  // Orari: "alle 18", "alle 9 e mezza", "all'una", "a mezzogiorno", "tra mezz'ora", "tra 2 ore"
+  function findTime(t, nowD) {
+    const n = v => /^\d+$/.test(v) ? +v : NUM_WORDS[v.replace(/'$/, '')];
+    let m;
+    const rel = [
+      [new RegExp(`\\b(?:tra|fra)\\s+(\\d+|${NUMW})\\s+minut[oi]\\b`), mm => n(mm[1])],
+      [new RegExp(`\\b(?:tra|fra)\\s+(\\d+|un'?|una|${NUMW})\\s*'?\\s*or[ae]\\b`), mm => 60 * (n(mm[1]) || 1)],
+      [/\b(?:tra|fra)\s+mezz'?\s*ora\b/, () => 30],
+      [/\b(?:tra|fra)\s+un\s+quarto\s+d'?\s*ora\b/, () => 15],
+      [/\b(?:tra|fra)\s+un'?\s*ora\s+e\s+mezz[ao]\b/, () => 90]
+    ];
+    for (const [re, f] of rel.slice().reverse()) {
+      if ((m = re.exec(t))) {
+        const mins = f(m); if (!mins) continue;
+        const d = new Date(nowD.getTime() + mins * 60000);
+        return { date: toISO(d), time: hhmm(d.getHours(), d.getMinutes()), span: [m.index, m.index + m[0].length], relative: true };
+      }
+    }
+    if ((m = /\b(?:a|verso|per|entro)\s+mezzogiorno\b/.exec(t))) return { h: 12, min: 0, fixed: true, span: [m.index, m.index + m[0].length] };
+    if ((m = /\b(?:a|verso|per|entro)\s+mezzanotte\b/.exec(t))) return { h: 23, min: 59, fixed: true, span: [m.index, m.index + m[0].length] };
+    const abs = new RegExp(`(?:\\b(?:alle|verso\\s+le|per\\s+le|entro\\s+le|dalle|ore|h)\\s*|\\ball'\\s*)(\\d{1,2}|${HOURW})(?:\\s*(?:[:.]|e)\\s*(\\d{2}|mezza|mezzo|un\\s+quarto|tre\\s+quarti|\\d{1,2})(?!\\s*(?:giorn|settiman|mes|ann|minut|or[ae])))?(?:\\s+(di\\s+sera|di\\s+mattina|del\\s+mattino|del\\s+pomeriggio|di\\s+pomeriggio|di\\s+notte))?\\b`);
+    if ((m = abs.exec(t))) {
+      const h = /^\d+$/.test(m[1]) ? +m[1] : HOUR_WORDS[m[1]];
+      let min = 0, hasMin = false;
+      if (m[2]) { hasMin = true; min = /^\d+$/.test(m[2]) ? +m[2] : /mezz/.test(m[2]) ? 30 : /tre\s+quarti/.test(m[2]) ? 45 : 15; }
+      if (h > 23 || min > 59) return null;
+      return { h, min, hasMin, qual: m[3] || '', span: [m.index, m.index + m[0].length] };
+    }
+    return null;
+  }
+
+  /** Analizza una frase tipo "ricordami che il bollo scade a fine novembre" o "oggi alle 18 parrucchiere". */
+  function parseSpeech(raw, now) {
+    const nowD = now || new Date();
+    const today = todayISO(nowD);
+    const src = String(raw || '').trim();
+    const t = norm(src);
+    const spans = []; // [start,end] da togliere per costruire il titolo
+    let date = null, time = null;
+
+    // l'orario si cerca per primo, così "alle 9.12" non diventa il 9 dicembre
+    const tm = findTime(t, nowD);
+    let tD = t;
+    if (tm) { spans.push(tm.span); tD = t.slice(0, tm.span[0]) + ' '.repeat(tm.span[1] - tm.span[0]) + t.slice(tm.span[1]); }
+
+    const take = (re, fn) => {
+      if (date) return;
+      re.lastIndex = 0;
+      const mm = re.exec(tD);
+      if (mm) { const r = fn(mm); if (r) { date = r; spans.push([mm.index, mm.index + mm[0].length]); } }
+    };
+
+    // 1) data completa numerica: 12/03/2027, 12-3-27
+    take(/(?:\b(?:il|al|del|entro\s+il|per\s+il)\s+)?(?<!\d)(\d{1,2})\s?[\/\-]\s?(\d{1,2})(?:\s?[\/.\-]\s?(\d{4}|\d{2}))?(?!\d)|(?:\b(?:il|al|del|entro\s+il|per\s+il)\s+)?(?<!\d)(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?!\d)/, mm => {
+      const d = +(mm[1] || mm[4]), mo = +(mm[2] || mm[5]), yy = mm[3] || mm[6];
+      if (yy) { const y = fullYear(yy); return valid(y, mo, d) ? iso(y, mo, d) : null; }
+      return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? nextOccurrence(today, mo, d) : null;
+    });
+    // 2) "12 marzo 2027", "il primo marzo", "3 di giugno"
+    take(new RegExp(`(?:\\b(?:il|al|del|entro\\s+il|per\\s+il|dal)\\s+)?\\b(\\d{1,2}|primo|1o)\\s*(?:°|º)?\\s*(?:di\\s+)?(${MONTH_RE})\\b\\.?(?:\\s+(?:del\\s+)?(\\d{4}|\\d{2})\\b)?`), mm => {
+      const d = /^\d+$/.test(mm[1]) ? +mm[1] : 1, mo = MONTHS[mm[2]];
+      if (mm[3]) { const y = fullYear(mm[3]); return valid(y, mo, d) ? iso(y, mo, d) : null; }
+      return nextOccurrence(today, mo, d);
+    });
+    // 3) solo mese: "a fine novembre", "entro giugno", "novembre 2027" → ultimo giorno del mese
+    take(new RegExp(`(?:\\b(?:a|ad|di|entro|per|verso|nel\\s+mese\\s+di|il\\s+mese\\s+di)\\s+)?(?:\\b(?:fine|inizio|meta)\\s+(?:di\\s+)?)?\\b(${MONTH_RE})\\b(?:\\s+(?:del\\s+)?(\\d{4}|\\d{2})\\b)?`), mm => {
+      const mo = MONTHS[mm[1]];
+      const whole = mm[0];
+      if (mm[1].length <= 4 && !/\b(a|ad|di|entro|per|verso|fine|inizio|meta|mese)\b/.test(whole) && !mm[2]) return null;
+      const dayOf = y => /\binizio\b/.test(whole) ? 1 : /\bmeta\b/.test(whole) ? 15 : lastDay(y, mo);
+      let y = mm[2] ? fullYear(mm[2]) : +today.slice(0, 4);
+      let cand = iso(y, mo, dayOf(y));
+      if (!mm[2] && cand < today) { y += 1; cand = iso(y, mo, dayOf(y)); }
+      return cand;
+    });
+    // 4) relative: oggi, domani, dopodomani, stasera, fine mese, fine anno
+    take(/\b(?:per\s+|entro\s+)?(dopodomani|domani|oggi|stasera|stamattina|stamani|stanotte|stasera)\b/, mm => addDays(today, mm[1] === 'dopodomani' ? 2 : mm[1] === 'domani' ? 1 : 0));
+    take(/\b(?:a\s+|entro\s+(?:la\s+)?)?fine\s+(mese|anno)\b/, mm => {
+      const y = +today.slice(0, 4), mo = +today.slice(5, 7);
+      return mm[1] === 'mese' ? iso(y, mo, lastDay(y, mo)) : iso(y, 12, 31);
+    });
+    // 5) "tra 3 mesi", "fra una settimana", "tra due anni"
+    take(new RegExp(`\\b(?:tra|fra|entro)\\s+(\\d+|${NUMW})\\s+(giorn[oi]|settiman[ae]|mes[ei]|ann[oi])\\b`), mm => {
+      const k = /^\d+$/.test(mm[1]) ? +mm[1] : NUM_WORDS[mm[1]];
+      if (/^giorn/.test(mm[2])) return addDays(today, k);
+      if (/^settiman/.test(mm[2])) return addDays(today, k * 7);
+      if (/^mes/.test(mm[2])) return addMonths(today, k);
+      return addMonths(today, k * 12);
+    });
+    take(/\b(?:tra|fra|entro)\s+(?:un|una)?\s*(settimana|mese|anno)\b/, mm =>
+      mm[1] === 'settimana' ? addDays(today, 7) : mm[1] === 'mese' ? addMonths(today, 1) : addMonths(today, 12));
+    // 6) giorno della settimana: "lunedì", "venerdì prossimo"
+    take(/\b(?:(?:per|entro)\s+)?(?:il\s+|la\s+)?(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)(?:\s+prossim[oa])?\b/, mm => {
+      const target = WEEKDAYS[mm[1]]; const cur = parseISO(today).getDay();
+      let delta = (target - cur + 7) % 7; if (delta === 0) delta = 7;
+      return addDays(today, delta);
+    });
+    // 7) solo giorno: "il 5", "il 20 del mese"
+    take(/\b(?:il|entro\s+il|per\s+il)\s+(\d{1,2})\b(?:\s+del\s+mese)?(?!\s*(?:giorn|settiman|mes|ann|euro|€))/, mm => {
+      const d = +mm[1]; if (d < 1 || d > 31) return null;
+      const y = +today.slice(0, 4), mo = +today.slice(5, 7);
+      let cand = iso(y, mo, Math.min(d, lastDay(y, mo)));
+      if (cand < today) { const nx = addMonths(iso(y, mo, 1), 1); const ny = +nx.slice(0, 4), nm = +nx.slice(5, 7); cand = iso(ny, nm, Math.min(d, lastDay(ny, nm))); }
+      return cand;
+    });
+
+    const { type, score } = detectType(src);
+
+    // orario
+    if (tm) {
+      if (tm.relative) { date = tm.date; time = tm.time; }
+      else {
+        let h = tm.h;
+        const pm = /sera|pomeriggio/.test(tm.qual) || /\b(stasera|sera|pomeriggio|stanotte)\b/.test(t);
+        const am = /mattin/.test(tm.qual) || /\b(stamattina|stamani|mattina|mattino)\b/.test(t);
+        if (!tm.fixed) {
+          if (pm && h < 12) h += 12;
+          else if (!am && h >= 1 && h <= 7 && !(tm.hasMin && type === 'viaggio')) h += 12;
+        }
+        time = hhmm(h === 24 ? 12 : h, tm.min);
+        if (!date) {
+          // nessun giorno detto: oggi se l'ora non è ancora passata, altrimenti domani
+          const cand = new Date(nowD); cand.setHours(h, tm.min, 0, 0);
+          date = cand > nowD ? today : addDays(today, 1);
+        }
+      }
+    }
+
+    let purchase = null;
+    const boughtWords = /\b(comprat[oaie]|acquistat[oaie]|pres[oaie]|preso)\b/.test(t);
+    if (type === 'garanzia' || (boughtWords && type === 'altro')) {
+      const pd = date && date <= today ? date : (date ? null : today);
+      if (pd || boughtWords) {
+        purchase = pd || today;
+        date = addMonths(purchase, 24); time = null;
+        return finish('garanzia');
+      }
+    }
+    return finish(type);
+
+    function finish(typeId) {
+      let s = src;
+      const sorted = spans.slice().sort((a, b) => b[0] - a[0]);
+      for (const [a, b] of sorted) s = s.slice(0, a) + ' ' + s.slice(b);
+      const fillers = [
+        /^\s*(ehi|ok|ciao)?\s*,?\s*memo\s*,?\s*/i,
+        /^\s*(per\s+favore\s+)?(ricordami|ricordarmi|ricorda|ricordati|segnami|segna|segnati|aggiungi|metti|memorizza|promemoria|nota|devo|dovrei|bisogna|ho)\b\s*(di|che|per|:)?\s*/i,
+        /^\s*(che|di|per|il|lo|la|i|gli|le|l'|un|uno|una|mio|mia|miei|mie|sera|mattina|pomeriggio|notte)\s+/i,
+        /^\s*(ho|abbiamo|l'ho|l'abbiamo)\s+(comprat[oaie]|acquistat[oaie]|pres[oaie]|preso)\s+/i,
+        /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto)\s*$/i
+      ];
+      for (let i = 0; i < 6; i++) { for (const f of fillers) s = s.replace(f, ' ').trim(); }
+      s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
+      const T2 = TYPE_BY_ID[typeId];
+      if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:il|lo|la|i|gli|le)\s+|l')/i, '');
+      if (!s || s.length < 2) s = T2.label;
+      s = s.charAt(0).toUpperCase() + s.slice(1);
+      if (s.length > 60) s = s.slice(0, 57).trim() + '…';
+      return { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
+    }
+  }
+
+  // ---------- Promemoria: quando avvisare ----------
+  // Senza orario: N giorni prima, alle 9 del mattino. Con orario: N minuti prima (parrucchiere 15, chiamata 5...).
+  function dueAt(item) { const d = parseISO(item.due); if (item.time) { const [h, m] = item.time.split(':').map(Number); d.setHours(h, m, 0, 0); } else d.setHours(23, 59, 0, 0); return d; }
+  function leadOf(item) {
+    const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
+    if (item.leadMin != null) return item.leadMin;
+    if (item.time && T.leadMin != null) return T.leadMin;
+    return null; // si usa T.lead in giorni
+  }
+  function remindAt(item) {
+    const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
+    const lm = leadOf(item);
+    if (lm != null && item.time) return new Date(dueAt(item).getTime() - lm * 60000);
+    if (lm != null && !item.time) { const d = parseISO(addDays(item.due, -Math.round(lm / 1440))); d.setHours(9, 0, 0, 0); return d; }
+    const d = parseISO(addDays(item.due, -T.lead)); d.setHours(9, 0, 0, 0);
+    if (item.time) { const due = dueAt(item); if (d >= due) return new Date(due.getTime() - 15 * 60000); }
+    return d;
+  }
+  // anticipo predefinito in minuti, per mostrarlo e per cambiarlo
+  function defaultLeadMin(item) { const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro; return item.time && T.leadMin != null ? T.leadMin : T.lead * 1440; }
+  function remindDate(item) { return toISO(remindAt(item)); }
+  function statusOf(item, now) {
+    const nowD = now || new Date();
+    const today = todayISO(nowD);
+    const left = diffDays(today, item.due);
+    const rem = remindAt(item), due = dueAt(item);
+    const minutesLeft = Math.round((due - nowD) / 60000);
+    const base = { left, remind: rem, minutesLeft };
+    if (nowD >= rem) return { key: 'now', ...base };
+    if (rem - nowD <= 60 * 86400000) return { key: 'soon', ...base };
+    return { key: 'calm', ...base };
+  }
+
+  const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
+    todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, dueAt, defaultLeadMin, statusOf, lastDay };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
+})(typeof window !== 'undefined' ? window : globalThis);
