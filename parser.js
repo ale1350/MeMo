@@ -317,7 +317,7 @@
     const src = String(raw || '').trim();
     const t = norm(src);
     const spans = []; // [start,end] da togliere per costruire il titolo
-    let date = null, time = null;
+    let date = null, time = null, part = null;
 
     // l'orario si cerca per primo, così "alle 9.12" non diventa il 9 dicembre
     const tm = findTime(t, nowD);
@@ -354,7 +354,14 @@
       if (!mm[2] && cand < today) { y += 1; cand = iso(y, mo, dayOf(y)); }
       return cand;
     });
-    // 4) relative: oggi, domani, dopodomani, stasera, fine mese, fine anno
+    // 4) relative con il momento della giornata: domattina, domani sera, oggi pomeriggio, stasera
+    take(/\b(?:per\s+|entro\s+)?(?:(dopodomani|domani|oggi)\s+(?:in\s+)?(?:(?:la|di|alla|nel)\s+)?(mattina|mattinata|mattino|pomeriggio|sera|serata|notte)|(domattina|stamattina|stamani|stasera|stanotte))\b/, mm => {
+      const w = mm[1] || mm[3];
+      part = mm[2] ? (/^matt/.test(mm[2]) ? 'mattina' : /^pom/.test(mm[2]) ? 'pomeriggio' : /^ser/.test(mm[2]) ? 'sera' : 'notte')
+        : /domattina|stamattina|stamani/.test(w) ? 'mattina' : w === 'stasera' ? 'sera' : 'notte';
+      return addDays(today, w === 'dopodomani' ? 2 : /^(domani|domattina)$/.test(w) ? 1 : 0);
+    });
+    // 4b) relative: oggi, domani, dopodomani, fine mese, fine anno
     take(/\b(?:per\s+|entro\s+)?(dopodomani|domani|oggi|stasera|stamattina|stamani|stanotte|stasera)\b/, mm => addDays(today, mm[1] === 'dopodomani' ? 2 : mm[1] === 'domani' ? 1 : 0));
     take(/\b(?:a\s+|entro\s+(?:la\s+)?)?fine\s+(mese|anno)\b/, mm => {
       const y = +today.slice(0, 4), mo = +today.slice(5, 7);
@@ -392,7 +399,7 @@
       if (tm.relative) { date = tm.date; time = tm.time; }
       else {
         let h = tm.h;
-        const pm = /sera|pomeriggio/.test(tm.qual) || /\b(stasera|sera|pomeriggio|stanotte)\b/.test(t);
+        const pm = /sera|pomeriggio/.test(tm.qual) || part === 'sera' || part === 'pomeriggio' || /\b(stasera|sera|pomeriggio|stanotte)\b/.test(t);
         const am = /mattin/.test(tm.qual) || /\b(stamattina|stamani|mattina|mattino)\b/.test(t);
         if (!tm.fixed) {
           if (pm && h < 12) h += 12;
@@ -428,7 +435,7 @@
         /^\s*(per\s+favore\s+)?(ricordami|ricordarmi|ricorda|ricordati|segnami|segna|segnati|aggiungi|metti|memorizza|promemoria|nota|devo|dovrei|bisogna|ho)\b\s*(di|che|per|:)?\s*/i,
         /^\s*(che|di|per|il|lo|la|i|gli|le|l'|un|uno|una|mio|mia|miei|mie|mi|ti|ci|sera|mattina|pomeriggio|notte)\s+/i,
         /^\s*(ho|abbiamo|l'ho|l'abbiamo)\s+(comprat[oaie]|acquistat[oaie]|pres[oaie]|preso)\s+/i,
-        /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto)\s*$/i
+        /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto|domattina|stasera)\s*$/i
       ];
       for (let i = 0; i < 6; i++) { for (const f of fillers) s = s.replace(f, ' ').trim(); }
       s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
@@ -439,7 +446,9 @@
       if (!s || s.length < 2) s = typeId === 'altro' ? 'MeMo' : T2.label;
       s = s.charAt(0).toUpperCase() + s.slice(1);
       if (s.length > 60) s = s.slice(0, 57).trim() + '…';
-      return { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
+      const out = { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
+      if (part && date && !time && TYPE_BY_ID[typeId].dateKind !== 'purchase') out.askTime = { part };
+      return out;
     }
   }
 
@@ -455,12 +464,14 @@
     'idraulico elettricista fornaio panettiere macellaio gommista ottico oculista psicologo fisioterapista sarto calzolaio lavoro scuola ufficio palestra mercato ' +
     'supermercato centro fuori dentro sopra sotto quando dove come cosa chi due tre quattro cinque sei sette otto nove dieci mezzogiorno mezzanotte').split(' '));
   const capw = w => w.charAt(0).toUpperCase() + w.slice(1);
+  const INF = { prendere: 'Prendere', prendi: 'Prendere', prendo: 'Prendere', comprare: 'Comprare', compra: 'Comprare', compro: 'Comprare', acquistare: 'Comprare',
+    recuperare: 'Recuperare', procurare: 'Procurare', portare: 'Portare', porta: 'Portare', porto: 'Portare' };
   const isName = w => { const n = norm(w); return n.length >= 3 && !NOT_NAME.has(n) && !/(?:are|ere|ire|ando|endo|mente)$/.test(n) && !/^\d/.test(n) && !MONTHS[n]; };
   // a chi è destinato: "per Mattia", "per la cena", "a Giulia" (con portare), o dal contesto "vado da Mattia", "cena da Luca", "festa di Anna"
   function forWhom(text, ownPer) {
     if (!text) return '';
     if (ownPer) { const m = /\bper\s+((?:(?:il|la|lo|l'|i|le|gli|mia|mio|tua|tuo)\s+)*[A-Za-zÀ-ÿ']+(?:\s+di\s+[A-Za-zÀ-ÿ']+)?)/i.exec(text); if (m && !/^(favore|sicurezza|tempo|piacere|caso|bene|ora|oggi|domani|stasera)$/i.test(m[1])) return 'per ' + fixName(m[1]); }
-    const re = /\b(?:a\s+casa\s+(?:di|del|della|dello)|a\s+(?:cena|pranzo|colazione)\s+da|alla\s+festa\s+di|festa\s+di|compleanno\s+di|da|con)\s+((?:(?:la|il|lo|mia|mio|tua|tuo|nostra|nostro)\s+)*)([A-Za-zÀ-ÿ']+)/gi;
+    const re = /\b(?:a\s+casa\s+(?:di|del|della|dello)|a\s+(?:cena|pranzo|colazione)\s+da|alla\s+festa\s+di|festa\s+di|compleanno\s+di|da)\s+((?:(?:la|il|lo|mia|mio|tua|tuo|nostra|nostro)\s+)*)([A-Za-zÀ-ÿ']+)/gi;
     let m;
     while ((m = re.exec(text))) {
       const pre = m[1].trim(), w = m[2];
@@ -482,13 +493,14 @@
         const inf = /^prend/.test(verb) ? 'Prendere' : /^port/.test(verb) ? 'Portare' : capw(verb);
         return inf + ' ' + rest.replace(CUT_RE, '').trim();
       }
-      let obj = rest.replace(CUT_RE, '').trim();
-      obj = obj.replace(ART_RE, '').replace(/\s+e\s+(?:(?:il|lo|la|i|gli|le|un|uno|una|del|dello|della|dei|degli|delle)\s+|(?:l'|un'|dell'))/gi, ' e ').trim();
+      const full = rest.replace(CUT_RE, '').trim();
+      const obj = full.replace(ART_RE, '').replace(/\s+e\s+(?:(?:il|lo|la|i|gli|le|un|uno|una|del|dello|della|dei|degli|delle)\s+|(?:l'|un'|dell'))/gi, ' e ').trim();
       if (!obj) return s;
       let who = forWhom(rest, true);
       if (!who && /^port/.test(verb)) { const a = /\s+a\s+([A-Za-zÀ-ÿ']+)/i.exec(rest); if (a && (isName(a[1]) || KIN_RE.test(norm(a[1])))) who = 'per ' + fixName(a[1]); }
       if (!who) who = forWhom(ctx, false);
-      return capw(obj) + (who ? ' ' + who : '');
+      if (who) return capw(obj) + ' ' + who;           // "Vino per Mattia"
+      return INF[verb.replace(/^procurarmi$/, 'procurare')] + ' ' + full; // "Comprare il pane"
     }
     // altri verbi: si tiene l'azione, senza i "perché..." e i "quindi..." in coda
     return s.replace(/\s+(?:perch[eé]|cos[iì]|quindi|che\s+poi|e\s+poi)(?![\wÀ-ÿ']).*$|\s*[,;.!?]\s.*$/i, '').trim();
@@ -522,24 +534,30 @@
     return null;
   }
   const EVENT_TYPES = ['appuntamento', 'salute', 'viaggio', 'compleanno'];
+  // "…perché poi stasera vedo Mattia alle 18": la spiegazione non decide quando avvisare
+  const REASON_RE = /\s*[,;.]?\s*\b(?:perche|siccome|visto\s+che|dato\s+che|tanto\s+poi|che\s+poi|cosi\s+poi)\b/;
   function parseSpeech(raw, now) {
-    const nowD = now || new Date(), src = String(raw || '').trim(), today = todayISO(nowD);
+    const nowD = now || new Date(), today = todayISO(nowD);
+    let src = String(raw || '').trim().replace(/\s+/g, ' ');
+    let reason = '';
+    const rm = REASON_RE.exec(norm(src));
+    if (rm && rm.index > 3) { reason = src.slice(rm.index + rm[0].length); src = src.slice(0, rm.index); }
     const sp = splitTask(src);
-    if (!sp) return parseOne(src, nowD);
-    const a = parseOne(sp.task, nowD, { noDefault: true, ctx: sp.ctx });
+    if (!sp) { const r = parseOne(src, nowD, { ctx: src + ' ' + reason }); return r; }
+    const a = parseOne(sp.task, nowD, { noDefault: true, ctx: sp.ctx + ' ' + reason });
     const c = sp.ctx ? parseOne(sp.ctx, nowD, { noDefault: true }) : null;
     if (a.type === 'garanzia') return a.date ? a : parseOne(src, nowD);
-    let date = a.date, time = a.time, leadMin = null;
-    const isGet = GET_RE.test(norm(sp.task).replace(/^(?:\s*(?:che|di|devo|dovrei)\s+)+/, ''));
+    let date = a.date, time = a.time, leadMin = null, askTime = a.askTime || null;
     if (time) {
       if (!date && c && c.date) date = c.date;
       if ((sp.di || sp.duty) && !EVENT_TYPES.includes(a.type)) leadMin = 0;
     } else if (c && c.time) {
-      time = c.time; date = date || c.date;
-      const onlyTime = !c.typeScore && (!c.title || c.title === 'MeMo'); // "tra un'ora ricordami di…": l'orario è proprio quello dell'avviso
+      const onlyTime = !c.typeScore && (!c.title || c.title === 'MeMo'); // "tra un'ora ricordami di…": quello è proprio l'orario dell'avviso
       const pre = minutesBefore(norm(sp.task));
-      leadMin = pre != null ? pre : onlyTime ? (sp.di && !EVENT_TYPES.includes(a.type) ? 0 : null) : isGet ? 60 : null;
-    } else if (!date && c) date = c.date;
+      if (onlyTime) { time = c.time; date = date || c.date; if (sp.di && !EVENT_TYPES.includes(a.type)) leadMin = 0; }
+      else if (pre != null && !date) { time = c.time; date = c.date; leadMin = pre; }       // "…un'ora prima": rispetto all'impegno
+      else { date = date || c.date; if (!askTime) askTime = { part: a.askTime ? a.askTime.part : null, ctxTime: c.time }; } // altrimenti chiedo io l'ora
+    } else if (!date && c) { date = c.date; if (c.askTime && !askTime) askTime = c.askTime; }
     if (time && !date) {
       const [h, mi] = time.split(':').map(Number), cand = new Date(nowD); cand.setHours(h, mi, 0, 0);
       date = cand > nowD ? today : addDays(today, 1);
@@ -548,7 +566,37 @@
     if ((!title || title === 'MeMo') && c) { title = c.title; if (!a.typeScore) type = c.type; }
     const out = { type, title, date, time, purchase: null, confident: !!date, typeScore: a.typeScore };
     if (leadMin != null && time) out.leadMin = leadMin;
+    if (askTime && date && !time) out.askTime = askTime;
     return out;
+  }
+
+  // ---------- Come dirlo a parole: "di comprare il pane", "del dentista", "di rinnovare la patente" ----------
+  const DOC_DO = { cie: "di rinnovare la carta d'identità", passaporto: 'di rinnovare il passaporto', patente: 'di rinnovare la patente', tessera: 'di rinnovare la tessera sanitaria',
+    bollo: 'di pagare il bollo auto', assicurazione: "di rinnovare l'assicurazione", revisione: "di fare la revisione dell'auto", caldaia: 'di far controllare la caldaia' };
+  const MASC_A = /^(dentista|oculista|ortodontista|pediatra|ginecologo|problema|programma|tema|sistema|cinema|pigiama|clima|pilota|collega|papa|papà|commercialista|farmacista|fisioterapista|giornalista|artista)$/i;
+  function articleOf(word) {
+    const w = norm(word);
+    const plural = /[i]$/.test(w) && !/^(taxi|bici|brindisi|analisi|crisi|tesi)$/.test(w);
+    if (/^[aeiouh]/.test(w)) return plural ? 'degli' : /a$/.test(w) && !MASC_A.test(w) ? "dell'" : "dell'";
+    if (/^(s[bcdfgklmnpqrtv]|z|gn|ps|x|y|pn)/.test(w)) return plural ? 'degli' : /a$/.test(w) ? 'della' : 'dello';
+    if (plural) return 'dei';
+    if (/(?:zione|sione|gione|tà|tù|ice|igine|ite)$/.test(w) || /ione$/.test(w) && !/^(camion|milione|campione|pallone)$/.test(w)) return 'della';
+    if (/e$/.test(w) && /^(chiave|nave|notte|neve|carne|fame|gente|lezione|madre|moglie|classe|parte|fine|febbre|mente|sede|sete|torre|voce|luce|pelle|frase|base|fase|crème)$/.test(w)) return 'della';
+    if (/a$/.test(w) && !MASC_A.test(w)) return 'della';
+    if (/e$/.test(w) && /[^i]e$/.test(w) && /^(uova|patate|pere|mele|banane|olive|scarpe|chiavi)$/.test(w)) return 'delle';
+    return 'del';
+  }
+  function phraseOf(item) {
+    const title = String(item.title || '').trim(), t = norm(title);
+    if (DOC_DO[item.type] && /^scadenza|^revisione|^controllo|^bollo|^assicuraz|^patente|^passaport|^carta|^tessera/.test(t)) {
+      const extra = title.match(/\s(di|del|della)\s+([A-ZÀ-Ý][\wà-ÿ']+)$/); return DOC_DO[item.type] + (extra ? ` ${extra[1]} ${extra[2]}` : '');
+    }
+    if (item.type === 'compleanno') { const m = title.match(/^(?:compleanno|onomastico)\s+(?:di|del|della)\s+(.+)$/i); if (m) return `di fare gli auguri a ${m[1]}`; }
+    const first = (t.split(/\s+/)[0] || '').replace(/[^a-z']/g, '');
+    if (/(?:are|ere|ire|arsi|ersi|irsi|urre|orre|arre)$/.test(first) && first.length > 3) return 'di ' + title.charAt(0).toLowerCase() + title.slice(1);
+    const head = title.split(/\s+/)[0] || '', art = articleOf(head);
+    const rest = /^[A-Z][a-zà-ÿ]+$/.test(head) && !/\s/.test(title) ? title.toLowerCase() : title.charAt(0).toLowerCase() + title.slice(1);
+    return art.endsWith("'") ? art + rest : art + ' ' + rest;
   }
 
   // ---------- Promemoria: quando avvisare ----------
@@ -600,6 +648,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
+    phraseOf, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);

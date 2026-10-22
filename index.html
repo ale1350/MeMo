@@ -52,6 +52,18 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .aurora i{position:absolute;width:95vmax;height:95vmax;border-radius:50%}
 .aurora i:nth-child(1){background:radial-gradient(circle, var(--mood1) 0%, transparent 58%);top:-48vmax;left:-38vmax;animation:drift1 19s ease-in-out infinite alternate}
 .aurora i:nth-child(2){background:radial-gradient(circle, var(--mood2) 0%, transparent 58%);top:-18vmax;right:-55vmax;animation:drift2 23s ease-in-out infinite alternate;opacity:.75}
+/* ogni tanto un pesciolino passa lontano, sullo sfondo */
+.swimmer{position:fixed;left:0;top:var(--top,40vh);z-index:0;pointer-events:none;opacity:0;width:var(--size,26px);height:var(--size,26px)}
+.swimmer.go{animation:swimLtr var(--dur,20s) linear forwards}
+.swimmer.rtl.go{animation-name:swimRtl}
+.swimmer .bob{width:100%;height:100%;animation:swBob 2.6s ease-in-out infinite;filter:blur(.5px) saturate(.75)}
+.swimmer svg{width:100%;height:100%;overflow:visible}
+.swimmer.rtl svg{transform:scaleX(-1)}
+.swimmer .tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .5s ease-in-out infinite alternate}
+@keyframes swimLtr{0%{transform:translate(-14vw,0);opacity:0}9%{opacity:.5}50%{transform:translate(46vw,-4vh)}91%{opacity:.5}100%{transform:translate(110vw,1vh);opacity:0}}
+@keyframes swimRtl{0%{transform:translate(110vw,0);opacity:0}9%{opacity:.5}50%{transform:translate(46vw,-3vh)}91%{opacity:.5}100%{transform:translate(-14vw,2vh);opacity:0}}
+@keyframes swBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+@keyframes swTail{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
 @keyframes drift1{to{transform:translate(18vmax,14vmax) scale(1.12)}}
 @keyframes drift2{to{transform:translate(-14vmax,18vmax) scale(.92)}}
 
@@ -59,7 +71,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .bar{position:fixed;top:0;left:0;right:0;z-index:10;height:calc(env(safe-area-inset-top) + 54px);padding:env(safe-area-inset-top) 10px 0 18px;display:flex;align-items:center;justify-content:space-between}
 .bar::before{content:"";position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 72%, transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);opacity:var(--p2, 0)}
 .brand{position:relative;display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;letter-spacing:-.01em;opacity:calc(1 - var(--p2, 0))}
-.brand svg{width:28px;height:28px}
+.brand svg{display:none}
 .mini{position:absolute;left:20px;top:calc(env(safe-area-inset-top) + 27px);transform:translateY(-50%) translateY(calc((1 - var(--p2, 0)) * 8px));opacity:var(--p2, 0);display:flex;align-items:center;gap:8px;font-weight:750;font-size:15px;white-space:nowrap;pointer-events:none}
 .mini .dot{width:9px;height:9px;border-radius:50%;background:var(--mood1);box-shadow:0 0 0 2px color-mix(in srgb, var(--ink) 10%, transparent)}
 .icon-btn{position:relative;width:44px;height:44px;border-radius:22px;display:grid;place-items:center;color:var(--ink-2)}
@@ -168,7 +180,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .hero,.list-sec,.peek,.bar{translate:var(--hx) 0}
 .calp{position:fixed;inset:0;z-index:11;background:transparent;overflow-y:auto;overscroll-behavior:contain;translate:calc(var(--hx) - 100vw) 0;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(170px + env(safe-area-inset-bottom));pointer-events:none}
 .calp.open{pointer-events:auto}
-body.slide .hero,body.slide .list-sec,body.slide .peek,body.slide .bar,body.slide .calp{transition:translate .5s cubic-bezier(.22,.9,.22,1)}
+.hero,.list-sec,.peek,.bar,.calp{will-change:translate}
 html,body{overflow-x:clip}
 html{overflow-x:hidden}
 .calp-head{display:flex;align-items:center;justify-content:space-between;max-width:620px;margin:0 auto 10px;min-height:44px}
@@ -176,11 +188,10 @@ html{overflow-x:hidden}
 .calp-head .icon-btn{margin-right:-10px;color:var(--ink)}
 .calp-head .icon-btn.back{margin:0 0 0 -10px}
 .setp{translate:calc(var(--hx) + 100vw) 0}
-body.slide .setp{transition:translate .5s cubic-bezier(.22,.9,.22,1)}
-.setp .s-block{background:rgba(255,255,255,.4);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6)}
+.setp .s-block{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7)}
 .setp .s-block .btn{background:rgba(255,255,255,.6)}
 /* calendario leggero: vetro trasparente al posto del bianco pieno */
-.calp .cal{background:rgba(255,255,255,.38);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(43,72,140,.07)}
+.calp .cal{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(43,72,140,.07)}
 .calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
 .calp .chip{box-shadow:none}
 .calp .day:active{background:rgba(255,255,255,.5)}
@@ -260,6 +271,11 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .mic-big.on::before,.mic-big.on::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--azure);animation:ripple 1.8s ease-out infinite}
 .mic-big.on::after{animation-delay:.9s}
 @keyframes ripple{from{transform:scale(.85);opacity:1}to{transform:scale(1.5);opacity:0}}
+.time-picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 20px}
+.tpick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;border-radius:18px;background:var(--field,#EEF2F8);font-size:19px;color:var(--ink);padding:8px 4px}
+.tpick b{font-weight:800}
+.tpick span{font-size:12px;font-weight:650;color:var(--ink-2)}
+.tpick:active{transform:scale(.96)}
 .hint{font-size:14.5px;color:var(--ink-2);text-align:center;margin:0 0 16px;line-height:1.4}
 .s-block{background:var(--field);border-radius:22px;padding:16px;margin:0 0 12px}
 .s-block h3{font-size:17px;margin:0 0 6px}
@@ -356,6 +372,12 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </head>
 <body data-mood="empty">
 <div class="aurora" aria-hidden="true"><i></i><i></i></div>
+<div class="swimmer" id="swimmer" aria-hidden="true"><div class="bob"><svg viewBox="8 26 80 52"><defs><clipPath id="swb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+<path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
+<path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
+<path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
+<g clip-path="url(#swb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
+<circle cx="67.5" cy="48.5" r="7" fill="#fff"/><circle cx="69.2" cy="47" r="3.7" fill="#1F2552"/></svg></div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs><path id="knotPath" d="M2 28 C14 28 22 28 28 21 C34 13 44 9 46 17 C48 26 36 30 32 23 C28 16 38 10 46 20 C52 27 58 28 66 28"/></defs>
@@ -470,7 +492,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.17';
+const VERSION = '1.18';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -579,8 +601,21 @@ function countUp(el, to) {
   requestAnimationFrame(step);
 }
 let rowObserver = null;
+// il logo serve ancora per gli avvisi dentro l'app, ma in alto resta solo la scritta MeMo
+const LOGO_SVG = (() => { const el = document.querySelector('.brand svg'); const h = el ? el.outerHTML.replace(/display:\s*none;?/, '') : ''; if (el) el.remove(); return h; })();
 const CALM_LINES = ['Tutto sotto controllo.', 'Ho tutto sotto pinna.', 'Me lo sono segnato io.', 'Tranquillo, ce l\'ho io.', 'Lascia fare a me.', 'Tu vivi, io ricordo.', 'Nessun pensiero: ci sono io.'];
 const CALM_LINE = CALM_LINES[Math.floor(Math.random() * CALM_LINES.length)];
+// la frase sotto: parla come un amico che ti avvisa, e cambia parole ogni volta che apri l'app
+const SAY_LEAD = ['Ricordati {x}.', 'Non scordarti {x}.', 'Mi raccomando: ricordati {x}.', 'Non dimenticarti {x}.'];
+const SAY_TAIL1 = ['Te lo ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, con calma.'];
+const SAY_TAILN = ['Te li ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, uno alla volta.'];
+const SAY_SEED = [Math.random(), Math.random()];
+const sayPick = (arr, k) => arr[Math.floor(SAY_SEED[k] * arr.length)];
+function tellLine(list) {
+  const two = list.slice().sort((a, b) => P.dueAt(a) - P.dueAt(b)).slice(0, 2);
+  const parts = two.map(it => P.phraseOf(it) + (it.time ? ' alle ' + timeLbl(it.time) : ''));
+  return sayPick(SAY_LEAD, 0).replace('{x}', parts.join(' e ')) + ' ' + sayPick(two.length === 1 ? SAY_TAIL1 : SAY_TAILN, 1);
+}
 function render() {
   const nowD = new Date();
   const active = items.map(i => ({ i, s: P.statusOf(i, nowD) })).sort((a, b) => P.dueAt(a.i) - P.dueAt(b.i));
@@ -621,9 +656,7 @@ function render() {
       const when = days <= 0 ? 'per oggi' : days === 1 ? 'per domani' : days < 45 ? `tra ${days} giorni` : `tra ${Math.round(days / 30.44)} mesi`;
       unit.textContent = `MeMo ${when}`;
       h.textContent = CALM_LINE;
-      const t = sameDay.map(x => `«${x.i.title}»`);
-      const names = n <= 3 ? (n === 1 ? t[0] : t.slice(0, -1).join(', ') + ' e ' + t[n - 1]) : `${t[0]}, ${t[1]} e altri ${n - 2}`;
-      p.textContent = `${names}. ${n === 1 ? 'Te lo ricordo' : 'Te li ricordo'} io, al momento giusto.`;
+      p.textContent = tellLine(sameDay.map(x => x.i));
       mini.textContent = `${n} MeMo ${when}`;
     }
   }
@@ -711,23 +744,40 @@ function openCalendar() {
   renderCal(); setCal(true);
 }
 // tre pagine affiancate: calendario | home | impostazioni. --hx sposta tutto insieme
-const setHX = px => document.documentElement.style.setProperty('--hx', px + 'px');
-let slideT, page = 'home', setOpen = false;
-function goPage(to) {
+let hx = 0, hxAnim = 0;
+const setHX = px => { hx = px; document.documentElement.style.setProperty('--hx', px.toFixed(2) + 'px'); };
+// il movimento parte alla stessa velocità del dito e rallenta dolcemente fino a fermarsi: nessuno scatto quando lo lasci
+function glideHX(target, v0) {
+  cancelAnimationFrame(hxAnim);
+  const x0 = hx, d = target - x0;
+  if (Math.abs(d) < 0.5) { setHX(target); return; }
+  let D = 440, m = 1.7; // m = pendenza iniziale (1,7 = parte decisa e si posa piano)
+  if (v0 && Math.sign(v0) === Math.sign(d) && Math.abs(v0) > 0.12) { D = Math.max(260, Math.min(460, 1.9 * Math.abs(d) / Math.abs(v0))); m = Math.min(2.6, Math.abs(v0) * D / Math.abs(d)); }
+  const t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / D), k2 = k * k, k3 = k2 * k;
+    setHX(x0 + d * ((3 * k2 - 2 * k3) + m * (k3 - 2 * k2 + k)));
+    if (k < 1) hxAnim = requestAnimationFrame(step); else { setHX(target); hxAnim = 0; }
+  };
+  hxAnim = requestAnimationFrame(step);
+}
+let page = 'home', setOpen = false;
+function goPage(to, v0, instant) {
   page = to; calOpen = to === 'cal'; setOpen = to === 'set';
-  document.body.classList.add('slide'); clearTimeout(slideT); slideT = setTimeout(() => document.body.classList.remove('slide'), 520);
-  setHX(to === 'cal' ? window.innerWidth : to === 'set' ? -window.innerWidth : 0);
+  const target = to === 'cal' ? window.innerWidth : to === 'set' ? -window.innerWidth : 0;
+  if (instant) { cancelAnimationFrame(hxAnim); setHX(target); } else glideHX(target, v0);
   for (const [id, on] of [['#calPanel', calOpen], ['#setPanel', setOpen]]) { const el = $(id); el.classList.toggle('open', on); el.setAttribute('aria-hidden', String(!on)); if (on) el.scrollTop = 0; }
   document.body.classList.toggle('cal-on', to !== 'home');
   if (to !== 'home') haptic();
 }
 const setCal = open => goPage(open ? 'cal' : 'home');
-window.addEventListener('resize', () => goPage(page));
+window.addEventListener('resize', () => goPage(page, 0, true));
 // swipe: verso destra si apre il calendario, verso sinistra le impostazioni; il gesto opposto riporta alla home
 (() => {
   let x0 = null, y0 = 0, mode = null, dx = 0, from = null, onRow = false, lastX = 0, lastT = 0, vx = 0;
   const W = () => window.innerWidth;
-  const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; onRow = !!e.target.closest('#list .row'); };
+  let baseX = 0;
+  const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; onRow = !!e.target.closest('#list .row'); baseX = hx; };
   const allowed = mx => from === 'home' ? (mx > 0 || !onRow) : from === 'cal' ? mx < 0 : mx > 0;
   const move = e => {
     if (x0 == null) return; const t = e.touches[0]; const mx = t.clientX - x0, my = t.clientY - y0;
@@ -737,17 +787,20 @@ window.addEventListener('resize', () => goPage(page));
       if (mode === 'x' && from === 'home' && mx < 0) { renderSettings(); $('#setPanel').scrollTop = 0; }
     }
     if (mode !== 'x') return;
-    const now = performance.now(); vx = (t.clientX - lastX) / Math.max(1, now - lastT); lastX = t.clientX; lastT = now;
-    dx = mx; document.body.classList.remove('slide');
-    const base = from === 'cal' ? W() : from === 'set' ? -W() : 0;
-    setHX(Math.max(-W(), Math.min(W(), base + dx)));
+    if (e.cancelable) e.preventDefault(); // mentre scorri di lato, la pagina non si muove anche in su o in giù
+    const now = performance.now(), dt = Math.max(1, now - lastT), v = (t.clientX - lastX) / dt;
+    vx = vx * 0.35 + v * 0.65; lastX = t.clientX; lastT = now;
+    if (dx === 0) cancelAnimationFrame(hxAnim);
+    dx = mx;
+    setHX(Math.max(-W(), Math.min(W(), baseX + dx)));
   };
   const end = () => {
     if (x0 == null) return; x0 = null;
     if (mode !== 'x') return;
-    const far = Math.abs(dx) > W() * 0.3 || Math.abs(vx) > 0.45;
-    if (from === 'home') goPage(far ? (dx > 0 ? 'cal' : 'set') : 'home');
-    else goPage(far ? 'home' : from);
+    if (performance.now() - lastT > 90) vx = 0; // se ti eri fermato prima di lasciare, nessuna spinta
+    const far = Math.abs(dx) > W() * 0.3 || (Math.abs(vx) > 0.35 && Math.sign(vx) === Math.sign(dx));
+    if (from === 'home') goPage(far ? (dx > 0 ? 'cal' : 'set') : 'home', vx);
+    else goPage(far ? 'home' : from, vx);
   };
   document.addEventListener('touchstart', e => {
     if (page !== 'home' || !$('#sheetWrap').hidden || document.querySelector('.intro')) return;
@@ -756,7 +809,7 @@ window.addEventListener('resize', () => goPage(page));
   }, { passive: true });
   $('#calPanel').addEventListener('touchstart', e => { if (page !== 'cal' || e.target.closest('#cBox, .chips.scroll')) return; start(e, 'cal'); }, { passive: true });
   $('#setPanel').addEventListener('touchstart', e => { if (page !== 'set' || e.target.closest('.chips.scroll, input')) return; start(e, 'set'); }, { passive: true });
-  document.addEventListener('touchmove', move, { passive: true });
+  document.addEventListener('touchmove', move, { passive: false });
   document.addEventListener('touchend', end, { passive: true });
   document.addEventListener('touchcancel', end, { passive: true });
   $('#calBack').addEventListener('click', () => goPage('home'));
@@ -1149,7 +1202,11 @@ async function submitSpeech(text) {
   stopRec();
   const res = P.parseSpeech(text);
   if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
-  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim()  };
+  if (res.askTime && !res.time) { askTime(res, text); return; }
+  saveSpoken(res, text);
+}
+async function saveSpoken(res, text) {
+  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
   if (res.leadMin != null && it.time) it.leadMin = res.leadMin;
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
   const st = P.statusOf(it);
@@ -1158,7 +1215,62 @@ async function submitSpeech(text) {
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
   ]);
 }
+// "domattina", "domani sera", oppure un impegno con un orario che non è quello dell'avviso: l'ora dell'avviso la scegli tu
+const PART_TIMES = { mattina: ['07:30', '08:00', '08:30', '09:00', '10:00', '11:00'], pomeriggio: ['14:00', '15:00', '16:00', '17:00'], sera: ['18:00', '19:00', '20:00', '21:00'], notte: ['21:00', '22:00', '23:00'] };
+function whenPart(iso, part) {
+  const w = dayWord(iso) || P.parseISO(iso).toLocaleDateString('it-IT', { weekday: 'long' });
+  if (!part) return w;
+  if (w === 'domani' && part === 'mattina') return 'domattina';
+  if (w === 'oggi') return part === 'mattina' ? 'stamattina' : part === 'sera' ? 'stasera' : part === 'notte' ? 'stanotte' : 'oggi pomeriggio';
+  return `${w} ${part}`;
+}
+function askTime(res, text) {
+  const { part, ctxTime } = res.askTime, now = new Date();
+  let opts = [];
+  if (ctxTime) {
+    const [h, m] = ctxTime.split(':').map(Number);
+    for (const [off, l] of [[60, "un'ora prima"], [30, "mezz'ora prima"], [120, '2 ore prima']]) { const t = h * 60 + m - off; if (t >= 0) opts.push([`${pad(Math.floor(t / 60))}:${pad(t % 60)}`, l]); }
+  }
+  for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '13:00', '18:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
+  const future = v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(res.date); d.setHours(h, m, 0, 0); return d > now; };
+  opts = opts.filter(([v]) => future(v));
+  const when = whenPart(res.date, part);
+  openSheet(`<h2>A che ora te lo ricordo?</h2>
+    <p class="lead"><b>${esc(res.title)}</b>, ${esc(when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ''}</p>
+    ${opts.length ? `<div class="time-picks" id="aPicks">${opts.map(([v, l]) => `<button class="tpick" data-v="${v}"><b>${timeLbl(v)}</b>${l ? `<span>${esc(l)}</span>` : ''}</button>`).join('')}</div>` : ''}
+    <div class="field"><label for="aTime">Un altro orario</label><input class="input" type="time" id="aTime"></div>
+    <button class="btn btn-main" id="aGo" disabled>Ricordamelo</button>
+    <button class="btn btn-ghost" id="aNo" style="margin-top:10px">Senza orario</button>`, body => {
+    const t = body.querySelector('#aTime'), go = body.querySelector('#aGo');
+    const done = v => saveSpoken({ ...res, time: v, leadMin: 0 }, text);
+    const picks = body.querySelector('#aPicks');
+    if (picks) picks.addEventListener('click', e => { const b = e.target.closest('.tpick'); if (!b) return; haptic(); done(b.dataset.v); });
+    t.addEventListener('input', () => { go.disabled = !t.value; });
+    go.onclick = () => t.value && done(t.value);
+    body.querySelector('#aNo').onclick = () => saveSpoken({ ...res, time: null }, text);
+  });
+}
 $('#btnVoice').addEventListener('click', openVoice);
+
+// ================= Il pesciolino di passaggio =================
+// di rado (la prima volta dopo mezzo minuto o poco più, poi ogni 3-7 minuti) attraversa lo sfondo, piccolo e lontano
+(() => {
+  const el = $('#swimmer'); let tm = null;
+  if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const later = ms => { clearTimeout(tm); tm = setTimeout(swim, ms); };
+  const free = () => document.visibilityState === 'visible' && page === 'home' && $('#sheetWrap').hidden && !document.querySelector('.intro') && window.scrollY < innerHeight * 0.4;
+  function swim(force) {
+    if (!force && !free()) { later(45000); return; }
+    const ltr = Math.random() < 0.6, dur = 17 + Math.random() * 7;
+    el.className = 'swimmer';
+    el.style.cssText = `--top:${(16 + Math.random() * 46).toFixed(1)}vh;--size:${(22 + Math.random() * 10).toFixed(0)}px;--dur:${dur.toFixed(1)}s`;
+    void el.offsetWidth; el.className = `swimmer ${ltr ? 'ltr' : 'rtl'} go`;
+    setTimeout(() => { el.className = 'swimmer'; }, dur * 1000 + 300);
+    if (!force) later((180 + Math.random() * 240) * 1000);
+  }
+  later((30 + Math.random() * 40) * 1000);
+  window.memoSwim = () => swim(true);
+})();
 
 // ================= Fatto =================
 async function doneItem(it) {
@@ -1379,7 +1491,7 @@ let nbTimer, nbItem = null;
 function notifyText(it, salt) { return N.make(it, { name: userName(), emoji: emojiOf(it), salt }); }
 function showBanner(n, it) {
   const el = $('#nb'); nbItem = it || null;
-  $('#nbIcon').innerHTML = document.querySelector('.brand svg').outerHTML;
+  $('#nbIcon').innerHTML = LOGO_SVG;
   $('#nbT').textContent = n.title; $('#nbB').textContent = n.body;
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); haptic();
   clearTimeout(nbTimer); nbTimer = setTimeout(() => el.classList.remove('show'), 6500);
