@@ -62,6 +62,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 @keyframes drift2{to{transform:translate(-14vmax,18vmax) scale(.92)}}
 
 /* ---------- barra in alto ---------- */
+/* l'iPhone colora da sé la fascia dell'orologio: qui la si raccorda al cielo di MeMo, senza stacco */
+.topfade{position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 96px);z-index:9;pointer-events:none;background:linear-gradient(180deg,#D8DFEC 0%,rgba(216,223,236,.78) 28%,rgba(216,223,236,.32) 62%,rgba(216,223,236,0) 100%)}
 .bar{position:fixed;top:0;left:0;right:0;z-index:10;height:calc(env(safe-area-inset-top) + 54px);padding:env(safe-area-inset-top) 10px 0 18px;display:flex;align-items:center;justify-content:space-between}
 .bar::before{content:"";position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 72%, transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);opacity:var(--p2, 0)}
 .brand{position:relative;display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;letter-spacing:-.01em;opacity:calc(1 - var(--p2, 0))}
@@ -314,8 +316,8 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .viewer button{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;border-radius:22px;background:rgba(255,255,255,.14);display:grid;place-items:center}
 
 /* ---------- banner notifica, stile iPhone ---------- */
-.nb{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);z-index:60;max-width:520px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:24px;background:rgba(246,246,248,.82);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);box-shadow:0 12px 40px rgba(18,24,38,.22);transform:translateY(-140%);transition:transform .5s cubic-bezier(.2,.9,.25,1.15);text-align:left;color:#111}
-.nb.show{transform:none}
+.nb{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);z-index:60;max-width:520px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:24px;background:rgba(246,246,248,.82);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);box-shadow:none;transform:translateY(-160%);visibility:hidden;transition:transform .5s cubic-bezier(.2,.9,.25,1.15),box-shadow .3s,visibility 0s .5s;text-align:left;color:#111}
+.nb.show{transform:none;visibility:visible;box-shadow:0 12px 40px rgba(18,24,38,.22);transition:transform .5s cubic-bezier(.2,.9,.25,1.15),box-shadow .3s,visibility 0s}
 .nb .ni{flex:0 0 40px;height:40px;border-radius:10px;overflow:hidden}
 .nb .ni svg{width:40px;height:40px;display:block}
 .nb .nt{flex:1;min-width:0;display:block}
@@ -398,6 +400,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </head>
 <body data-mood="empty">
 <div class="aurora" aria-hidden="true"><i></i><i></i></div>
+<div class="topfade" aria-hidden="true"></div>
 <div class="swimmer" id="swimmer" aria-hidden="true"><div class="bob"><svg viewBox="8 26 80 52"><defs><clipPath id="swb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
 <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
