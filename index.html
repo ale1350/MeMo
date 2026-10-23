@@ -54,7 +54,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .aurora i:nth-child(2){background:radial-gradient(circle, var(--mood2) 0%, transparent 58%);top:-18vmax;right:-55vmax;animation:drift2 23s ease-in-out infinite alternate;opacity:.75}
 /* ogni tanto un pesciolino passa lontano, sullo sfondo */
 .swimmer{position:fixed;left:0;top:0;z-index:0;pointer-events:none;opacity:0;width:40px;height:40px;margin:-20px 0 0 -20px;will-change:transform}
-.swimmer .bob{width:100%;height:100%;filter:saturate(.95)}
+.swimmer .bob{width:100%;height:100%;filter:saturate(.95);animation:dvSwim .36s ease-in-out infinite alternate}
 .swimmer svg{width:100%;height:100%;overflow:visible}
 .swimmer .tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .22s ease-in-out infinite alternate}
 @keyframes swTail{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
@@ -251,9 +251,13 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .deep i{position:absolute;bottom:-14px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 8px rgba(255,255,255,.55);opacity:0}
 .deep.on i{animation:dpMote linear infinite}
 @keyframes dpMote{0%{transform:translateY(0);opacity:0}15%{opacity:.75}100%{transform:translateY(-72vh);opacity:0}}
-.diver{position:fixed;left:0;top:0;z-index:41;pointer-events:none;width:190px;height:134px;opacity:0;will-change:transform,opacity,filter}
+.diver{position:fixed;left:0;top:0;z-index:41;transform-style:flat;backface-visibility:visible;pointer-events:none;width:190px;height:134px;opacity:0;will-change:transform,opacity,filter}
 .dv-bob,.dv-head{width:100%;height:100%}
 .diver.idle .dv-bob{animation:dvBob 2.7s ease-in-out infinite}
+.diver.swim .dv-bob{animation:dvSwim .34s ease-in-out infinite alternate}
+.diver.swim .dv-tail{animation-duration:.13s}
+.diver.swim .dv-fin{animation-duration:.26s}
+@keyframes dvSwim{from{transform:rotate(-2.5deg) skewY(-1.5deg)}to{transform:rotate(2.5deg) skewY(1.5deg)}}
 .dv-head{transition:transform .4s cubic-bezier(.3,.8,.3,1.25)}
 .dv-head svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 14px 18px rgba(255,110,60,.28))}
 .dv-tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .2s ease-in-out infinite alternate}
@@ -266,7 +270,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .dv-blush{opacity:0;transition:opacity .3s}
 .dv-happy{opacity:0;transition:opacity .14s}
 .dv-mouth>*{opacity:0;transition:opacity .12s}
-.diver[data-m="smile"] .m-smile,.diver[data-m="big"] .m-big,.diver[data-m="o"] .m-o,.diver[data-m="flat"] .m-flat,.diver[data-m="side"] .m-side,.diver[data-m="wavy"] .m-wavy{opacity:1}
+[data-m="smile"] .m-smile,[data-m="big"] .m-big,[data-m="o"] .m-o,[data-m="flat"] .m-flat,[data-m="side"] .m-side,[data-m="wavy"] .m-wavy{opacity:1}
 .diver[data-f="curious"] .dv-brow{transform:translateY(-2.6px)}
 .diver[data-f="curious"] .dv-eye{transform:scale(1.1)}
 .diver[data-f="mm"] .dv-brow{transform:translateY(-1.8px)}
@@ -297,8 +301,22 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 @keyframes lBub{0%{opacity:0;transform:translate(var(--bx),var(--by)) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translate(calc(var(--bx) + var(--dx)),calc(var(--by) - 60px)) scale(1.25)}}
 @media (prefers-reduced-motion: reduce){.deep.on i,.diver.idle .dv-bob{animation:none}}
 /* ---------- scrivi a MeMo ---------- */
-.w-ta{resize:none;min-height:100px;font-size:18px;line-height:1.42;transition:opacity .2s}
+.brandw{background:linear-gradient(120deg,#2F6BF2,#4C8DF6 55%,#2FCDBE);-webkit-background-clip:text;background-clip:text;color:transparent}
+.w-sheet .w-h{font-size:23px;margin:0 0 4px}
+.w-lead{font-size:15px;line-height:1.42;color:var(--ink-2);margin:0 0 12px}
+.w-lead .brandw{font-weight:750}
+.w-box{position:relative}
+.w-ta{display:block;width:100%;resize:none;min-height:76px;padding:13px 60px 13px 15px;font-size:17px;line-height:1.4;border-radius:22px;transition:opacity .2s}
+.w-send{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--brand-grad);box-shadow:0 6px 16px rgba(47,107,242,.32);transition:transform .15s,opacity .2s}
+.w-send:active{transform:scale(.92)}
+.w-send:disabled{opacity:.32;box-shadow:none}
+.w-send .dots{margin:0}
+.w-ex{display:flex;flex-direction:column;margin:6px 4px 0}
+.w-ex button{text-align:left;font-size:14.5px;color:var(--ink-2);padding:7px 0}
+.w-ex button::before{content:"«"}.w-ex button::after{content:"»"}
+.sheet-wrap.kb .sheet{padding-bottom:12px}
 .w-ta[readonly]{opacity:.55}
+.w-sheet .dots{display:inline-flex;gap:4px}.w-sheet .dots i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:wDot 1s ease-in-out infinite;opacity:.35}.w-sheet .dots i:nth-child(2){animation-delay:.15s}.w-sheet .dots i:nth-child(3){animation-delay:.3s}
 .btn .dots{display:inline-flex;gap:4px;margin-left:2px}
 .btn .dots i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:wDot 1s ease-in-out infinite;opacity:.35}
 .btn .dots i:nth-child(2){animation-delay:.15s}.btn .dots i:nth-child(3){animation-delay:.3s}
@@ -513,6 +531,21 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .start-art button[aria-pressed="true"]{color:var(--brand-ink);background:color-mix(in srgb, var(--azure) 14%, #fff)}
 .start-art span,.start-art button{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);font-weight:700;font-size:13.5px;box-shadow:0 6px 18px rgba(43,72,140,.08)}
 .share-art span{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:var(--card);border:1px solid var(--stroke)}
+/* tutorial: il pesciolino in 3D con i tre modi per parlargli */
+.hi-art{position:relative;width:270px;height:220px;display:grid;place-items:center}
+.i-fish{width:230px;height:162px;animation:dvBob 2.8s ease-in-out infinite}
+.i-fish svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 16px 20px rgba(255,110,60,.25))}
+.i-fish .dv-tail{animation-duration:.6s}
+.i-fish .dv-eye{animation:iBlink 4.2s infinite}
+@keyframes iBlink{0%,93%,100%{transform:none}95.5%{transform:scaleY(.08)}}
+.hi-b{position:absolute;display:grid;place-items:center;border-radius:50%;color:#fff;box-shadow:0 8px 20px rgba(47,107,242,.25);animation:hiFloat 3.4s ease-in-out infinite}
+.hi-b svg{width:22px;height:22px}
+.hi-b.b1{width:50px;height:50px;left:-4px;top:12px;background:linear-gradient(135deg,#4C8DF6,#2FCDBE)}
+.hi-b.b2{width:58px;height:58px;right:-8px;top:-4px;background:linear-gradient(135deg,#2F6BF2,#4C8DF6 60%,#2FCDBE);animation-delay:-1.1s}
+.hi-b.b2 svg{width:26px;height:26px}
+.hi-b.b3{width:48px;height:48px;left:26px;bottom:-6px;background:#fff;color:var(--ink);box-shadow:0 8px 20px rgba(43,72,140,.16);animation-delay:-2.2s}
+@keyframes hiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media (prefers-reduced-motion: reduce){.i-fish,.hi-b,.i-fish .dv-eye{animation:none}}
 .intro-foot{padding:10px 24px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:18px}
 .dots{display:flex;gap:8px}
 .dots i{width:8px;height:8px;border-radius:4px;background:color-mix(in srgb, var(--ink) 25%, transparent);transition:width .3s,background .3s}
@@ -531,21 +564,21 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <div class="aurora" aria-hidden="true"><i></i><i></i></div>
 <div class="topfade" aria-hidden="true"></div>
 <div class="swimmer" id="swimmer" aria-hidden="true"><div class="bob"><svg viewBox="8 26 80 52"><defs><clipPath id="swb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
-<path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
-<path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
-<path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
-<g clip-path="url(#swb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
-<circle cx="67.5" cy="48.5" r="7" fill="#fff"/><circle cx="69.2" cy="47" r="3.7" fill="#1F2552"/></svg></div></div>
+<path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
+<path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/>
+<path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="url(#g3Body)"/>
+<g clip-path="url(#swb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>
+<circle cx="67.5" cy="48.5" r="7" fill="url(#g3Eye)"/><circle cx="69.2" cy="47" r="3.7" fill="url(#g3Pupil)"/></svg></div></div>
 <div class="deep" id="deep" aria-hidden="true"><i style="left:11%;width:5px;height:5px;animation-duration:9.6s;animation-delay:-1.7s"></i><i style="left:15%;width:4px;height:4px;animation-duration:7.7s;animation-delay:-0.6s"></i><i style="left:15%;width:6px;height:6px;animation-duration:8.2s;animation-delay:-0.5s"></i><i style="left:76%;width:3px;height:3px;animation-duration:6.5s;animation-delay:-1.8s"></i><i style="left:84%;width:3px;height:3px;animation-duration:8.3s;animation-delay:-0.5s"></i><i style="left:78%;width:7px;height:7px;animation-duration:7.6s;animation-delay:-7.8s"></i><i style="left:9%;width:3px;height:3px;animation-duration:8.2s;animation-delay:-1.1s"></i><i style="left:57%;width:5px;height:5px;animation-duration:6.6s;animation-delay:-0.9s"></i><i style="left:43%;width:7px;height:7px;animation-duration:8.2s;animation-delay:-5.5s"></i></div>
 <div class="diver" id="diver" aria-hidden="true" data-f="listen" data-m="smile"><div class="dv-bob"><div class="dv-head"><svg viewBox="4 20 88 62">
 <defs><clipPath id="dvb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
-<path class="dv-tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
-<path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
-<path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
-<g clip-path="url(#dvb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
-<path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="#FF9466"/>
+<path class="dv-tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
+<path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/>
+<path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="url(#g3Body)"/>
+<g clip-path="url(#dvb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>
+<path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="url(#g3Fin)"/>
 <ellipse class="dv-blush" cx="66.5" cy="59.5" rx="4.3" ry="2.3" fill="#FF4F6E"/>
-<g transform="translate(67.5 48.5) scale(1.14) translate(-67.5 -48.5)"><g class="dv-eye"><circle cx="67.5" cy="48.5" r="8.4" fill="#fff"/><g class="dv-pupil"><circle cx="68.6" cy="48.4" r="4.6" fill="#1F2552"/><circle cx="70.3" cy="46.5" r="1.5" fill="#fff"/></g></g>
+<g transform="translate(67.5 48.5) scale(1.14) translate(-67.5 -48.5)"><g class="dv-eye"><circle cx="67.5" cy="48.5" r="8.4" fill="url(#g3Eye)"/><g class="dv-pupil"><circle cx="68.6" cy="48.4" r="4.6" fill="url(#g3Pupil)"/><circle cx="70.3" cy="46.5" r="1.5" fill="#fff"/></g></g>
 <path class="dv-happy" d="M60.5 50.5 Q67.5 42.5 74.5 50.5" fill="none" stroke="#1F2552" stroke-width="2.6" stroke-linecap="round"/></g>
 <path class="dv-brow" d="M60.4 37.4 Q67.5 33.9 74.6 37" fill="none" stroke="#C9512C" stroke-width="2.3" stroke-linecap="round"/>
 <g transform="translate(79 59.8) scale(1.5) translate(-79 -59.8)"><g class="dv-mouth" fill="none" stroke="#1F2552" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -558,7 +591,15 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </g></g></svg></div></div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs><path id="knotPath" d="M2 28 C14 28 22 28 28 21 C34 13 44 9 46 17 C48 26 36 30 32 23 C28 16 38 10 46 20 C52 27 58 28 66 28"/></defs>
+  <defs><path id="knotPath" d="M2 28 C14 28 22 28 28 21 C34 13 44 9 46 17 C48 26 36 30 32 23 C28 16 38 10 46 20 C52 27 58 28 66 28"/>
+    <!-- il pesciolino in 3D: luce dall'alto, pancia più chiara, occhio lucido (solo nell'app, non nell'icona) -->
+    <linearGradient id="g3Fin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB68E"/><stop offset="1" stop-color="#F7713F"/></linearGradient>
+    <radialGradient id="g3Body" cx=".44" cy=".28" r=".9"><stop offset="0" stop-color="#FFAA7C"/><stop offset=".42" stop-color="#FF7E50"/><stop offset=".85" stop-color="#EF5F33"/><stop offset="1" stop-color="#D94C25"/></radialGradient>
+    <linearGradient id="g3Belly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD0AC"/><stop offset=".6" stop-color="#FFAA7E"/><stop offset="1" stop-color="#F48A5C"/></linearGradient>
+    <radialGradient id="g3Shine" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g3Eye" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".72" stop-color="#F3F5FA"/><stop offset="1" stop-color="#D3DAE8"/></radialGradient>
+    <radialGradient id="g3Pupil" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#454FA0"/><stop offset=".55" stop-color="#1F2552"/><stop offset="1" stop-color="#0C0F2E"/></radialGradient>
+  </defs>
 </svg>
 
 <header class="bar">
@@ -591,12 +632,12 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
       <div class="center"><div class="num" id="heroNum"></div><div class="unit" id="heroUnit"></div>
         <svg class="knot fish" id="heroKnot" hidden viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(51 53) scale(1.0213190196026987) translate(-50.43 -56.67)"><defs><clipPath id="hbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <g class="fishbody" transform="rotate(-16 54 54)">
-  <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
-  <g clip-path="url(#hbody)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
-  <circle cx="67.5" cy="48.5" r="7" fill="#fff"/>
-  <circle cx="69.2" cy="46.4" r="3.7" fill="#1F2552"/>
+  <path d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="url(#g3Body)"/>
+  <g clip-path="url(#hbody)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>
+  <circle cx="67.5" cy="48.5" r="7" fill="url(#g3Eye)"/>
+  <circle cx="69.2" cy="46.4" r="3.7" fill="url(#g3Pupil)"/>
   <circle cx="70.6" cy="45" r="1.3" fill="#fff"/>
   <ellipse cx="73" cy="58" rx="3.2" ry="2.1" fill="#FF5E7E" opacity=".4"/>
 </g>
@@ -627,7 +668,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
   <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span><span class="rb-l">Tieni premuto</span></button>
-  <button class="rb add" id="btnAdd" aria-label="Scrivi a MeMo"><span class="c"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18.5c-1.2-1.4-2-3.2-2-5.1C3 8.8 7 5 12 5s9 3.8 9 8.4-4 8.4-9 8.4c-1.4 0-2.7-.3-3.9-.8L4 22l1-3.5z"/><path d="M8.5 12h7M8.5 15.2h4.5"/></svg></span>Scrivi</button>
+  <button class="rb add" id="btnAdd" aria-label="Scrivi a MeMo"><span class="c"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(0 -1.5)"><path d="M5 18.5c-1.2-1.4-2-3.2-2-5.1C3 8.8 7 5 12 5s9 3.8 9 8.4-4 8.4-9 8.4c-1.4 0-2.7-.3-3.9-.8L4 22l1-3.5z"/><path d="M8.5 12h7M8.5 15.2h4.5"/></g></svg></span>Scrivi</button>
 </nav>
 
 <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
@@ -675,7 +716,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.0';
+const VERSION = '2.1';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1681,29 +1722,31 @@ async function saveSpoken(res, text) {
 // ================= Scrivi a MeMo =================
 // come un messaggio a un amico: scrivi come ti viene, MeMo capisce e ti mostra il MeMo già pronto
 let writeDraft = '';
-const WRITE_EX = ['Dentista martedì alle 15:30, avvisami il giorno prima', 'Domani alle 8 pagare il bollo', 'Ogni lunedì palestra alle 19', 'Ricordami venerdì che sabato è il compleanno di Giulia',
-  'Mi scade la patente a marzo 2029', 'Tra 2 ore chiamare la mamma', 'Stasera alle 20 cena da Luca, prendere il vino', 'Il 16 dicembre pagare l\'IMU', 'Sabato mattina cambio gomme',
-  'Ogni mese il 27 pagare l\'affitto', 'Giovedì alle 18 calcetto, avvisami un\'ora prima', 'Domattina ritirare il pacco', 'Il 4 novembre compleanno di papà', 'Dopodomani alle 9 colloquio'];
-const WRITE_LEAD = ['Cosa, quando e, se vuoi, quando avvisarti. Scrivi come ti viene.', 'Scrivi come lo diresti a un amico: al resto ci penso io.', 'Cosa e quando, anche di fretta. Capisco io.'];
+const WRITE_EX = ['Dentista martedì alle 15:30', 'Domani alle 8 pagare il bollo', 'Ogni lunedì palestra alle 19', 'Patente scade a marzo 2029', 'Tra 2 ore chiamare la mamma',
+  'Il 16 dicembre pagare l\'IMU', 'Sabato mattina cambio gomme', 'Domattina ritirare il pacco', 'Il 4 novembre compleanno di papà', 'Dopodomani alle 9 colloquio', 'Venerdì cena da Luca, il vino'];
+// il tono: non serve scriverlo bene, basta buttarlo giù. Al resto ci pensa MeMo
+const WRITE_LEAD = ['Scrivi di getto, senza pensarci troppo. Al resto ci pensa <span class="brandw">MeMo</span>.', 'Non serve scriverlo bene: due parole di getto e ci pensa <span class="brandw">MeMo</span>.',
+  'Butta giù quello che ti viene, anche di fretta. Al resto ci pensa <span class="brandw">MeMo</span>.'];
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const anyOf = a => a[Math.floor(Math.random() * a.length)];
+const SEND_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
 function openWrite(prefill) {
-  const ex = shuffle(WRITE_EX).slice(0, 4), ph = ex.pop();
-  openSheet(`<div class="sheet-in"><h2>Di' a MeMo cosa ti serve</h2>
-    <p class="lead">${esc(anyOf(WRITE_LEAD))}</p>
-    <div class="field"><textarea class="input w-ta" id="wText" rows="3" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true" aria-label="Cosa devo ricordarti" placeholder="Per esempio: ${esc(ph)}"></textarea></div>
-    <div class="examples" id="wEx">${ex.map(x => `<button>${esc(x)}</button>`).join('')}</div>
-    <button class="btn btn-main" id="wGo" disabled>Fatto</button></div>`, body => {
+  const ex = shuffle(WRITE_EX).slice(0, 3), ph = ex.pop();
+  openSheet(`<div class="sheet-in w-sheet"><h2 class="w-h">Di' a <span class="brandw">MeMo</span> cosa ti serve</h2>
+    <p class="w-lead">${anyOf(WRITE_LEAD)}</p>
+    <div class="w-box"><textarea class="input w-ta" id="wText" rows="2" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true" aria-label="Cosa devo ricordarti" placeholder="Per esempio: ${esc(ph)}"></textarea>
+      <button class="w-send" id="wGo" aria-label="Fatto" disabled>${SEND_SVG}</button></div>
+    <div class="w-ex" id="wEx">${ex.map(x => `<button>${esc(x)}</button>`).join('')}</div></div>`, body => {
     const ta = body.querySelector('#wText'), go = body.querySelector('#wGo'), exEl = body.querySelector('#wEx');
     let busy = false;
     ta.value = prefill != null ? prefill : writeDraft;
-    const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(Math.max(ta.scrollHeight, 100), 230) + 'px'; };
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(Math.max(ta.scrollHeight, 76), 170) + 'px'; };
     const upd = () => { const v = ta.value.trim(); go.disabled = !v; exEl.hidden = !!v; if (!busy) writeDraft = ta.value; fit(); };
     const send = async () => {
       const v = ta.value.trim(); if (!v) return;
       if (busy) { if (thinkCtl) thinkCtl.abort(); return; } // secondo tocco: vado avanti senza aspettare l'AI
       busy = true; ta.readOnly = true; ta.blur(); haptic();
-      go.innerHTML = 'Ci penso<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>';
+      go.classList.add('busy'); go.setAttribute('aria-label', 'Ci penso'); go.innerHTML = '<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>';
       let list; try { list = await understandAll(v); } finally { busy = false; }
       if ($('#wText') !== ta) return; // nel frattempo hai chiuso
       writeDraft = '';
@@ -1838,6 +1881,41 @@ function askRemind(res, text) {
     go.onclick = () => t.value && done(t.value);
   });
 }
+// ================= Il nuoto in 3D (lo usano tutti i pesciolini dell'app) =================
+const Swim3 = (() => {
+  // posa nello spazio: yaw = quanto è girato (0 guarda a destra, ±180 a sinistra, verso -90 viene verso di te), tilt = muso su o giù
+const tf = (x, y, s, yaw, tilt) => `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) perspective(720px) rotateZ(${tilt.toFixed(1)}deg) rotateY(${yaw.toFixed(1)}deg) scale(${s.toFixed(3)})`;
+const bez = (p0, p1, p2, p3) => t => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
+// un tragitto in 3D: P(t) = [x, y, z] con z da -1 (in fondo, piccolo e sfocato) a 0 (davanti a te).
+// Il pesce guarda sempre dove nuota: se viene verso di te si gira verso di te, se torna giù si gira via. Nuota a colpi di coda.
+function swim3(P, o) {
+  const N = o.n || 56, fr = [], W = innerWidth, K = W * .9; let prev = o.yaw0 ?? null;
+  for (let i = 0; i <= N; i++) {
+    let t = i / N; t = o.ease(t); t = Math.min(1, Math.max(0, t + .03 * Math.sin(6.283 * 2.6 * t) * (1 - t) * (o.pulse ?? 1))); // spinte e scivolate
+    const [x, y, z] = P(t), e = .012, [xa, ya, za] = P(Math.max(0, t - e)), [xb, yb, zb] = P(Math.min(1, t + e));
+    const dx = xb - xa, dy = yb - ya, dz = (zb - za) * K;
+    let yaw;
+    if (Math.abs(dx) + Math.abs(dz) < .5) yaw = prev != null ? prev : (o.side > 0 ? 0 : -180);
+    else {
+      // si gira dall'altra parte solo se va davvero di là, non per ogni colpo di coda
+      const was = prev != null ? (Math.cos(prev / 57.3) < 0 ? 180 : 0) : (o.side > 0 ? 0 : 180);
+      const side = Math.abs(dx) > Math.abs(dz) * .35 + 1 ? (dx >= 0 ? 0 : 180) : was;
+      let dev = Math.atan2(dz, Math.abs(dx)) * 57.3; dev = Math.max(-62, Math.min(62, dev)); // mai di taglio: sempre almeno mezzo pesce
+      yaw = side === 0 ? -dev : -(180 - dev);
+    }
+    if (prev != null) { yaw = prev + ((yaw - prev + 540) % 360 - 180); yaw = prev + Math.max(-11, Math.min(11, yaw - prev)); } // si gira con calma, come un pesce vero
+    prev = yaw;
+    const right = Math.cos(yaw / 57.3) >= 0 ? 1 : -1;
+    const tilt = Math.max(-26, Math.min(26, Math.atan2(dy, Math.abs(dx) + Math.abs(dz) * .4 + 2) * 57.3 * .5)) * right;
+    const sc = o.scale ? o.scale(z) : 1 + z * (1 - o.far);
+    const bl = Math.max(0, -z) ** 1.4 * (o.blur ?? 9);
+    fr.push({ transform: tf(x, y, sc, yaw, tilt), filter: `blur(${bl.toFixed(2)}px)`, opacity: +Math.max(0, Math.min(1, o.op(i / N, z))).toFixed(3) });
+  }
+  return { fr, yaw: prev };
+}
+  return { tf, bez, swim3 };
+})();
+
 // ================= Il pesciolino che ascolta =================
 // quando tieni premuto il microfono sale dal profondo, si avvicina grande davanti a te e ascolta davvero:
 // sbatte gli occhi, guarda le tue parole, annuisce, alza le sopracciglia, fa "oh", sorride quando capisce.
@@ -1853,19 +1931,7 @@ const Fish = (() => {
   const setFace = f => { face = f; el.dataset.f = f; el.dataset.m = MOUTH[f] || 'smile'; };
   const look = (x, y) => { el.style.setProperty('--lx', x.toFixed(2) + 'px'); el.style.setProperty('--ly', y.toFixed(2) + 'px'); };
   const gesture = g => { head.classList.remove('g-nod', 'g-hop', 'g-shake'); void head.offsetWidth; head.classList.add('g-' + g); };
-  const tf = (x, y, s, a, fx) => `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${a.toFixed(1)}deg) scale(${(s * fx).toFixed(3)},${s.toFixed(3)})`;
-  const bez = (p0, p1, p2, p3) => t => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
-  // un tragitto: guarda sempre dove va (si gira quando cambia verso), e da lontano è piccolo e sfocato
-  function path(B, o) {
-    const N = 50, fr = []; let fx = o.fx0;
-    for (let i = 0; i <= N; i++) {
-      const t = o.ease(i / N), [x, y] = B(t), [xa, ya] = B(Math.max(0, t - .015)), [xb, yb] = B(Math.min(1, t + .015)), dx = xb - xa, dy = yb - ya;
-      if (Math.abs(dx) > 1.5) fx = dx > 0 ? 1 : -1;
-      const tilt = Math.max(-24, Math.min(24, Math.atan2(dy, Math.abs(dx) + 3) * 57.3 * .55));
-      fr.push({ transform: tf(x, y, o.sz(t), fx * tilt, fx), filter: `blur(${Math.max(0, o.bl(t)).toFixed(2)}px)`, opacity: +Math.max(0, Math.min(1, o.op(i / N))).toFixed(3) });
-    }
-    return fr;
-  }
+  const { tf, bez, swim3 } = Swim3;
   function bubble(n = 1, gap = 180) {
     for (let i = 0; i < n; i++) setTimeout(() => { if (!at) return;
       const b = document.createElement('i'), sz = 6 + r() * 6; b.className = 'lbub';
@@ -1892,21 +1958,27 @@ const Fish = (() => {
     el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.margin = `${-h / 2}px 0 0 ${-w / 2}px`;
     const cEl = $('#ptt .ptt-card'), card = cEl.getBoundingClientRect(), pillTop = card.top - (cEl.closest('.ptt.show') ? 0 : 12);
     const fx = r() < .5 ? 1 : -1, tx = W / 2 + (r() - .5) * W * .08, ty = Math.max(h / 2 + 80, pillTop - h / 2 - 10);
-    at = { x: tx, y: ty, fx, w, h };
+    at = { x: tx, y: ty, fx, w, h, yaw: fx > 0 ? 0 : -180 };
     deep.classList.add('on'); document.body.classList.add('listening'); el.classList.remove('idle', 'blink');
     setFace('curious'); look(0, 0);
     if (anim) anim.cancel();
-    if (calm) { el.style.transform = tf(tx, ty, 1, 0, fx); el.style.filter = 'none'; anim = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: 'forwards' }); settle(); return; }
-    // dal profondo: lontano, piccolo e sfocato; poi si avvicina a te, a volte con una S, a volte passando oltre e tornando
+    const restYaw = fx > 0 ? 0 : -180;
+    if (calm) { el.style.transform = tf(tx, ty, 1, restYaw, 0); el.style.filter = 'none'; anim = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: 'forwards' }); settle(); return; }
+    // dal profondo: in fondo è piccolo e sfocato, nuota verso di te girato verso di te, e davanti si mette di lato a guardarti
     const sx = W * (.12 + r() * .76), sy = H * (.1 + r() * .26), way = r();
-    const p0 = [sx, sy], p3 = [tx, ty], p2 = [tx - fx * (45 + r() * 75), ty - 18 - r() * 45];
-    const p1 = way < .4 ? [sx + (r() - .5) * W * .9, sy + (ty - sy) * .35] : way < .7 ? [tx + fx * W * .42, (sy + ty) / 2 + (r() - .5) * 80] : [sx + (r() - .5) * 60, sy + (ty - sy) * .6];
-    const s0 = .09 + r() * .06;
-    const fr = path(bez(p0, p1, p2, p3), { fx0: fx, ease: t => 1 - Math.pow(1 - t, 2.1), sz: t => s0 + (1.08 - s0) * Math.pow(t, 1.8), bl: t => 9 * Math.pow(1 - t, 1.6), op: k => k * 3.2 });
-    fr.forEach((f, i) => { f.offset = .84 * i / (fr.length - 1); });
-    fr.push({ offset: .92, transform: tf(tx, ty + 4, .96, 0, fx), filter: 'blur(0px)', opacity: 1 }, { offset: 1, transform: tf(tx, ty, 1, 0, fx), filter: 'blur(0px)', opacity: 1 });
-    anim = el.animate(fr, { duration: 1100 + r() * 500, easing: 'linear', fill: 'forwards' });
-    anim.onfinish = () => { if (on) settle(); };
+    const p0 = [sx, sy], p3 = [tx, ty], p2 = [tx - fx * (55 + r() * 70), ty - 10 - r() * 35];
+    const p1 = way < .4 ? [sx + (r() - .5) * W * .9, sy + (ty - sy) * .35] : way < .7 ? [tx + fx * W * .4, (sy + ty) / 2 + (r() - .5) * 80] : [sx + (r() - .5) * 70, sy + (ty - sy) * .6];
+    const B = bez(p0, p1, p2, p3), wig = 10 + r() * 16, k = 1.5 + r();
+    const s0 = .1 + r() * .06;
+    const { fr, yaw: endYaw } = swim3(t => { const [x, y] = B(t); return [x + wig * Math.sin(6.283 * k * t) * (1 - t), y, -Math.pow(1 - t, 1.7)]; },
+      { ease: t => 1 - Math.pow(1 - t, 1.8), far: s0, side: fx, op: k2 => k2 * 3.2 });
+    const rest = restYaw + 360 * Math.round((endYaw - restYaw) / 360); // lo stesso verso, senza giri su se stesso
+    fr.forEach((f, i) => { f.offset = .86 * i / (fr.length - 1); });
+    fr.push({ offset: .93, transform: tf(tx, ty + 4, .97, rest, 0), filter: 'blur(0px)', opacity: 1 }, { offset: 1, transform: tf(tx, ty, 1, rest, 0), filter: 'blur(0px)', opacity: 1 });
+    el.classList.add('swim');
+    anim = el.animate(fr, { duration: 1250 + r() * 500, easing: 'linear', fill: 'forwards' });
+    anim.onfinish = () => { el.classList.remove('swim'); if (on) settle(); };
+    at.yaw = rest;
   }
   // mentre parli: ogni tanto una reazione, mai due volte di fila la stessa
   const REACT = ['nod', 'mm', 'o', 'got', 'look', 'nod', 'mm'];
@@ -1934,27 +2006,35 @@ const Fish = (() => {
       el.classList.remove('idle', 'blink'); document.body.classList.remove('listening');
       const a = at; if (!a) return;
       if (calm) { anim = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' }); at = null; return; }
-      const W = innerWidth, H = innerHeight, P0 = [a.x, a.y], smooth = t => t * t * (3 - 2 * t);
-      const pick = kind === 'cancel' ? 'flick' : kind === 'none' ? 'sink' : kind === 'saved' ? (r() < .55 ? 'away' : 'swirl') : ['away', 'flick', 'swirl', 'sink', 'away'][Math.floor(r() * 5)];
-      let o, B;
-      if (pick === 'away') { // torna nel profondo
-        const ex = W * (.12 + r() * .76), ey = H * (.08 + r() * .2);
-        B = bez(P0, [a.x + a.fx * (70 + r() * 60), a.y - 20], [ex + (r() - .5) * 140, ey + 140], [ex, ey]);
-        o = { ease: smooth, sz: t => 1 - .9 * Math.pow(t, .85), bl: t => 9 * t * t, op: k => k < .72 ? 1 : 1 - (k - .72) / .28, dur: 1050 + r() * 350 };
-      } else if (pick === 'swirl') { // una giravolta e via
-        B = bez(P0, [a.x + a.fx * 170, a.y + 50], [a.x - a.fx * 160, a.y - 170], [a.x + (r() - .5) * W * .5, H * .1]);
-        o = { ease: smooth, sz: t => 1.05 - .95 * t, bl: t => 8 * t * t, op: k => k < .75 ? 1 : 1 - (k - .75) / .25, dur: 1350 };
+      const W = innerWidth, H = innerHeight, smooth = t => t * t * (3 - 2 * t), fx = a.fx;
+      const pick = kind === 'cancel' ? 'flick' : kind === 'none' ? 'sink' : kind === 'saved' ? (r() < .55 ? 'deep' : 'swirl') : ['deep', 'flick', 'swirl', 'sink', 'deep', 'turn'][Math.floor(r() * 6)];
+      let P, o;
+      if (pick === 'deep') { // si gira e torna nuotando nel profondo
+        const ex = W * (.12 + r() * .76), ey = H * (.08 + r() * .22), B = bez([a.x, a.y], [a.x + fx * (80 + r() * 70), a.y - 10], [ex + (r() - .5) * 160, ey + 150], [ex, ey]);
+        P = t => { const [x, y] = B(t); return [x + 12 * Math.sin(6.283 * 1.8 * t) * t, y, -Math.pow(t, .9)]; };
+        o = { ease: smooth, far: .1, op: k => k < .72 ? 1 : 1 - (k - .72) / .28, dur: 1250 + r() * 400 };
+      } else if (pick === 'swirl') { // una giravolta contenta e via in fondo
+        const B = bez([a.x, a.y], [a.x + fx * 190, a.y + 60], [a.x - fx * 170, a.y - 180], [a.x + (r() - .5) * W * .5, H * .1]);
+        P = t => { const [x, y] = B(t); return [x, y, t < .35 ? .12 * Math.sin(t / .35 * 3.14) : -Math.pow((t - .35) / .65, 1.1)]; };
+        o = { ease: smooth, far: .1, op: k => k < .78 ? 1 : 1 - (k - .78) / .22, dur: 1550 };
+      } else if (pick === 'turn') { // si volta dall'altra parte e se ne va di lato
+        const dir = -fx, B = bez([a.x, a.y], [a.x + fx * 30, a.y + 12], [a.x + dir * W * .35, a.y - 30], [a.x + dir * (W * .55 + a.w), a.y - 60 - r() * 80]);
+        P = t => { const [x, y] = B(t); return [x, y, .18 * Math.sin(Math.min(1, t * 2.2) * 3.14)]; };
+        o = { ease: t => t * t * (2 - t * .8), far: .5, op: k => k < .85 ? 1 : 1 - (k - .85) / .15, dur: 1000 };
       } else if (pick === 'flick') { // un colpo di coda e sparisce di lato
-        const dir = kind === 'cancel' ? -a.fx : (r() < .5 ? a.fx : -a.fx);
-        B = bez(P0, [a.x + dir * 30, a.y + 10], [a.x + dir * W * .4, a.y - 20], [a.x + dir * (W * .55 + a.w), a.y - 40 - r() * 90]);
-        o = { ease: t => t * t, sz: () => 1, bl: () => 0, op: k => k < .8 ? 1 : 1 - (k - .8) / .2, dur: kind === 'cancel' ? 430 : 620 };
-      } else { // affonda piano all'indietro
-        B = bez(P0, [a.x, a.y + 24], [a.x + a.fx * 30, a.y - 40], [a.x + a.fx * (30 + r() * 60), a.y - H * .26]);
-        o = { ease: smooth, sz: t => 1 - .86 * t, bl: t => 8 * t, op: k => 1 - k * k, dur: 1500 };
+        const dir = kind === 'cancel' ? -fx : (r() < .5 ? fx : -fx), B = bez([a.x, a.y], [a.x + dir * 25, a.y + 8], [a.x + dir * W * .4, a.y - 20], [a.x + dir * (W * .55 + a.w), a.y - 40 - r() * 90]);
+        P = t => { const [x, y] = B(t); return [x, y, dir === fx ? 0 : .14 * Math.sin(Math.min(1, t * 3) * 3.14)]; };
+        o = { ease: t => t * t, far: .5, op: k => k < .82 ? 1 : 1 - (k - .82) / .18, dur: kind === 'cancel' ? 520 : 700, pulse: 0 };
+      } else { // affonda piano all'indietro, guardandoti ancora un po'
+        const B = bez([a.x, a.y], [a.x - fx * 10, a.y + 20], [a.x + fx * 40, a.y - 50], [a.x + fx * (40 + r() * 60), a.y - H * .26]);
+        P = t => { const [x, y] = B(t); return [x, y, -Math.pow(t, 1.2)]; };
+        o = { ease: smooth, far: .12, op: k => 1 - k * k, dur: 1700 };
       }
-      const fr = path(B, { ...o, fx0: a.fx }); fr[0].transform = tf(a.x, a.y, 1, 0, a.fx); fr[0].filter = 'blur(0px)'; fr[0].opacity = 1;
+      const { fr } = swim3(P, { ...o, side: fx, yaw0: a.yaw });
+      fr[0].transform = tf(a.x, a.y, 1, a.yaw, 0); fr[0].filter = 'blur(0px)'; fr[0].opacity = 1;
       if (anim) anim.cancel();
-      anim = el.animate(fr, { duration: o.dur, easing: 'linear', fill: 'forwards' }); at = null;
+      el.classList.add('swim');
+      anim = el.animate(fr, { duration: o.dur, easing: 'linear', fill: 'forwards' }); anim.onfinish = () => el.classList.remove('swim'); at = null;
     };
     // prima la faccia giusta: contento se ha segnato, perplesso se non ha sentito, preoccupato se annulli
     let wait = 260;
@@ -2046,35 +2126,33 @@ const PTT = (() => {
 })();
 
 // ================= Il pesciolino di passaggio =================
-// ogni tanto sfreccia sullo sfondo: da sinistra verso destra, salendo un po', mai in linea retta e mai due volte uguale.
-// Non passa se il pesciolino è già al centro della home.
+// ogni tanto nuota sullo sfondo: una volta da una parte e la volta dopo dall'altra, avvicinandosi e allontanandosi,
+// a colpi di coda, mai due volte uguale. Non passa se il pesciolino è già al centro della home o se ti sta ascoltando.
 (() => {
-  const el = $('#swimmer'); let tm = null, anim = null;
+  const el = $('#swimmer'); let tm = null, anim = null, dir = Math.random() < .5 ? 1 : -1;
   if (!el || !el.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { bez, swim3 } = Swim3, r = Math.random;
   const later = ms => { clearTimeout(tm); tm = setTimeout(swim, ms); };
   const free = () => document.visibilityState === 'visible' && page === 'home' && $('#sheetWrap').hidden && !document.querySelector('.intro') && !document.body.classList.contains('listening')
     && window.scrollY < innerHeight * 0.4 && $('#heroKnot').hasAttribute('hidden');
   function swim(force) {
-    if (!force && !free()) { later(20000); return; }
+    if (!force && !free()) { later(15000); return; }
     if (anim) anim.cancel();
-    const W = innerWidth, H = innerHeight, r = Math.random;
-    const size = 36 + r() * 14, x0 = -size, x1 = W + size;
-    const y0 = H * (0.42 + r() * 0.3), rise = H * (0.14 + r() * 0.2);           // sale verso destra
-    const A = H * (0.025 + r() * 0.035), k = 0.8 + r() * 1.1, ph = r() * 6.28;      // ondeggia
-    const dart = 0.05 + r() * 0.05, dk = 1.5 + r() * 1.5;                           // scatti di velocità
-    const X = f => x0 + (x1 - x0) * (f + dart * Math.sin(6.283 * dk * f) / (6.283 * dk) * 2.5);
-    const Y = f => y0 - rise * (f * f * 0.4 + f * 0.6) + A * Math.sin(6.283 * k * f + ph) - A * Math.sin(ph);
-    const N = 48, frames = [];
-    for (let i = 0; i <= N; i++) {
-      const f = i / N, e = 0.002, ang = Math.atan2(Y(f + e) - Y(f - e), X(f + e) - X(f - e)) * 57.3;
-      frames.push({ transform: `translate(${X(f).toFixed(1)}px,${Y(f).toFixed(1)}px) rotate(${ang.toFixed(1)}deg) scale(${(size / 40).toFixed(3)})`, opacity: i === 0 || i === N ? 0 : 0.85 });
-    }
-    anim = el.animate(frames, { duration: 3200 + r() * 1800, easing: 'linear' });
+    const W = innerWidth, H = innerHeight, size = 40 * (.95 + r() * .35);
+    const x0 = dir > 0 ? -60 : W + 60, x1 = dir > 0 ? W + 60 : -60;
+    const y0 = H * (.4 + r() * .3), y1 = H * (.28 + r() * .4);
+    const B = bez([x0, y0], [x0 + dir * W * (.25 + r() * .2), y0 - H * (r() - .3) * .25], [x1 - dir * W * (.25 + r() * .2), y1 + H * (r() - .5) * .25], [x1, y1]);
+    // la profondità cambia lungo il tragitto: a volte si avvicina, a volte scende in fondo e poi risale
+    const zA = -.15 - r() * .35, zB = -.15 - r() * .35, dip = (r() - .35) * .7, wob = 6 + r() * 10, k = 2 + r() * 2, ph = r() * 6.28;
+    const P = t => { const [x, y] = B(t); return [x, y + wob * Math.sin(6.283 * k * t + ph), Math.min(.15, zA + (zB - zA) * t - dip * Math.sin(Math.PI * t))]; };
+    const { fr } = swim3(P, { n: 72, ease: t => t, side: dir, blur: 2.6, scale: z => size / 40 * (1 + z * .6),
+      op: (q, z) => Math.min(1, q * 9, (1 - q) * 9) * (.92 + z * .45) });
+    anim = el.animate(fr, { duration: 5200 + r() * 2600, easing: 'linear' });
     anim.onfinish = () => { anim = null; };
-    if (!force) later((55 + r() * 75) * 1000);
+    dir = -dir; // la prossima volta dall'altra parte
+    if (!force) later((20 + r() * 20) * 1000);
   }
-  later((12 + r0() * 18) * 1000);
-  function r0() { return Math.random(); }
+  later((7 + r() * 8) * 1000);
   window.memoSwim = () => swim(true);
 })();
 
@@ -2283,13 +2361,12 @@ $('#btnSettings').addEventListener('click', openSettings);
 
 // ================= Tutorial =================
 function showIntro() {
+  // poche pagine: chi sono, che ci penso io, e (se vuoi) le scadenze di tutti. Il resto l'app lo fa capire da sola
+  const ic = id => { const c = $(id + ' .c'); return c ? c.innerHTML : ''; };
   const slides = [
-    { art: `<div class="photo-art"><div class="pdfdoc"><b>PDF</b><i></i><i></i><i style="width:60%"></i></div><div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div></div>`,
-      h: 'Fai una foto.', p: `Scatta o scegli una foto o un PDF. Leggo io cos'è e quando scade, e resta tutto sul tuo ${PHONE}.` },
-    { art: `<span class="bubble wide">Vino per Mattia domani alle 18, avvisami il giorno prima. E domattina il pane!</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`,
-      h: 'Oppure dimmelo.', p: "Tieni premuto e parla, oppure scrivi come in chat. Anche più cose insieme." },
-    { art: `<div class="get-art"><div class="g-card"><span class="g-ic">🍷</span><div><b>Vino per Mattia</b><small>domani alle 18:00</small><em>🔔 ti avviso il giorno prima</em></div></div><div class="g-card"><span class="g-ic">🥖</span><div><b>Comprare il pane</b><small>domattina · a che ora?</small></div></div></div>`,
-      h: 'Capisco al volo.', p: "Tiro fuori l'essenziale. Se manca qualcosa, te lo chiedo." }
+    { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${$('#diver .dv-head').innerHTML}</div>
+        <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
+      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Una foto, due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
   ];
   const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<button data-pre="${p.id}" data-short="1" aria-pressed="${hasPreset(p.id)}">${hasPreset(p.id) ? '✓ ' + preLabel(p, true).replace(/^\S+\s/, '') : preLabel(p, true)}</button>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
@@ -2453,7 +2530,7 @@ const Push = (() => {
   // l'AI del server capisce la frase; se non risponde in pochi secondi, si va avanti senza
   async function understand(text, ctl) {
     const now = new Date().toLocaleString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    ctl = ctl || new AbortController(); const t = setTimeout(() => ctl.abort(), 6000);
+    ctl = ctl || new AbortController(); const t = setTimeout(() => ctl.abort(), 7200);
     try {
       const r = await fetch(MEMO_SERVER + '/understand', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...me(), text, now }), signal: ctl.signal });
       if (r.status === 501) throw new Error('no ai');
