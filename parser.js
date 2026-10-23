@@ -214,12 +214,31 @@
   const EXPIRY_LABEL = /(scad|expir|valid|fino\s*al|until|4b|date\s*of\s*expiry|data\s*di\s*scadenza|entro\s*il|pagare\s*entro|rinnov)/;
   const ISSUE_LABEL = /(emission|rilasci|issue|nascita|birth|nato|nata|4a\b|\b3\.|data\s*di\s*nascita)/;
 
+  // l'etichetta che conta è la più vicina alla data: sulla stessa riga, oppure sulla riga sopra se la data apre la riga
   function labelBefore(text, idx) {
-    const before = norm(text.slice(Math.max(0, idx - 45), idx));
-    const lastLine = before.split('\n').slice(-2).join(' ');
-    return { expiry: EXPIRY_LABEL.test(lastLine), issue: ISSUE_LABEL.test(lastLine) };
+    const lineStart = text.lastIndexOf('\n', idx - 1) + 1;
+    let seg = norm(text.slice(lineStart, idx));
+    if (!/[a-z]{3}/.test(seg)) { const prev = text.lastIndexOf('\n', lineStart - 2) + 1; seg = norm(text.slice(prev, lineStart)); }
+    const lastPos = re => { const g = new RegExp(re.source, 'g'); let m, p = -1; while ((m = g.exec(seg))) { p = m.index; if (!m[0].length) g.lastIndex++; } return p; };
+    const e = lastPos(EXPIRY_LABEL), i = lastPos(ISSUE_LABEL);
+    return { expiry: e >= 0 && e > i, issue: i >= 0 && i > e };
   }
 
+  function columnLabels(text, dates) {
+    const map = new Map(), lines = text.split('\n'); let pos = 0; const starts = lines.map(l => { const p = pos; pos += l.length + 1; return p; });
+    for (let i = 0; i < lines.length; i++) {
+      const n = norm(lines[i]), found = [];
+      for (const [kind, re] of [['expiry', EXPIRY_LABEL], ['issue', ISSUE_LABEL]]) { const g = new RegExp(re.source, 'g'); let m; while ((m = g.exec(n))) { found.push([m.index, kind]); if (!m[0].length) g.lastIndex++; } }
+      if (found.length < 2 || !found.some(f => f[1] === 'expiry') || !found.some(f => f[1] === 'issue')) continue;
+      found.sort((x, y) => x[0] - y[0]);
+      const end = starts[i + 1] ?? text.length;
+      let blockEnd = end;
+      for (let j = i + 1; j < lines.length && j <= i + 3; j++) { if (/[a-z]{3}/i.test(lines[j].replace(/\d/g, ''))) break; blockEnd = starts[j] + lines[j].length; }
+      const under = dates.filter(d => d.index >= end && d.index < blockEnd).sort((x, y) => x.index - y.index);
+      under.forEach((d, k) => { if (found[k]) map.set(d.index, found[k][1]); });
+    }
+    return map;
+  }
   function guessStore(text) {
     const lines = String(text).split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4);
     for (const l of lines) {
@@ -232,6 +251,7 @@
   }
 
   /** Analizza il testo letto da una foto. */
+  const ID_DOCS = new Set(['cie', 'passaporto', 'patente', 'tessera']);
   function parseOcr(text, now) {
     const today = todayISO(now);
     const { type, score } = detectType(text);
@@ -245,8 +265,21 @@
       const past = dates.map(d => d.date).filter(d => d <= addDays(today, 1)).sort();
       purchase = past.length ? past[past.length - 1] : null;
       if (purchase) { date = addMonths(purchase, 24); confident = true; }
+    } else if (ID_DOCS.has(type)) {
+      // documenti d'identità: nascita < emissione < scadenza, quindi la scadenza è sempre la data più lontana.
+      // Le etichette qui ingannano (sulla CIE "emissione" e "scadenza" stanno sulla stessa riga, con le date sotto).
+      const all = dates.map(d => d.date).filter(d => d > '1990-01-01');
+      if (mrz) all.push(mrz);
+      if (all.length) {
+        date = all.sort().pop();
+        // la riga in fondo alle carte (MRZ) è la fonte più affidabile, se non è più vicina della data stampata
+        if (mrz && mrz >= today) date = mrz > date ? mrz : (date === mrz ? mrz : date);
+        confident = date > today || all.length === 1;
+      }
     } else {
-      const labelled = dates.filter(d => { const l = labelBefore(text, d.index); return l.expiry && !l.issue; });
+      // intestazioni in colonna ("Data emissione   Scadenza") con le date sotto: si abbinano nell'ordine
+      const cols = columnLabels(text, dates);
+      const labelled = dates.filter(d => { if (cols.has(d.index)) return cols.get(d.index) === 'expiry'; const l = labelBefore(text, d.index); return l.expiry && !l.issue; });
       if (labelled.length) { date = labelled.map(d => d.date).sort().pop(); confident = true; }
       else if (mrz) { date = mrz; confident = true; }
       else if (dates.length) {
@@ -326,12 +359,27 @@
 
     // "il giorno prima del 22 novembre", "una settimana prima", "la sera prima": quanto prima avvisare
     let leadDays = null, eveBefore = false;
-    { const lm = new RegExp(`\\b(?:per\\s+|con\\s+(?:un\\s+)?(?:avviso|anticipo)\\s+(?:di\\s+)?)?(?:(?:il|la|un|una|lo)\\s+)?(?:(\\d+|${NUMW})\\s+)?(giorn[oi]|sera|mattina|settiman[ae]|mes[ei])\\s+prima(?:\\s+(?:del|della|dello|dell'|dei|di|che))?\\b`).exec(tD);
-      if (lm) {
-        const k = lm[1] ? (/^\d+$/.test(lm[1]) ? +lm[1] : NUM_WORDS[lm[1]] || 1) : 1, u = lm[2];
-        leadDays = /^giorn/.test(u) ? k : /^settiman/.test(u) ? 7 * k : /^mes/.test(u) ? 30 * k : 1;
-        eveBefore = u === 'sera';
+    { // "il giorno prima", "due giorni prima", "la sera prima", "il giorno precedente", "la vigilia", "con un giorno di anticipo", "24 ore prima"
+      const Q = `(?:(\\d+|${NUMW}|un\\s+paio\\s+di|qualche)\\s+)?`, U = `(giorn[oi]|sera|mattina|settiman[ae]|mes[ei]|or[ae])`;
+      const forms = [
+        new RegExp(`\\b(?:per\\s+|con\\s+(?:un\\s+)?(?:avviso|anticipo)\\s+(?:di\\s+)?)?(?:(?:il|la|un|una|lo)\\s+)?${Q}${U}\\s+(?:prima|precedente|avanti|innanzi)(?:\\s+(?:del|della|dello|dell'|dei|di|che))?\\b`),
+        new RegExp(`\\b(?:con\\s+)?(?:(?:il|la|un|una)\\s+)?${Q}${U}\\s+(?:di|d')\\s*(?:anticipo|preavviso)\\b`),
+        /\b(?:la\s+)?vigilia\b/
+      ];
+      for (const re of forms) {
+        const lm = re.exec(tD); if (!lm) continue;
+        if (/vigilia/.test(lm[0])) { leadDays = 1; eveBefore = false; }
+        else {
+          const q = lm[1] || '', u = lm[2];
+          if (/^or/.test(u)) { const h = /^\d+$/.test(q) ? +q : NUM_WORDS[q] || 1; if (h < 24) continue; leadDays = Math.round(h / 24); } // "24 ore prima" = il giorno prima
+          else {
+            const k = !q ? 1 : /paio/.test(q) ? 2 : q === 'qualche' ? 3 : /^\d+$/.test(q) ? +q : NUM_WORDS[q] || 1;
+            leadDays = /^giorn/.test(u) ? k : /^settiman/.test(u) ? 7 * k : /^mes/.test(u) ? 30 * k : 1;
+            eveBefore = u === 'sera';
+          }
+        }
         spans.push([lm.index, lm.index + lm[0].length]); tD = tD.slice(0, lm.index) + ' '.repeat(lm[0].length) + tD.slice(lm.index + lm[0].length);
+        break;
       } }
     const take = (re, fn) => {
       if (date) return;
@@ -625,7 +673,11 @@
     if (!time && w && w.askTime) askTime = w.askTime;
     if (!time && ai.ask === 'time' && !askTime) askTime = { part: null };
     if (time && ai.exact) leadMin = 0;
-    if (ai.remind && date) { const lm = leadFrom(ai.remind, { due: date, time, type }, nowD); if (lm != null) { leadMin = lm; askTime = null; } }
+    if (ai.remind && date) {
+      let lm = leadFrom(ai.remind, { due: date, time, type }, nowD);
+      if (lm == null) { const loc = parseOne(said, nowD, { noDefault: true }); if (loc.leadMin != null) lm = loc.leadEve && time ? (() => { const [hh, mm] = time.split(':').map(Number); return hh * 60 + mm + 24 * 60 - 19 * 60; })() : loc.leadMin; }
+      if (lm != null) { leadMin = lm; askTime = null; }
+    }
     // rete di sicurezza: se l'AI si è persa un "il giorno prima" o il tipo, li prendo dalla frase intera
     if (leadMin == null && !ai.remind && date) {
       const loc = parseOne(said, nowD, { noDefault: true });

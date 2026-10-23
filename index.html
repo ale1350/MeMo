@@ -160,7 +160,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .grid.slide-r{animation:slideR .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes slideL{from{transform:translateX(36px);opacity:0}}
 @keyframes slideR{from{transform:translateX(-36px);opacity:0}}
-.cal-jump{margin:14px 0 2px}
+.cal-jump{margin:26px 0 4px}
 .cal-jump .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;font-size:12px;font-weight:800;background:rgba(76,141,246,.14);color:var(--brand-ink)}
 .chip[aria-pressed="true"] .cnt{background:rgba(255,255,255,.25);color:#fff}
 .cal-day h4{font-size:17px;font-weight:800;margin:20px 4px 10px}
@@ -188,7 +188,8 @@ html{overflow-x:hidden}
 .setp .s-block .btn{background:rgba(255,255,255,.6)}
 .setp .s-block .btn.btn-main{background:var(--brand-grad);color:#fff}
 .g-steps{margin:0 0 18px;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:g}
-.g-steps li{counter-increment:g;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.g-steps li{counter-increment:g;display:grid;grid-template-columns:30px 1fr;gap:2px 10px;align-items:start}
+.g-steps li::before{grid-row:1 / span 2}
 .g-steps li::before{content:counter(g);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--field);color:var(--brand-ink);font-weight:800;font-size:14px}
 .g-alt li::before{content:'•'}
 .g-steps li > b{display:block;font-size:16px;grid-column:2;grid-row:1}
@@ -196,6 +197,7 @@ html{overflow-x:hidden}
 .g-steps li p b{color:var(--ink);font-weight:750}
 .g-steps code{font:600 13px ui-monospace,Menlo,monospace;background:var(--field);padding:1px 5px;border-radius:6px}
 .g-h{font-size:18px;margin:6px 0 12px}
+.mic-help{margin-top:8px;padding:8px 14px;border-radius:999px;background:var(--field);color:var(--brand-ink);font-weight:700;font-size:14px}
 .s-row{display:flex;gap:14px;align-items:center;justify-content:space-between}
 .s-row p{margin-bottom:0}
 .sw{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:51px;height:31px;border-radius:16px;background:#D5DBE5;position:relative;cursor:pointer;transition:background .25s;margin:0}
@@ -208,6 +210,15 @@ html{overflow-x:hidden}
 .calp .cal{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(43,72,140,.07)}
 .calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
 .calp .chip{box-shadow:none}
+/* il pannello scorre solo su e giù: niente trascinamenti di lato o in diagonale */
+.calp{overflow-x:hidden;touch-action:pan-y}
+.calp .chips.scroll{margin:0 -16px;padding:2px 16px 10px;touch-action:pan-x pan-y}
+.calp .cal-jump .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.78);border-color:rgba(255,255,255,.95);color:var(--ink)}
+.calp .cal-jump .chip{font-size:15.5px;font-weight:700;padding:11px 15px 11px 14px}
+.calp .cal-jump .cnt{background:rgba(47,107,242,.16);color:var(--brand-ink)}
+.calp .cal-jump .chip[aria-pressed="true"] .cnt{background:rgba(255,255,255,.28);color:#fff}
+.cal-jump-h{font-size:15px;font-weight:750;color:var(--ink-2);margin:28px 4px 10px}
+.cal-jump-h + .cal-jump{margin-top:0}
 .calp .day:active{background:rgba(255,255,255,.5)}
 .calp .add-day{border-color:rgba(76,141,246,.35);background:rgba(255,255,255,.18)}
 .dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
@@ -518,7 +529,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.26 bis';
+const VERSION = '1.29';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -896,7 +907,7 @@ function renderCal(anim) {
       <div class="dow">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map(x => `<span>${x}</span>`).join('')}</div>
       <div class="grid ${anim || ''}" id="cGrid">${cells}</div>
       <div class="legend"><span><i class="marks"><i class="now"></i></i>adesso</span><span><i class="marks"><i class="soon"></i></i>prossimamente</span><span><i class="marks"><i></i></i>più avanti</span><span><i class="marks"><i class="rep"></i></i>si ripete</span></div></div>
-    ${keys.length ? `<div class="chips scroll cal-jump" id="cJump">${keys.map(k => `<button class="chip" data-m="${k}" aria-pressed="${k === mk}">${cap(P.parseISO(k + '-01').toLocaleDateString('it-IT', { month: 'short', year: 'numeric' }))} <span class="cnt">${months[k]}</span></button>`).join('')}</div>` : ''}
+    ${keys.length ? `<div class="cal-jump-h">Mesi con un MeMo</div><div class="chips scroll cal-jump" id="cJump">${keys.map(k => `<button class="chip" data-m="${k}" aria-pressed="${k === mk}">${cap(P.parseISO(k + '-01').toLocaleDateString('it-IT', { month: 'short', year: 'numeric' }))} <span class="cnt">${months[k]}</span></button>`).join('')}</div>` : ''}
     <div class="cal-day">${selList ? `<h4>${esc(cap(selLabel))}</h4>
       ${selList.length ? `<div class="rows">${selList.map(x => calRow(x.it, x.st, x.rep)).join('')}</div>` : '<p class="cal-empty">Niente in questo giorno.</p>'}
       <button class="add-day" id="cAdd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Aggiungi qualcosa per questo giorno</button>`
@@ -1193,7 +1204,7 @@ function openVoice(opts = {}) {
       else { Ear.stop(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); }
     }, ms); };
     const listen = () => {
-      if (!SR) { idle('Tocca il microfono sulla tastiera e parla, oppure scrivi.'); ta.focus(); return; }
+      if (!SR) { idle(inAppBrowser() ? 'Qui il microfono non funziona: apri MeMo con Safari o dall\'icona sulla Home.' : 'Tocca il microfono sulla tastiera e parla, oppure scrivi.'); if (inAppBrowser()) micHelp(); else ta.focus(); return; }
       clear(); base = ta.value.trim(); started = false; on = true;
       mic.classList.add('on'); mic.setAttribute('aria-label', 'Ho finito'); say(base ? 'Dimmi pure il resto…' : 'Parla pure, con calma: ti ascolto.');
       const ok = Ear.start({
@@ -1203,7 +1214,7 @@ function openVoice(opts = {}) {
           if (code === 'aborted' || code === 'no-speech') return;
           clear(); Ear.reset();
           if (auto) { auto = false; idle('Tocca il microfono e parla.'); return; }
-          if (code === 'not-allowed' || code === 'service-not-allowed') idle('Non riesco a usare il microfono: controlla che Safari possa usarlo e che la Dettatura sia attiva. Intanto puoi scrivere qui sotto.');
+          if (code === 'not-allowed' || code === 'service-not-allowed') { idle('Il microfono è bloccato. Tocca qui sotto per sapere come sbloccarlo, intanto puoi scrivere.'); micHelp(code); }
           else if (code === 'audio-capture') idle("Il microfono è occupato da un'altra app. Chiudila e tocca di nuovo qui.");
           else if (code === 'network') idle('Per capire la voce serve internet. Intanto puoi scrivere qui sotto.');
           else idle('Qualcosa non è andato. Tocca il microfono e riprova.');
@@ -1217,7 +1228,7 @@ function openVoice(opts = {}) {
       if (auto) { // aperta da sola: se non dici niente, la scheda si chiude piano e resti sulla home
         clearTimeout(quiet); quiet = setTimeout(() => { if (!ta.value.trim() && auto && !closed) { Ear.stop(); closeSheet(); } }, 7000);
       } else armQuiet(9000); // se all'inizio non dici niente, aspetta un po' prima di arrendersi
-      watch = setTimeout(() => { if (on && !started) { Ear.reset(); idle(auto ? 'Tocca il microfono e parla.' : 'Il microfono non è partito. Toccalo e riprova.'); auto = false; } }, 3500);
+      watch = setTimeout(() => { if (on && !started) { Ear.reset(); idle(auto ? 'Tocca il microfono e parla.' : 'Il microfono non è partito. Toccalo e riprova.'); if (!auto) micHelp(); auto = false; } }, 3500);
     };
     let auto = !!opts.auto;
     mic.onclick = () => { auto = false; haptic(); if (on) { if (ta.value.trim()) send(); else { clear(); Ear.stop(); idle('Tocca il microfono quando vuoi parlare.'); } } else listen(); };
@@ -1226,23 +1237,43 @@ function openVoice(opts = {}) {
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (ta.value.trim()) { clear(); Ear.stop(); submitSpeech(ta.value); } } });
     body.querySelector('#vEx').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; clear(); Ear.stop(); idle('Tocca Ricordamelo, o il microfono per dirlo tu.'); ta.value = b.textContent; upd(); });
     go.onclick = () => { clear(); Ear.stop(); submitSpeech(ta.value); };
+    go.addEventListener('touchend', e => { if (go.disabled) return; e.preventDefault(); go.click(); });
     onSheetClose = () => { closed = true; clear(); Ear.stop(); };
     listen();
   });
 }
+// quando l'iPhone non chiede nemmeno il permesso del microfono: i casi tipici e cosa fare
+const inAppBrowser = () => /FBAN|FBAV|Instagram|Line\/|Telegram|WhatsApp|GSA\//.test(navigator.userAgent) || (isIOS && !/Safari\//.test(navigator.userAgent) && !isStandalone());
+function micHelp(code) {
+  const hint = $('#vHint'); if (!hint || hint.querySelector('button')) return;
+  const b = document.createElement('button'); b.className = 'mic-help'; b.textContent = 'Come sblocco il microfono?';
+  b.onclick = () => openSheet(`<h2>Sblocchiamo il microfono</h2><p class="lead">L'iPhone non mi lascia ascoltare. Di solito basta una di queste cose:</p>
+    <ol class="g-steps">
+      ${inAppBrowser() ? '<li><b>Apri MeMo da Safari</b><p>Sei dentro un\'altra app (WhatsApp, Instagram…): lì il microfono non funziona. Apri il link con Safari, oppure usa l\'icona di MeMo sulla Home.</p></li>' : ''}
+      <li><b>Microfono per i siti</b><p>Impostazioni › App › <b>Safari</b> › scorri fino a «Impostazioni per i siti web» › <b>Microfono</b> › scegli <b>Chiedi</b> o <b>Consenti</b> (non «Rifiuta»).</p></li>
+      <li><b>Dettatura accesa</b><p>Impostazioni › Generali › Tastiera › attiva <b>Abilita dettatura</b>. MeMo usa la dettatura dell'iPhone per capirti.</p></li>
+      <li><b>Riapri MeMo</b><p>Chiudila del tutto (scorri verso l'alto dall'elenco delle app aperte) e riaprila: alla prima volta che tocchi Dimmi, l'iPhone ti chiede il permesso.</p></li>
+      <li><b>Tempo di utilizzo</b><p>Se hai limiti attivi: Impostazioni › Tempo di utilizzo › Restrizioni contenuti e privacy › <b>Microfono</b> › Consenti.</p></li>
+    </ol>
+    <p class="lead" style="font-size:15px">Nel frattempo puoi sempre scrivere, oppure usare il microfono della tastiera.</p>`);
+  hint.appendChild(document.createElement('br')); hint.appendChild(b);
+}
 function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove('on'); }
-let aiOff = false, thinking = false;
+let aiOff = false, thinking = false, thinkCtl = null;
 async function think(text) {
   if (aiOff || !MEMO_SERVER || navigator.onLine === false) return null;
   const h = $('#vHint'), go = $('#vGo'), mic = $('#vMic');
-  if (h) h.textContent = 'Ci penso un attimo…'; if (go) { go.disabled = true; go.textContent = 'Ci penso…'; } if (mic) mic.classList.add('think');
-  try { return await Push.understand(text); }
+  // il tasto resta attivo: se lo tocchi mentre ci penso, vado avanti subito senza aspettare l'AI
+  if (h) h.textContent = 'Ci penso un attimo…'; if (go) go.textContent = 'Ci penso… (tocca per fare subito)'; if (mic) mic.classList.add('think');
+  thinkCtl = new AbortController();
+  try { return await Push.understand(text, thinkCtl); }
   catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
-  finally { if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+  finally { thinkCtl = null; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
 }
 async function submitSpeech(text) {
   stopRec();
-  if (thinking || !String(text || '').trim()) return; thinking = true;
+  if (thinking) { if (thinkCtl) thinkCtl.abort(); return; } // secondo tocco durante l'attesa: si salta l'AI
+  if (!String(text || '').trim()) return; thinking = true;
   let ai = null; try { ai = await think(text); } finally { thinking = false; }
   let res; try { res = ai ? P.fromAI(ai, text) : P.parseSpeech(text); } catch (e) { res = P.parseSpeech(text); }
   if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(text); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
@@ -1651,7 +1682,7 @@ async function testNotification() {
   const it = sampleItem(); const at = new Date();
   const n = N.make(it, { name: userName(), emoji: emojiOf(it), salt: String(Date.now()), at: it.id === 'prova' ? at : undefined });
   if (Push.state() === 'on') {
-    try { const r = await Push.test({ ...n, url: it.id === 'prova' ? './' : n.url }); toast(r.ok ? 'Mandata. Arriva tra un attimo.' : 'Il server non è riuscito a mandarla.', r.ok ? 'Se l\'app è aperta, la vedi in alto.' : 'Riprova tra poco.'); }
+    try { const r = await Push.test({ ...n, url: it.id === 'prova' ? './' : n.url }); toast(r.ok ? 'Mandata. Arriva tra un attimo.' : 'Apple non l\'ha accettata.', r.ok ? 'Se l\'app è aperta, la vedi in alto.' : `Codice ${r.status || '?'}${r.reason ? ' · ' + String(r.reason).slice(0, 80) : ''}. Mandami questo messaggio.`); }
     catch (e) { toast('Non riesco a parlare con il server.', 'Controlla la connessione e riprova.'); }
     return;
   }
@@ -1709,11 +1740,28 @@ const Push = (() => {
     try { await post('/sync', { reminders }); last = sig; } catch (e) { last = ''; }
   }
   const later = () => { if (state() !== 'on') return; clearTimeout(timer); timer = setTimeout(sync, 1500); };
-  async function test(n) { return post('/test', { message: n }); }
+  // ogni volta che apri MeMo: il server riceve l'iscrizione attuale del telefono (l'iPhone a volte la rinnova da solo)
+  async function subscription(fresh) {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (fresh && sub) { try { await sub.unsubscribe(); } catch (e) {} sub = null; }
+    if (!sub) { const { key } = await (await fetch(MEMO_SERVER + '/vapid')).json(); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }); }
+    await post('/subscribe', { sub: sub.toJSON(), subject: location.origin + location.pathname });
+  }
+  async function refresh() { if (state() !== 'on') return; try { await subscription(false); } catch (e) {} }
+  // la prova: se Apple dice che l'iscrizione non vale più, se ne crea una nuova e si riprova una volta
+  async function test(n) {
+    let r;
+    try { r = await post('/test', { message: n }); } catch (e) { r = { ok: false, status: /no subscription/.test(e.message) ? 410 : 0, reason: e.message }; }
+    if (!r.ok && (r.status === 404 || r.status === 410 || r.status === 403)) {
+      try { await subscription(true); r = await post('/test', { message: n }); } catch (e) { r = { ok: false, status: r.status, reason: e.message }; }
+    }
+    return r;
+  }
   // l'AI del server capisce la frase; se non risponde in pochi secondi, si va avanti senza
-  async function understand(text) {
+  async function understand(text, ctl) {
     const now = new Date().toLocaleString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
+    ctl = ctl || new AbortController(); const t = setTimeout(() => ctl.abort(), 6000);
     try {
       const r = await fetch(MEMO_SERVER + '/understand', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...me(), text, now }), signal: ctl.signal });
       if (r.status === 501) throw new Error('no ai');
@@ -1724,7 +1772,7 @@ const Push = (() => {
   async function register() { if (!MEMO_SERVER) return; try { await post('/register', { tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome' }); store.set('reg', '1'); } catch (e) {} }
   const siriUrl = () => { const m = me(); return `${MEMO_SERVER}/in/${m.device}.${m.token}`; };
   async function take() { if (!MEMO_SERVER || store.get('reg') !== '1') return []; try { const j = await post('/inbox/take', {}); return j.items || []; } catch (e) { return []; } }
-  return { state, enable, sync, later, test, understand, register, siriUrl, take };
+  return { state, enable, sync, later, test, understand, register, siriUrl, take, refresh };
 })();
 function autoListen() {
   if (store.get('autoListen') === '0' || navigator.webdriver) return;
@@ -1794,10 +1842,10 @@ function tick() {
   if (store.get('intro') !== '1' && !new URLSearchParams(location.search).has('nointro')) showIntro();
   openFromUrl(location.href);
   if (MEMO_SERVER && store.get('reg') !== '1') Push.register();
-  importInbox().finally(() => Push.sync());
+  Push.refresh().finally(() => importInbox().finally(() => Push.sync()));
   window.addEventListener('online', () => Push.sync()); // tornata la connessione: aggiorno gli avvisi rimasti indietro
 
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) importInbox().finally(() => Push.sync()); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) Push.refresh().finally(() => importInbox().finally(() => Push.sync())); });
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
