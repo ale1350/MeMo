@@ -53,10 +53,14 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .aurora i:nth-child(1){background:radial-gradient(circle, var(--mood1) 0%, transparent 58%);top:-48vmax;left:-38vmax;animation:drift1 19s ease-in-out infinite alternate}
 .aurora i:nth-child(2){background:radial-gradient(circle, var(--mood2) 0%, transparent 58%);top:-18vmax;right:-55vmax;animation:drift2 23s ease-in-out infinite alternate;opacity:.75}
 /* ogni tanto un pesciolino passa lontano, sullo sfondo */
-.swimmer{position:fixed;left:0;top:0;z-index:0;pointer-events:none;opacity:0;width:40px;height:40px;margin:-20px 0 0 -20px;will-change:transform}
-.swimmer .bob{width:100%;height:100%;filter:saturate(.95);animation:dvSwim .36s ease-in-out infinite alternate}
-.swimmer svg{width:100%;height:100%;overflow:visible}
+.swimmer{position:fixed;left:0;top:0;z-index:0;pointer-events:none;opacity:0;width:46px;height:32px;margin:-16px 0 0 -23px;will-change:transform,opacity,filter;perspective:420px}
+.swimmer .bob{animation:dvSwim .36s ease-in-out infinite alternate}
 .swimmer .tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .22s ease-in-out infinite alternate}
+/* il pesciolino in 3D: tante "fette" una dietro l'altra (il fianco con gli occhi davanti, il corpo con il suo spessore, la coda sottile al centro) */
+.f3,.f3>.bob,.f3>.bob>.fh,.dv-3d,.dv-bob,.dv-head{position:absolute;inset:0;transform-style:preserve-3d}
+.dl{position:absolute;inset:0;backface-visibility:visible}
+.dl.dv-face{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.dl svg{display:block;width:100%;height:100%;overflow:visible}
 @keyframes swTail{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
 @keyframes drift1{to{transform:translate(18vmax,14vmax) scale(1.12)}}
 @keyframes drift2{to{transform:translate(-14vmax,18vmax) scale(.92)}}
@@ -245,21 +249,22 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .ptt-hint{margin:0;font-weight:750;font-size:14.5px;color:var(--ink);white-space:nowrap}
 
 /* ---------- il pesciolino che arriva dal profondo e ti ascolta ---------- */
+#heroKnot{transition:opacity .18s}
+body.listening #heroKnot{opacity:0;transition:none}
 .deep{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;transition:opacity .6s ease;overflow:hidden;
   background:radial-gradient(120% 75% at 50% 64%, rgba(255,255,255,0) 0%, rgba(44,86,170,.18) 50%, rgba(20,46,110,.38) 100%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .deep.on{opacity:1}
 .deep i{position:absolute;bottom:-14px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 8px rgba(255,255,255,.55);opacity:0}
 .deep.on i{animation:dpMote linear infinite}
 @keyframes dpMote{0%{transform:translateY(0);opacity:0}15%{opacity:.75}100%{transform:translateY(-72vh);opacity:0}}
-.diver{position:fixed;left:0;top:0;z-index:41;transform-style:flat;backface-visibility:visible;pointer-events:none;width:190px;height:134px;opacity:0;will-change:transform,opacity,filter}
-.dv-bob,.dv-head{width:100%;height:100%}
+.diver{position:fixed;left:0;top:0;z-index:41;pointer-events:none;width:190px;height:134px;opacity:0;will-change:transform,opacity,filter;perspective:900px}
 .diver.idle .dv-bob{animation:dvBob 2.7s ease-in-out infinite}
 .diver.swim .dv-bob{animation:dvSwim .34s ease-in-out infinite alternate}
 .diver.swim .dv-tail{animation-duration:.13s}
 .diver.swim .dv-fin{animation-duration:.26s}
 @keyframes dvSwim{from{transform:rotate(-2.5deg) skewY(-1.5deg)}to{transform:rotate(2.5deg) skewY(1.5deg)}}
 .dv-head{transition:transform .4s cubic-bezier(.3,.8,.3,1.25)}
-.dv-head svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 14px 18px rgba(255,110,60,.28))}
+
 .dv-tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .2s ease-in-out infinite alternate}
 .diver.idle .dv-tail{animation-duration:.75s}
 .dv-fin{transform-box:fill-box;transform-origin:85% 10%;animation:dvFin .8s ease-in-out infinite alternate}
@@ -306,7 +311,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .w-lead{font-size:15px;line-height:1.42;color:var(--ink-2);margin:0 0 12px}
 .w-lead .brandw{font-weight:750}
 .w-box{position:relative}
-.w-ta{display:block;width:100%;resize:none;min-height:76px;padding:13px 60px 13px 15px;font-size:17px;line-height:1.4;border-radius:22px;transition:opacity .2s}
+textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:76px;padding:13px 60px 13px 15px;margin:0;font-size:17px;line-height:1.4;border-radius:22px;text-align:left;text-indent:0;vertical-align:top;white-space:pre-wrap;transition:opacity .2s}
 .w-send{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--brand-grad);box-shadow:0 6px 16px rgba(47,107,242,.32);transition:transform .15s,opacity .2s}
 .w-send:active{transform:scale(.92)}
 .w-send:disabled{opacity:.32;box-shadow:none}
@@ -343,6 +348,8 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .r-pick small{font-size:11.5px;font-weight:650;color:var(--ink-2)}
 .r-pick[aria-pressed="true"]{background:var(--brand-grad);color:#fff}
 .r-pick[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.sheet-wrap.fade .sheet{transform:none;opacity:0;transition:opacity .22s ease}
+.sheet-wrap.fade.open .sheet{opacity:1}
 .sheet-wrap.kb{bottom:auto}
 .sheet-wrap.kb .sheet{max-height:calc(100% - 10px)}
 .sheet-in{animation:shIn .3s ease both}
@@ -563,32 +570,9 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <body data-mood="empty">
 <div class="aurora" aria-hidden="true"><i></i><i></i></div>
 <div class="topfade" aria-hidden="true"></div>
-<div class="swimmer" id="swimmer" aria-hidden="true"><div class="bob"><svg viewBox="8 26 80 52"><defs><clipPath id="swb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
-<path class="tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
-<path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/>
-<path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="url(#g3Body)"/>
-<g clip-path="url(#swb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>
-<circle cx="67.5" cy="48.5" r="7" fill="url(#g3Eye)"/><circle cx="69.2" cy="47" r="3.7" fill="url(#g3Pupil)"/></svg></div></div>
+<div class="swimmer" id="swimmer" aria-hidden="true"></div>
 <div class="deep" id="deep" aria-hidden="true"><i style="left:11%;width:5px;height:5px;animation-duration:9.6s;animation-delay:-1.7s"></i><i style="left:15%;width:4px;height:4px;animation-duration:7.7s;animation-delay:-0.6s"></i><i style="left:15%;width:6px;height:6px;animation-duration:8.2s;animation-delay:-0.5s"></i><i style="left:76%;width:3px;height:3px;animation-duration:6.5s;animation-delay:-1.8s"></i><i style="left:84%;width:3px;height:3px;animation-duration:8.3s;animation-delay:-0.5s"></i><i style="left:78%;width:7px;height:7px;animation-duration:7.6s;animation-delay:-7.8s"></i><i style="left:9%;width:3px;height:3px;animation-duration:8.2s;animation-delay:-1.1s"></i><i style="left:57%;width:5px;height:5px;animation-duration:6.6s;animation-delay:-0.9s"></i><i style="left:43%;width:7px;height:7px;animation-duration:8.2s;animation-delay:-5.5s"></i></div>
-<div class="diver" id="diver" aria-hidden="true" data-f="listen" data-m="smile"><div class="dv-bob"><div class="dv-head"><svg viewBox="4 20 88 62">
-<defs><clipPath id="dvb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
-<path class="dv-tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
-<path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/>
-<path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="url(#g3Body)"/>
-<g clip-path="url(#dvb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>
-<path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="url(#g3Fin)"/>
-<ellipse class="dv-blush" cx="66.5" cy="59.5" rx="4.3" ry="2.3" fill="#FF4F6E"/>
-<g transform="translate(67.5 48.5) scale(1.14) translate(-67.5 -48.5)"><g class="dv-eye"><circle cx="67.5" cy="48.5" r="8.4" fill="url(#g3Eye)"/><g class="dv-pupil"><circle cx="68.6" cy="48.4" r="4.6" fill="url(#g3Pupil)"/><circle cx="70.3" cy="46.5" r="1.5" fill="#fff"/></g></g>
-<path class="dv-happy" d="M60.5 50.5 Q67.5 42.5 74.5 50.5" fill="none" stroke="#1F2552" stroke-width="2.6" stroke-linecap="round"/></g>
-<path class="dv-brow" d="M60.4 37.4 Q67.5 33.9 74.6 37" fill="none" stroke="#C9512C" stroke-width="2.3" stroke-linecap="round"/>
-<g transform="translate(79 59.8) scale(1.5) translate(-79 -59.8)"><g class="dv-mouth" fill="none" stroke="#1F2552" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-<path class="m-smile" d="M76.6 59.2 Q78.9 61.5 81.2 59"/>
-<path class="m-big" d="M76 58.6 Q78.9 64 81.6 58.4 Z" fill="#8E2A3A"/>
-<ellipse class="m-o" cx="79.2" cy="60" rx="1.7" ry="2.2" fill="#1F2552" stroke="none"/>
-<path class="m-flat" d="M76.7 60.3 L81.2 59.7"/>
-<path class="m-side" d="M76.8 60.8 Q79 60.3 81.3 58.7"/>
-<path class="m-wavy" d="M76.2 60.6 q1.2 -1.4 2.4 0 t2.4 0"/>
-</g></g></svg></div></div></div>
+<div class="diver" id="diver" aria-hidden="true" data-f="listen" data-m="smile"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs><path id="knotPath" d="M2 28 C14 28 22 28 28 21 C34 13 44 9 46 17 C48 26 36 30 32 23 C28 16 38 10 46 20 C52 27 58 28 66 28"/>
@@ -597,6 +581,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
     <radialGradient id="g3Body" cx=".44" cy=".28" r=".9"><stop offset="0" stop-color="#FFAA7C"/><stop offset=".42" stop-color="#FF7E50"/><stop offset=".85" stop-color="#EF5F33"/><stop offset="1" stop-color="#D94C25"/></radialGradient>
     <linearGradient id="g3Belly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD0AC"/><stop offset=".6" stop-color="#FFAA7E"/><stop offset="1" stop-color="#F48A5C"/></linearGradient>
     <radialGradient id="g3Shine" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="g3Side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E85A2E"/><stop offset=".55" stop-color="#F7774A"/><stop offset=".78" stop-color="#FF9E72"/><stop offset="1" stop-color="#F08A5C"/></linearGradient>
     <radialGradient id="g3Eye" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".72" stop-color="#F3F5FA"/><stop offset="1" stop-color="#D3DAE8"/></radialGradient>
     <radialGradient id="g3Pupil" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#454FA0"/><stop offset=".55" stop-color="#1F2552"/><stop offset="1" stop-color="#0C0F2E"/></radialGradient>
   </defs>
@@ -716,7 +701,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.1';
+const VERSION = '2.2';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1060,15 +1045,16 @@ window.addEventListener('resize', () => goPage(page, 0, true));
 })();
 // ================= Fogli =================
 let onSheetClose = null;
-function openSheet(html, after) {
-  const w = $('#sheetWrap'); $('#sheetBody').innerHTML = html; w.hidden = false; $('#sheet').scrollTop = 0; document.documentElement.classList.add('locked');
+function openSheet(html, after, opt) {
+  // su iPhone un campo che prende il cursore mentre il foglio scorre scrive nel punto sbagliato: Scrivi compare senza muoversi
+  const w = $('#sheetWrap'); if (opt && opt.fade && w.hidden) w.classList.add('fade'); $('#sheetBody').innerHTML = html; w.hidden = false; $('#sheet').scrollTop = 0; document.documentElement.classList.add('locked');
   requestAnimationFrame(() => requestAnimationFrame(() => w.classList.add('open')));
   if (after) after($('#sheetBody'));
 }
 function closeSheet() {
   const w = $('#sheetWrap'); w.classList.remove('open');
   if (onSheetClose) { const f = onSheetClose; onSheetClose = null; f(); }
-  setTimeout(() => { if (!w.classList.contains('open')) { w.hidden = true; $('#sheetBody').innerHTML = ''; document.documentElement.classList.remove('locked'); } }, 420);
+  setTimeout(() => { if (!w.classList.contains('open')) { w.hidden = true; w.classList.remove('fade'); $('#sheetBody').innerHTML = ''; document.documentElement.classList.remove('locked'); } }, 420);
 }
 $('#scrim').addEventListener('click', closeSheet);
 // mentre un foglio è aperto, lo sfondo sotto resta fermo: si scorre solo il foglio (e solo se è più lungo dello schermo)
@@ -1660,19 +1646,24 @@ async function aiOf(t) {
   if (aiOff || !MEMO_SERVER || navigator.onLine === false) return null;
   try { return await Push.understand(t, thinkCtl || undefined); } catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
 }
-function resOf(text, ai) {
+function resOf(text, ai, inherit) {
   const t = P.typed(text);
+  if (ai && ai.action) { const c = cmdFromAI(ai, text); if (c) return { cmd: c, said: String(text || '').trim() }; }
   let res; try { res = ai ? P.fromAI(ai, t) : P.parseSpeech(t); } catch (e) { res = P.parseSpeech(t); }
   if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(t); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
+  if (inherit && !res.date) { res.date = inherit; delete res.needTitle; } // "…e poi ricordami anche di chiamare Tia": il giorno è quello di prima
+  if (P.needsTime(res)) res.askTime = { part: null, soon: true }; // a breve e senza ora: l'ora si chiede
   res.said = String(text || '').trim();
   return res;
 }
 async function understandAll(text) {
-  const parts = P.splitMany(text) || [String(text || '').trim()];
+  const cmd = P.command(text); if (cmd) return [{ cmd, said: String(text || '').trim() }]; // un comando sui MeMo che ci sono: lo capisce il telefono, niente AI
+  const many = P.splitMany(text), parts = many || [String(text || '').trim()];
   const online = !aiOff && MEMO_SERVER && navigator.onLine !== false;
   let ais = parts.map(() => null);
   if (online) { thinkCtl = new AbortController(); try { ais = await Promise.all(parts.map(x => aiOf(P.typed(x)))); } finally { thinkCtl = null; } }
-  return parts.map((x, i) => resOf(x, ais[i]));
+  const out = parts.map((x, i) => resOf(x, ais[i], many && many.inherit ? many.inherit[i] : null));
+  const c = out.find(r => r.cmd); return c ? [c] : out;
 }
 async function submitSpeech(text) {
   stopRec();
@@ -1683,6 +1674,7 @@ async function submitSpeech(text) {
   if (h) h.textContent = 'Ci penso un attimo…'; if (go) go.textContent = 'Ci penso… (tocca per fare subito)'; if (mic) mic.classList.add('think');
   let list; try { list = await understandAll(text); }
   finally { thinking = false; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+  if (list[0] && list[0].cmd) { await handleCommand(list[0].cmd, text); return; }
   if (list.length > 1) { openReview(list, text, { voice: true }); return; } // più cose insieme: un'occhiata prima di segnarle
   routeOne(list[0], text, { voice: true });
 }
@@ -1750,7 +1742,7 @@ function openWrite(prefill) {
       let list; try { list = await understandAll(v); } finally { busy = false; }
       if ($('#wText') !== ta) return; // nel frattempo hai chiuso
       writeDraft = '';
-      if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
+      if (list[0] && list[0].cmd) handleCommand(list[0].cmd, v); else if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
     };
     ta.addEventListener('input', upd);
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
@@ -1758,7 +1750,7 @@ function openWrite(prefill) {
     go.onclick = send;
     go.addEventListener('touchend', e => { if (go.disabled) return; e.preventDefault(); send(); });
     upd(); ta.focus({ preventScroll: true }); const n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (e) {}
-  });
+  }, { fade: true });
 }
 // gli orari tra cui scegliere quando hai detto solo "domattina", "stasera"…
 function timeOpts(res) {
@@ -1768,7 +1760,7 @@ function timeOpts(res) {
     const [h, m] = ctxTime.split(':').map(Number);
     for (const [off, l] of [[60, "un'ora prima"], [30, "mezz'ora prima"], [120, '2 ore prima']]) { const t = h * 60 + m - off; if (t >= 0) opts.push([`${pad(Math.floor(t / 60))}:${pad(t % 60)}`, l]); }
   }
-  for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '13:00', '18:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
+  for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
   const future = v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(res.date); d.setHours(h, m, 0, 0); return d > now; };
   return res.rep ? opts : opts.filter(([v]) => future(v));
 }
@@ -1779,14 +1771,14 @@ function remindOpts(res) {
 // cosa resta da scegliere su un MeMo già capito: l'ora, se hai detto solo "domattina"
 function pickOf(res) {
   if (res.remindAsk) { const o = remindOpts(res); return { kind: 'remind', label: `Te lo ricordo ${whenPart(res.remindAsk.date, res.remindAsk.part)}, a che ora?`, opts: o.map(v => [v, '']) }; }
-  if (res.askTime && !res.time) return { kind: 'time', label: 'A che ora te lo ricordo?', opts: timeOpts(res) };
+  if (res.askTime && !res.time) return { kind: 'time', label: res.askTime.ctxTime ? 'A che ora te lo ricordo?' : 'A che ora? Ti avviso un\'ora prima.', opts: timeOpts(res) };
   return null;
 }
 function withPick(res, pk, v) {
   if (!pk) return res;
   const r = { ...res };
   if (pk.kind === 'remind') { delete r.remindAsk; if (v) r.remindOn = `${res.remindAsk.date}T${v}`; return r; }
-  delete r.askTime; if (v) { r.time = v; r.leadMin = 0; } return r;
+  delete r.askTime; if (v) { r.time = v; if (res.askTime && res.askTime.ctxTime) r.leadMin = 0; } return r; // l'anticipo chiesto ("il giorno prima") resta
 }
 // ================= Ecco com'è venuto: confermi con un tocco, o lo sistemi =================
 const REVIEW_H = ['Ho capito così', 'Ecco il tuo MeMo', 'Va bene così?', 'Ci siamo?', 'Ecco qua'];
@@ -1837,6 +1829,132 @@ function openReview(list, text, o = {}) {
   };
   draw();
 }
+// ================= Cerca, elenca, sposta, modifica, cancella, fatto, aggiungi =================
+// l'AI (o il motore) capisce solo cosa vuoi fare e su quale MeMo; a cercarlo tra i tuoi ci pensa il telefono
+const nrm = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const STOPW = new Set('il lo la i gli le l un uno una di del della dello dei degli delle da dal dalla a al alla allo per con su sul sulla e o che mio mia miei mie tuo reminder memo promemoria avviso cosa cose fare quello quella'.split(' '));
+const stemOf = w => /^\d+$/.test(w) ? w : w.length > 6 ? w.slice(0, 6) : w.length > 4 ? w.slice(0, w.length - 1) : w;
+const wordsOf = x => nrm(x).split(/[^a-z0-9]+/).filter(Boolean);
+function findMemos(target, verb) {
+  const toks = wordsOf(target).filter(w => !STOPW.has(w) && w.length > 1);
+  if (verb) toks.push(...wordsOf(verb));
+  if (!toks.length) return [];
+  const out = [];
+  for (const it of items) {
+    const tw = wordsOf(it.title), rest = wordsOf([it.said, T(it.type).label, it.type, it.purchase ? 'garanzia' : ''].join(' '));
+    // stessa parola, oppure la stessa con un'altra desinenza (bolletta/bollette, dentista/dentisti), mai solo l'inizio (bollo ≠ bolletta)
+    const same = (w, t) => w === t || (w.length >= 6 && t.length >= 6 && w.slice(0, -1) === t.slice(0, -1)) || (w.length >= 7 && t.length >= 7 && stemOf(w) === stemOf(t) && Math.abs(w.length - t.length) <= 2);
+    const hit = (ws, t) => ws.some(w => same(w, t));
+    let sc = 0; for (const t of toks) sc += hit(tw, t) ? 1 : hit(rest, t) ? .6 : 0;
+    sc /= toks.length; if (sc >= .5) out.push({ it, sc });
+  }
+  return out.sort((a, b) => b.sc - a.sc || P.dueAt(a.it) - P.dueAt(b.it));
+}
+function cmdFromAI(ai, said) {
+  const A = { cerca: 'find', elenca: 'list', sposta: 'move', modifica: 'move', cancella: 'delete', fatto: 'done', aggiungi: 'add', avviso: 'lead' }[ai.action];
+  if (!A) return null;
+  if (A === 'list') return { action: A, period: ai.when ? P.period(ai.when) : null, said };
+  const target = String(ai.target || '').trim(); if (!target) return null;
+  if (A === 'move') { const when = ai.when ? P.whenOf(ai.when) : null; return when ? { action: A, target, when, said } : null; }
+  if (A === 'lead') { const lm = ai.remind ? P.leadText(ai.remind) : null; return lm != null ? { action: A, target, leadMin: lm, said } : null; }
+  if (A === 'add') return ai.extra ? { action: A, target, extra: ai.extra, said } : null;
+  return { action: A, target, said };
+}
+const cmdCard = (it, k) => `<div class="r-card"><button class="r-main" data-pick="${k}"><span class="orb" aria-hidden="true">${emojiOf(it)}</span><span class="txt"><b>${esc(it.title)}</b><span>${esc(cap(whenText(it)))}</span></span><span class="r-pen" aria-hidden="true">›</span></button></div>`;
+function snapshot(it) { return JSON.parse(JSON.stringify(it)); }
+async function restore(it, old) { for (const k of Object.keys(it)) delete it[k]; Object.assign(it, old); await DB.put(it); render(); }
+function addToTitle(title, extra) {
+  const x = String(extra || '').replace(/^(?:anche\s+)?(?:il|lo|la|i|gli|le|l'|un|uno|una|del|della|dei|delle)\s+/i, '').trim();
+  if (!x) return title;
+  if (/:/.test(title)) return `${title}, ${x}`;
+  if (/,| e /.test(title)) { const t = title.replace(/ e ([^,]+)$/, ', $1'); return `${t} e ${x}`; }
+  return `${title}: ${x}`;
+}
+async function handleCommand(cmd, text) {
+  if (cmd.action === 'list') return showList(cmd.period);
+  const found = findMemos(cmd.target, cmd.verb);
+  if (cmd.action === 'find') return showFound(cmd, found);
+  if (!found.length) return showMissing(cmd);
+  const clear = found.length === 1 || found[0].sc - found[1].sc >= .25;
+  if (!clear) return chooseMemo(found.slice(0, 5).map(f => f.it), cmd);
+  return applyCmd(cmd, found[0].it);
+}
+async function applyCmd(cmd, it) {
+  const old = snapshot(it), undo = [{ label: 'Annulla', fn: () => restore(it, old) }], tap = () => openDetail(it.id);
+  if (cmd.action === 'done') { closeSheet(); await doneItem(it); return; }
+  if (cmd.action === 'delete') {
+    if (it.rep) { // si ripete: solo il prossimo o tutti?
+      openSheet(`<div class="sheet-in"><h2>Solo il prossimo?</h2><p class="lead"><b>${esc(it.title)}</b> si ripete ${esc(P.repText(it.rep))}.</p>
+        <button class="btn btn-main" id="dNext">Salta solo il prossimo</button><button class="btn btn-ghost" id="dAll" style="margin-top:10px">Toglili tutti</button></div>`, body => {
+        body.querySelector('#dNext').onclick = async () => { it.due = P.nextRep(it); delete it.remindOn; P.rollRep(it); await DB.put(it); haptic(); closeSheet(); render(); toast('Saltato.', `${it.title} · la prossima ${whenText(it)}`, undo, tap); };
+        body.querySelector('#dAll').onclick = () => dropIt(it);
+      });
+      return;
+    }
+    return dropIt(it);
+  }
+  if (cmd.action === 'move') {
+    if (cmd.when) { if (cmd.when.date) it.due = cmd.when.date; if (cmd.when.time) it.time = cmd.when.time; }
+    else if (cmd.shift) {
+      if (cmd.shift.min && it.time) { const d = new Date(P.dueAt(it).getTime() + cmd.shift.min * 60000); it.due = P.toISO(d); it.time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+      else if (cmd.shift.min) { it.due = P.addDays(it.due, Math.round(cmd.shift.min / 1440) || (cmd.shift.min > 0 ? 1 : -1)); }
+      if (cmd.shift.days) it.due = P.addDays(it.due, cmd.shift.days);
+      if (cmd.shift.months) it.due = P.addMonths(it.due, cmd.shift.months);
+    }
+    delete it.remindOn; // l'avviso a parte non vale più: si torna a quello normale
+    await DB.put(it); haptic(); closeSheet(); render();
+    toast(anyOf(['Spostato.', 'Fatto, spostato.', 'Ecco, spostato.']), `${it.title} · ${savedLine(it)}`, undo, tap); return;
+  }
+  if (cmd.action === 'lead') {
+    it.leadMin = cmd.leadMin; delete it.remindOn; await DB.put(it); haptic(); closeSheet(); render();
+    toast('Avviso cambiato.', `${it.title} · ${savedLine(it)}`, undo, tap); return;
+  }
+  if (cmd.action === 'add') {
+    it.title = addToTitle(it.title, cmd.extra); await DB.put(it); haptic(); closeSheet(); render();
+    toast('Aggiunto.', it.title, undo, tap); return;
+  }
+}
+async function dropIt(it) {
+  const photo = it.photoId ? await DB.photoGet(it.photoId) : null, old = snapshot(it);
+  await removeItem(it); haptic(); closeSheet(); render();
+  toast(say('drop'), old.title, [{ label: 'Annulla', fn: async () => { await DB.put(old); if (photo) await DB.photoPut(old.photoId, photo); items.push(old); render(); } }]);
+}
+const ACT_Q = { move: 'Quale sposto?', delete: 'Quale tolgo?', done: 'Quale hai fatto?', lead: 'Di quale cambio l\'avviso?', add: 'A quale lo aggiungo?' };
+function chooseMemo(list, cmd) {
+  openSheet(`<div class="sheet-in"><h2>${ACT_Q[cmd.action] || 'Quale?'}</h2><p class="lead">Ne ho trovati ${list.length} su «${esc(cmd.target)}».</p>
+    <div class="r-cards" id="cList">${list.map(cmdCard).join('')}</div></div>`, body => {
+    body.querySelector('#cList').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (!b) return; haptic(); applyCmd(cmd, list[+b.dataset.pick]); });
+  });
+}
+function showMissing(cmd) {
+  const what = { move: 'da spostare', delete: 'da togliere', done: 'da segnare come fatto', lead: 'da cambiare', add: 'a cui aggiungerlo' }[cmd.action] || '';
+  openSheet(`<div class="sheet-in"><h2>Non lo trovo</h2><p class="lead">Non c'è un MeMo su «${esc(cmd.target)}» ${what}. Vuoi segnarlo adesso?</p>
+    <button class="btn btn-main" id="mNew">Segnalo</button><button class="btn btn-ghost" id="mNo" style="margin-top:10px">Lascia stare</button></div>`, body => {
+    body.querySelector('#mNew').onclick = () => openWrite(cap(cmd.target) + ' ');
+    body.querySelector('#mNo').onclick = closeSheet;
+  });
+}
+function showFound(cmd, found) {
+  const list = found.slice(0, 5).map(f => f.it);
+  if (!list.length) { showMissing({ ...cmd, action: 'find' }); $('#sheetBody h2').textContent = 'Non c\'è ancora'; $('#sheetBody .lead').innerHTML = `Non trovo niente su «${esc(cmd.target)}». Vuoi che lo segni?`; return; }
+  openSheet(`<div class="sheet-in"><h2>${list.length === 1 ? anyOf(['Sì, ce l\'hai', 'Sì, c\'è già', 'Ce l\'ho io']) : `Ne ho ${list.length}`}</h2>
+    <div class="r-cards" id="cList">${list.map(cmdCard).join('')}</div><button class="btn btn-main" id="fOk">Perfetto</button></div>`, body => {
+    body.querySelector('#cList').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) openDetail(list[+b.dataset.pick].id); });
+    body.querySelector('#fOk').onclick = closeSheet;
+  });
+}
+function showList(per) {
+  const now = new Date(), from = per ? per.from : P.todayISO(), to = per ? per.to : P.addDays(P.todayISO(), 6), label = per ? per.label : 'nei prossimi 7 giorni';
+  const list = items.filter(it => it.due >= from && it.due <= to).sort((a, b) => P.dueAt(a) - P.dueAt(b));
+  const when = cap(label);
+  const head = list.length ? `${when} ${list.length === 1 ? 'hai un MeMo' : `hai ${list.length} MeMo`}` : anyOf([`${when} niente.`, `${when} sei libero.`, `${when} tutto tranquillo.`]);
+  const lead = list.length ? '' : anyOf(['Nessun MeMo. Goditela.', 'Niente da ricordare. Se arriva qualcosa, ci penso io.', 'Zero cose in vista. Respira.']);
+  openSheet(`<div class="sheet-in"><h2>${esc(head)}</h2>${lead ? `<p class="lead">${esc(lead)}</p>` : ''}
+    ${list.length ? `<div class="r-cards" id="cList">${list.slice(0, 12).map(cmdCard).join('')}</div>` : ''}<button class="btn btn-main" id="lOk">Ok</button></div>`, body => {
+    const cl = body.querySelector('#cList'); if (cl) cl.addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) openDetail(list[+b.dataset.pick].id); });
+    body.querySelector('#lOk').onclick = closeSheet;
+  });
+}
 // "domattina", "domani sera", oppure un impegno con un orario che non è quello dell'avviso: l'ora dell'avviso la scegli tu
 const PART_TIMES = { mattina: ['07:30', '08:00', '08:30', '09:00', '10:00', '11:00'], pomeriggio: ['14:00', '15:00', '16:00', '17:00'], sera: ['18:00', '19:00', '20:00', '21:00'], notte: ['21:00', '22:00', '23:00'] };
 function whenPart(iso, part) {
@@ -1849,14 +1967,14 @@ function whenPart(iso, part) {
 function askTime(res, text) {
   const { part, ctxTime } = res.askTime, opts = timeOpts(res);
   const when = whenPart(res.date, part);
-  openSheet(`<h2>A che ora te lo ricordo?</h2>
-    <p class="lead"><b>${esc(res.title)}</b>, ${esc(res.rep ? P.repText(res.rep) : when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ''}</p>
+  openSheet(`<h2>${ctxTime ? 'A che ora te lo ricordo?' : 'A che ora?'}</h2>
+    <p class="lead"><b>${esc(res.title)}</b>, ${esc(res.rep ? P.repText(res.rep) : when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ' Ti avviso un\'ora prima.'}</p>
     ${opts.length ? `<div class="time-picks" id="aPicks">${opts.map(([v, l]) => `<button class="tpick" data-v="${v}"><b>${timeLbl(v)}</b>${l ? `<span>${esc(l)}</span>` : ''}</button>`).join('')}</div>` : ''}
     <div class="field"><label for="aTime">Un altro orario</label><input class="input" type="time" id="aTime"></div>
     <button class="btn btn-main" id="aGo" disabled>Ricordamelo</button>
     <button class="btn btn-ghost" id="aNo" style="margin-top:10px">Senza orario</button>`, body => {
     const t = body.querySelector('#aTime'), go = body.querySelector('#aGo');
-    const done = v => saveSpoken({ ...res, time: v, leadMin: 0 }, text);
+    const done = v => { const r = { ...res, time: v }; if (ctxTime) r.leadMin = 0; delete r.askTime; saveSpoken(r, text); };
     const picks = body.querySelector('#aPicks');
     if (picks) picks.addEventListener('click', e => { const b = e.target.closest('.tpick'); if (!b) return; haptic(); done(b.dataset.v); });
     t.addEventListener('input', () => { go.disabled = !t.value; });
@@ -1881,15 +1999,53 @@ function askRemind(res, text) {
     go.onclick = () => t.value && done(t.value);
   });
 }
-// ================= Il nuoto in 3D (lo usano tutti i pesciolini dell'app) =================
+// ================= Il pesciolino in 3D =================
+// non è un'immagine piatta: è fatto a fette, come una TAC. Davanti e dietro i due fianchi (occhio, pinna, faccia),
+// in mezzo il corpo con il suo spessore (più largo al centro, come un pesce vero), e al centro la coda e la pinna sul dorso.
+// Quando si gira verso di te si vede lo spessore, non un foglio.
+const FISH_BODY = 'M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z';
+function fishLayers(big) {
+  // centrato sul corpo (x = 55): così il fianco di là, specchiato, cade esattamente dietro quello di qua e il pesce gira sul suo centro
+  const vb = 'viewBox="11 20 88 62"', id = big ? 'dvb' : 'swb', n = big ? 6 : 3;
+  const belly = `<g clip-path="url(#${id})"><ellipse cx="55" cy="72" rx="34" ry="12" fill="url(#g3Belly)"/><ellipse cx="53" cy="40.5" rx="17" ry="6" fill="url(#g3Shine)" transform="rotate(-9 53 40.5)"/></g>`;
+  const eyeBig = `<g transform="translate(67.5 48.5) scale(1.14) translate(-67.5 -48.5)"><g class="dv-eye"><circle cx="67.5" cy="48.5" r="8.4" fill="url(#g3Eye)"/><g class="dv-pupil"><circle cx="68.6" cy="48.4" r="4.6" fill="url(#g3Pupil)"/><circle cx="70.3" cy="46.5" r="1.5" fill="#fff"/></g></g>
+<path class="dv-happy" d="M60.5 50.5 Q67.5 42.5 74.5 50.5" fill="none" stroke="#1F2552" stroke-width="2.6" stroke-linecap="round"/></g>
+<path class="dv-brow" d="M60.4 37.4 Q67.5 33.9 74.6 37" fill="none" stroke="#C9512C" stroke-width="2.3" stroke-linecap="round"/>
+<g transform="translate(79 59.8) scale(1.5) translate(-79 -59.8)"><g class="dv-mouth" fill="none" stroke="#1F2552" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+<path class="m-smile" d="M76.6 59.2 Q78.9 61.5 81.2 59"/><path class="m-big" d="M76 58.6 Q78.9 64 81.6 58.4 Z" fill="#8E2A3A"/><ellipse class="m-o" cx="79.2" cy="60" rx="1.7" ry="2.2" fill="#1F2552" stroke="none"/>
+<path class="m-flat" d="M76.7 60.3 L81.2 59.7"/><path class="m-side" d="M76.8 60.8 Q79 60.3 81.3 58.7"/><path class="m-wavy" d="M76.2 60.6 q1.2 -1.4 2.4 0 t2.4 0"/></g></g>`;
+  const eyeMini = `<circle cx="67.5" cy="48.5" r="7.6" fill="url(#g3Eye)"/><circle cx="69" cy="47.6" r="4" fill="url(#g3Pupil)"/><circle cx="70.5" cy="46" r="1.4" fill="#fff"/>`;
+  const side = back => `<div class="dl dv-face ${back ? 'back' : 'front'}" style="transform:${back ? 'rotateY(180deg) ' : ''}translateZ(var(--zm)) scale(.86)"><svg ${vb}>
+<path d="${FISH_BODY}" fill="url(#g3Body)"/>${belly}
+<path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="url(#g3Fin)"/>
+${big ? `<ellipse class="dv-blush" cx="66.5" cy="59.5" rx="4.3" ry="2.3" fill="#FF4F6E"/>${eyeBig}` : eyeMini}</svg></div>`;
+  let mid = '';
+  for (let k = -n; k <= n; k++) {
+    const z = k / (n + 1), sc = (1 - .16 * z * z).toFixed(3);
+    const extra = k === 0 ? `<path class="dv-tail tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="5" stroke-linejoin="round"/>
+<path d="M46 37 C50 26 60 25 64 35 Z" fill="url(#g3Fin)" stroke="url(#g3Fin)" stroke-width="3" stroke-linejoin="round"/><path d="M57 70.5 C52 73 50.5 77.5 53.5 78.5 C56.5 77 58.5 74.5 57 70.5 Z" fill="#E2602F"/>` : '';
+    mid += `<div class="dl" style="transform:translateZ(calc(var(--zm) * ${z.toFixed(3)})) scale(${sc})"><svg ${vb}>${extra}<path d="${FISH_BODY}" fill="url(#g3Side)"/></svg></div>`;
+  }
+  return `<svg width="0" height="0" style="position:absolute"><defs><clipPath id="${id}"><path d="${FISH_BODY}"/></clipPath></defs></svg>${side(true)}${mid}${side(false)}`;
+}
+// il pesciolino visto di lato, tutto in un disegno (per il tutorial, dove sta fermo)
+function fishFlat() {
+  const mid = [...document.querySelectorAll('#diver .dl')].find(d => d.querySelector('.dv-tail'));
+  const fins = mid ? mid.querySelector('svg').innerHTML.replace(/<path d="M28 58[^>]*g3Side[^>]*><\/path>|<path d="M28 58[^>]*g3Side[^>]*\/>/, '') : '';
+  return `<svg viewBox="4 20 88 62">${fins}${$('#diver .dv-face.front svg').innerHTML}</svg>`;
+}
+$('#diver').innerHTML = `<div class="dv-3d"><div class="dv-bob"><div class="dv-head">${fishLayers(true)}</div></div></div>`;
+$('#swimmer').innerHTML = `<div class="f3"><div class="bob"><div class="fh">${fishLayers(false)}</div></div></div>`;
+
+// ================= Il nuoto in 3D (lo usano tutti e due: è sempre lo stesso pesciolino) =================
+// due movimenti insieme: dove si trova (posizione, grandezza, sfocatura) e come è girato (verso di te, di lato, verso il fondo)
 const Swim3 = (() => {
-  // posa nello spazio: yaw = quanto è girato (0 guarda a destra, ±180 a sinistra, verso -90 viene verso di te), tilt = muso su o giù
-const tf = (x, y, s, yaw, tilt) => `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) perspective(720px) rotateZ(${tilt.toFixed(1)}deg) rotateY(${yaw.toFixed(1)}deg) scale(${s.toFixed(3)})`;
+const posT = (x, y, s) => `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${s.toFixed(3)})`;
+const rotT = (yaw, tilt) => `rotateZ(${tilt.toFixed(1)}deg) rotateY(${yaw.toFixed(1)}deg)`;
 const bez = (p0, p1, p2, p3) => t => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
-// un tragitto in 3D: P(t) = [x, y, z] con z da -1 (in fondo, piccolo e sfocato) a 0 (davanti a te).
-// Il pesce guarda sempre dove nuota: se viene verso di te si gira verso di te, se torna giù si gira via. Nuota a colpi di coda.
+// P(t) = [x, y, z]: z = -1 in fondo (piccolo, sfocato), 0 davanti a te, > 0 ancora più vicino. Guarda sempre dove nuota, a colpi di coda
 function swim3(P, o) {
-  const N = o.n || 56, fr = [], W = innerWidth, K = W * .9; let prev = o.yaw0 ?? null;
+  const N = o.n || 56, pos = [], rot = [], meta = [], W = innerWidth, K = W * .9; let prev = o.yaw0 ?? null;
   for (let i = 0; i <= N; i++) {
     let t = i / N; t = o.ease(t); t = Math.min(1, Math.max(0, t + .03 * Math.sin(6.283 * 2.6 * t) * (1 - t) * (o.pulse ?? 1))); // spinte e scivolate
     const [x, y, z] = P(t), e = .012, [xa, ya, za] = P(Math.max(0, t - e)), [xb, yb, zb] = P(Math.min(1, t + e));
@@ -1900,42 +2056,51 @@ function swim3(P, o) {
       // si gira dall'altra parte solo se va davvero di là, non per ogni colpo di coda
       const was = prev != null ? (Math.cos(prev / 57.3) < 0 ? 180 : 0) : (o.side > 0 ? 0 : 180);
       const side = Math.abs(dx) > Math.abs(dz) * .35 + 1 ? (dx >= 0 ? 0 : 180) : was;
-      let dev = Math.atan2(dz, Math.abs(dx)) * 57.3; dev = Math.max(-62, Math.min(62, dev)); // mai di taglio: sempre almeno mezzo pesce
+      let dev = Math.atan2(dz, Math.abs(dx)) * 57.3; dev = Math.max(-66, Math.min(66, dev));
       yaw = side === 0 ? -dev : -(180 - dev);
     }
     if (prev != null) { yaw = prev + ((yaw - prev + 540) % 360 - 180); yaw = prev + Math.max(-11, Math.min(11, yaw - prev)); } // si gira con calma, come un pesce vero
     prev = yaw;
     const right = Math.cos(yaw / 57.3) >= 0 ? 1 : -1;
     const tilt = Math.max(-26, Math.min(26, Math.atan2(dy, Math.abs(dx) + Math.abs(dz) * .4 + 2) * 57.3 * .5)) * right;
-    const sc = o.scale ? o.scale(z) : 1 + z * (1 - o.far);
+    const sc = o.sOf ? o.sOf(t, z) : o.scale ? o.scale(z) : 1 + z * (1 - o.far);
     const bl = Math.max(0, -z) ** 1.4 * (o.blur ?? 9);
-    fr.push({ transform: tf(x, y, sc, yaw, tilt), filter: `blur(${bl.toFixed(2)}px)`, opacity: +Math.max(0, Math.min(1, o.op(i / N, z))).toFixed(3) });
+    pos.push({ transform: posT(x, y, sc), filter: `blur(${bl.toFixed(2)}px)`, opacity: +Math.max(0, Math.min(1, o.op(i / N, z))).toFixed(3) });
+    rot.push({ transform: rotT(yaw, tilt) });
+    meta.push({ x, y, z, s: sc, yaw, tilt });
   }
-  return { fr, yaw: prev };
+  return { pos, rot, meta, yaw: prev };
 }
-  return { tf, bez, swim3 };
+return { posT, rotT, bez, swim3 };
 })();
 
 // ================= Il pesciolino che ascolta =================
-// quando tieni premuto il microfono sale dal profondo, si avvicina grande davanti a te e ascolta davvero:
-// sbatte gli occhi, guarda le tue parole, annuisce, alza le sopracciglia, fa "oh", sorride quando capisce.
-// Ogni volta arriva e se ne va in un modo diverso.
+// quando tieni premuto il microfono arriva da te: se era nel cerchio della home esce da lì, se nuotava sullo sfondo arriva da lì,
+// altrimenti sale dal profondo. Si mette grande davanti a te e ascolta davvero (occhi, sopracciglia, bocca, cenni).
+// Quando hai finito se ne va sempre nuotando, e se era venuto dal cerchio ci torna. MeMo è uno solo.
 const Fish = (() => {
   const el = $('#diver'), deep = $('#deep'), none = { come() {}, hear() {}, got() {}, think() {}, worry() {}, go() {} };
   if (!el || !el.animate) return none;
-  const head = el.querySelector('.dv-head'), calm = matchMedia('(prefers-reduced-motion: reduce)').matches, r = Math.random;
-  let on = false, mode = '', anim = null, at = null, face = 'listen', lastHear = 0, lastReact = 0, lastKind = '', timers = [], bubT = null, exitT = null;
+  const in3 = el.querySelector('.dv-3d'), head = el.querySelector('.dv-head'), calm = matchMedia('(prefers-reduced-motion: reduce)').matches, r = Math.random;
+  const { posT, rotT, bez, swim3 } = Swim3;
+  let on = false, mode = '', anims = [], at = null, face = 'listen', lastHear = 0, lastReact = 0, lastKind = '', timers = [], bubT = null, exitT = null, home = null;
   const later = (f, ms) => { const t = setTimeout(f, ms); timers.push(t); return t; };
   const stopAll = () => { timers.forEach(clearTimeout); timers = []; clearInterval(bubT); };
   const MOUTH = { curious: 'o', listen: 'smile', mm: 'smile', o: 'o', got: 'big', wait: 'flat', think: 'side', happy: 'big', worry: 'wavy', puzzled: 'flat' };
   const setFace = f => { face = f; el.dataset.f = f; el.dataset.m = MOUTH[f] || 'smile'; };
   const look = (x, y) => { el.style.setProperty('--lx', x.toFixed(2) + 'px'); el.style.setProperty('--ly', y.toFixed(2) + 'px'); };
   const gesture = g => { head.classList.remove('g-nod', 'g-hop', 'g-shake'); void head.offsetWidth; head.classList.add('g-' + g); };
-  const { tf, bez, swim3 } = Swim3;
+  const stopAnims = () => { anims.forEach(a => a.cancel()); anims = []; };
+  function play(fr, dur, done) {
+    stopAnims();
+    const a = el.animate(fr.pos, { duration: dur, easing: 'linear', fill: 'forwards' }), b = in3.animate(fr.rot, { duration: dur, easing: 'linear', fill: 'forwards' });
+    anims = [a, b]; el.classList.add('swim');
+    a.onfinish = () => { el.classList.remove('swim'); if (done) done(); };
+  }
   function bubble(n = 1, gap = 180) {
     for (let i = 0; i < n; i++) setTimeout(() => { if (!at) return;
       const b = document.createElement('i'), sz = 6 + r() * 6; b.className = 'lbub';
-      b.style.setProperty('--bx', (at.x + at.fx * at.w * .36) + 'px'); b.style.setProperty('--by', (at.y + at.h * .1) + 'px'); b.style.setProperty('--dx', (at.fx * (6 + r() * 16)) + 'px');
+      b.style.setProperty('--bx', (at.x + at.fx * at.w * .27) + 'px'); b.style.setProperty('--by', (at.y + at.h * .1) + 'px'); b.style.setProperty('--dx', (at.fx * (6 + r() * 16)) + 'px');
       b.style.width = b.style.height = sz.toFixed(1) + 'px'; document.body.appendChild(b); setTimeout(() => b.remove(), 1500); }, i * gap);
   }
   // la vita mentre ascolta: sbatte gli occhi, li sposta sulle tue parole e su di te, se stai zitto ti aspetta curioso
@@ -1951,34 +2116,53 @@ const Fish = (() => {
     el.classList.add('idle'); blinkLoop(); eyeLoop(); waitLoop(); later(() => bubble(1), 250);
     later(() => { if (on && face === 'curious') { setFace('listen'); look(0, .3); } }, 500);
   }
+  // il pesciolino del cerchio della home: dove sta e quanto è grande rispetto a questo
+  function heroSpot(w) {
+    const k = $('#heroKnot'); if (!k || k.hasAttribute('hidden') || page !== 'home') return null;
+    const rc = k.getBoundingClientRect(); if (rc.width < 10 || rc.bottom < 0 || rc.top > innerHeight) return null;
+    const s = (rc.width * .56) / (w * .636);
+    return { x: rc.left + rc.width * .55, y: rc.top + rc.height * .54 - (2.5 / 62) * (w * 62 / 88) * s, s };
+  }
   function come() {
     clearTimeout(exitT); if (on) return;
     on = true; mode = 'listen'; lastHear = Date.now(); stopAll();
     const W = innerWidth, H = innerHeight, w = Math.round(Math.min(270, Math.max(170, W * .62))), h = Math.round(w * 62 / 88);
-    el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.margin = `${-h / 2}px 0 0 ${-w / 2}px`;
+    el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.margin = `${-h / 2}px 0 0 ${-w / 2}px`; el.style.setProperty('--zm', (w * .12).toFixed(1) + 'px');
     const cEl = $('#ptt .ptt-card'), card = cEl.getBoundingClientRect(), pillTop = card.top - (cEl.closest('.ptt.show') ? 0 : 12);
     const fx = r() < .5 ? 1 : -1, tx = W / 2 + (r() - .5) * W * .08, ty = Math.max(h / 2 + 80, pillTop - h / 2 - 10);
-    at = { x: tx, y: ty, fx, w, h, yaw: fx > 0 ? 0 : -180 };
+    const restYaw = fx > 0 ? 0 : -180;
+    // da dove arriva: dal cerchio della home, dallo sfondo dove stava nuotando, oppure dal profondo
+    home = heroSpot(w);
+    const swm = !home && window.memoSwimTake ? window.memoSwimTake() : null;
+    at = { x: tx, y: ty, fx, w, h, yaw: restYaw };
     deep.classList.add('on'); document.body.classList.add('listening'); el.classList.remove('idle', 'blink');
     setFace('curious'); look(0, 0);
-    if (anim) anim.cancel();
-    const restYaw = fx > 0 ? 0 : -180;
-    if (calm) { el.style.transform = tf(tx, ty, 1, restYaw, 0); el.style.filter = 'none'; anim = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: 'forwards' }); settle(); return; }
-    // dal profondo: in fondo è piccolo e sfocato, nuota verso di te girato verso di te, e davanti si mette di lato a guardarti
-    const sx = W * (.12 + r() * .76), sy = H * (.1 + r() * .26), way = r();
-    const p0 = [sx, sy], p3 = [tx, ty], p2 = [tx - fx * (55 + r() * 70), ty - 10 - r() * 35];
-    const p1 = way < .4 ? [sx + (r() - .5) * W * .9, sy + (ty - sy) * .35] : way < .7 ? [tx + fx * W * .4, (sy + ty) / 2 + (r() - .5) * 80] : [sx + (r() - .5) * 70, sy + (ty - sy) * .6];
-    const B = bez(p0, p1, p2, p3), wig = 10 + r() * 16, k = 1.5 + r();
-    const s0 = .1 + r() * .06;
-    const { fr, yaw: endYaw } = swim3(t => { const [x, y] = B(t); return [x + wig * Math.sin(6.283 * k * t) * (1 - t), y, -Math.pow(1 - t, 1.7)]; },
-      { ease: t => 1 - Math.pow(1 - t, 1.8), far: s0, side: fx, op: k2 => k2 * 3.2 });
-    const rest = restYaw + 360 * Math.round((endYaw - restYaw) / 360); // lo stesso verso, senza giri su se stesso
-    fr.forEach((f, i) => { f.offset = .86 * i / (fr.length - 1); });
-    fr.push({ offset: .93, transform: tf(tx, ty + 4, .97, rest, 0), filter: 'blur(0px)', opacity: 1 }, { offset: 1, transform: tf(tx, ty, 1, rest, 0), filter: 'blur(0px)', opacity: 1 });
-    el.classList.add('swim');
-    anim = el.animate(fr, { duration: 1250 + r() * 500, easing: 'linear', fill: 'forwards' });
-    anim.onfinish = () => { el.classList.remove('swim'); if (on) settle(); };
+    if (calm) { stopAnims(); el.style.transform = posT(tx, ty, 1); el.style.filter = 'none'; in3.style.transform = rotT(restYaw, 0); anims = [el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: 'forwards' })]; settle(); return; }
+    let fr;
+    if (home) { // esce dal cerchio: si gira verso di te mentre viene avanti, crescendo
+      const p0 = [home.x, home.y], B = bez(p0, [home.x + (r() - .5) * W * .35, home.y + (ty - home.y) * .3], [tx - fx * (60 + r() * 60), ty - 30 - r() * 30], [tx, ty]);
+      fr = swim3(t => { const [x, y] = B(t); return [x, y, .55 * Math.sin(Math.PI * Math.min(1, t * 1.15))]; },
+        { ease: t => 1 - Math.pow(1 - t, 1.7), side: 1, yaw0: 0, sOf: (t, z) => (home.s + (1 - home.s) * Math.pow(t, .9)) * (1 + .22 * Math.max(0, z)), op: () => 1 });
+      fr.rot[0].transform = rotT(0, -16);
+    } else if (swm) { // nuotava sullo sfondo: si gira e viene da te
+      const p0 = [swm.x, swm.y], B = bez(p0, [swm.x + (r() - .5) * W * .4, swm.y + (ty - swm.y) * .4], [tx - fx * (60 + r() * 60), ty - 25 - r() * 30], [tx, ty]);
+      const s0 = swm.px / w, z0 = Math.min(-.25, swm.z);
+      fr = swim3(t => { const [x, y] = B(t); return [x, y, z0 * Math.pow(1 - t, 1.6)]; },
+        { ease: t => 1 - Math.pow(1 - t, 1.8), side: fx, yaw0: swm.yaw, sOf: t => s0 + (1 - s0) * Math.pow(t, 1.5), blur: 4, op: (k) => Math.min(1, .7 + k * 2) });
+    } else { // dal profondo: in fondo è piccolo e sfocato, nuota verso di te girato verso di te
+      const sx = W * (.12 + r() * .76), sy = H * (.1 + r() * .26), way = r();
+      const p0 = [sx, sy], p3 = [tx, ty], p2 = [tx - fx * (55 + r() * 70), ty - 10 - r() * 35];
+      const p1 = way < .4 ? [sx + (r() - .5) * W * .9, sy + (ty - sy) * .35] : way < .7 ? [tx + fx * W * .4, (sy + ty) / 2 + (r() - .5) * 80] : [sx + (r() - .5) * 70, sy + (ty - sy) * .6];
+      const B = bez(p0, p1, p2, p3), wig = 10 + r() * 16, k = 1.5 + r(), s0 = .1 + r() * .06;
+      fr = swim3(t => { const [x, y] = B(t); return [x + wig * Math.sin(6.283 * k * t) * (1 - t), y, -Math.pow(1 - t, 1.7)]; },
+        { ease: t => 1 - Math.pow(1 - t, 1.8), far: s0, side: fx, op: k2 => k2 * 3.2 });
+    }
+    const rest = restYaw + 360 * Math.round((fr.yaw - restYaw) / 360); // lo stesso verso, senza giri su se stesso
+    fr.pos.forEach((f, i) => { f.offset = .86 * i / (fr.pos.length - 1); }); fr.rot.forEach((f, i) => { f.offset = .86 * i / (fr.rot.length - 1); });
+    fr.pos.push({ offset: .93, transform: posT(tx, ty + 4, .97), filter: 'blur(0px)', opacity: 1 }, { offset: 1, transform: posT(tx, ty, 1), filter: 'blur(0px)', opacity: 1 });
+    fr.rot.push({ offset: .93, transform: rotT(rest, 0) }, { offset: 1, transform: rotT(rest, 0) });
     at.yaw = rest;
+    play(fr, (home ? 1150 : 1250) + r() * 500, () => { if (on) settle(); });
   }
   // mentre parli: ogni tanto una reazione, mai due volte di fila la stessa
   const REACT = ['nod', 'mm', 'o', 'got', 'look', 'nod', 'mm'];
@@ -1986,7 +2170,7 @@ const Fish = (() => {
     if (!on || mode !== 'listen') return;
     const n = Date.now(); lastHear = n;
     if (face === 'wait') { setFace('listen'); look(0, .3); }
-    if (n - lastReact < 1100 || (anim && anim.playState === 'running')) return;
+    if (n - lastReact < 1100 || el.classList.contains('swim')) return;
     lastReact = n; let k; do { k = REACT[Math.floor(r() * REACT.length)]; } while (k === lastKind); lastKind = k;
     if (k === 'nod') { gesture('nod'); setFace('mm'); look(0, .6); }
     else if (k === 'mm') { setFace('mm'); look(.4, .1); }
@@ -2003,38 +2187,46 @@ const Fish = (() => {
     if (!on) return; on = false; mode = ''; stopAll();
     deep.classList.remove('on');
     const leave = () => {
-      el.classList.remove('idle', 'blink'); document.body.classList.remove('listening');
-      const a = at; if (!a) return;
-      if (calm) { anim = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' }); at = null; return; }
+      el.classList.remove('idle', 'blink');
+      const a = at; if (!a) { document.body.classList.remove('listening'); return; }
+      const back = home ? heroSpot(a.w) : null; // il cerchio c'è ancora (nessun MeMo in lista): torna a casa
+      if (calm) { document.body.classList.remove('listening'); stopAnims(); anims = [el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' })]; at = null; return; }
       const W = innerWidth, H = innerHeight, smooth = t => t * t * (3 - 2 * t), fx = a.fx;
-      const pick = kind === 'cancel' ? 'flick' : kind === 'none' ? 'sink' : kind === 'saved' ? (r() < .55 ? 'deep' : 'swirl') : ['deep', 'flick', 'swirl', 'sink', 'deep', 'turn'][Math.floor(r() * 6)];
-      let P, o;
-      if (pick === 'deep') { // si gira e torna nuotando nel profondo
-        const ex = W * (.12 + r() * .76), ey = H * (.08 + r() * .22), B = bez([a.x, a.y], [a.x + fx * (80 + r() * 70), a.y - 10], [ex + (r() - .5) * 160, ey + 150], [ex, ey]);
-        P = t => { const [x, y] = B(t); return [x + 12 * Math.sin(6.283 * 1.8 * t) * t, y, -Math.pow(t, .9)]; };
-        o = { ease: smooth, far: .1, op: k => k < .72 ? 1 : 1 - (k - .72) / .28, dur: 1250 + r() * 400 };
-      } else if (pick === 'swirl') { // una giravolta contenta e via in fondo
-        const B = bez([a.x, a.y], [a.x + fx * 190, a.y + 60], [a.x - fx * 170, a.y - 180], [a.x + (r() - .5) * W * .5, H * .1]);
-        P = t => { const [x, y] = B(t); return [x, y, t < .35 ? .12 * Math.sin(t / .35 * 3.14) : -Math.pow((t - .35) / .65, 1.1)]; };
-        o = { ease: smooth, far: .1, op: k => k < .78 ? 1 : 1 - (k - .78) / .22, dur: 1550 };
-      } else if (pick === 'turn') { // si volta dall'altra parte e se ne va di lato
-        const dir = -fx, B = bez([a.x, a.y], [a.x + fx * 30, a.y + 12], [a.x + dir * W * .35, a.y - 30], [a.x + dir * (W * .55 + a.w), a.y - 60 - r() * 80]);
-        P = t => { const [x, y] = B(t); return [x, y, .18 * Math.sin(Math.min(1, t * 2.2) * 3.14)]; };
-        o = { ease: t => t * t * (2 - t * .8), far: .5, op: k => k < .85 ? 1 : 1 - (k - .85) / .15, dur: 1000 };
-      } else if (pick === 'flick') { // un colpo di coda e sparisce di lato
-        const dir = kind === 'cancel' ? -fx : (r() < .5 ? fx : -fx), B = bez([a.x, a.y], [a.x + dir * 25, a.y + 8], [a.x + dir * W * .4, a.y - 20], [a.x + dir * (W * .55 + a.w), a.y - 40 - r() * 90]);
-        P = t => { const [x, y] = B(t); return [x, y, dir === fx ? 0 : .14 * Math.sin(Math.min(1, t * 3) * 3.14)]; };
-        o = { ease: t => t * t, far: .5, op: k => k < .82 ? 1 : 1 - (k - .82) / .18, dur: kind === 'cancel' ? 520 : 700, pulse: 0 };
-      } else { // affonda piano all'indietro, guardandoti ancora un po'
-        const B = bez([a.x, a.y], [a.x - fx * 10, a.y + 20], [a.x + fx * 40, a.y - 50], [a.x + fx * (40 + r() * 60), a.y - H * .26]);
-        P = t => { const [x, y] = B(t); return [x, y, -Math.pow(t, 1.2)]; };
-        o = { ease: smooth, far: .12, op: k => 1 - k * k, dur: 1700 };
+      let P, o, end = () => document.body.classList.remove('listening');
+      if (back) { // torna nel suo cerchio, rimpicciolendo, e lì si rimette al suo posto
+        const B = bez([a.x, a.y], [a.x + fx * 90, a.y - 30], [back.x - 60, back.y + 70], [back.x, back.y]);
+        P = t => { const [x, y] = B(t); return [x, y, .4 * Math.sin(Math.PI * t)]; };
+        o = { ease: smooth, sOf: (t, z) => (1 + (back.s - 1) * Math.pow(t, 1.1)) * (1 + .2 * Math.max(0, z)), op: () => 1, dur: 1150 };
+        end = () => { document.body.classList.remove('listening'); stopAnims(); el.style.opacity = 0; };
+      } else {
+        document.body.classList.remove('listening');
+        const pick = kind === 'cancel' ? 'flick' : kind === 'none' ? 'sink' : kind === 'saved' ? (r() < .55 ? 'deep' : 'swirl') : ['deep', 'flick', 'swirl', 'sink', 'deep', 'turn'][Math.floor(r() * 6)];
+        if (pick === 'deep') { // si gira e torna nuotando nel profondo
+          const ex = W * (.12 + r() * .76), ey = H * (.08 + r() * .22), B = bez([a.x, a.y], [a.x + fx * (80 + r() * 70), a.y - 10], [ex + (r() - .5) * 160, ey + 150], [ex, ey]);
+          P = t => { const [x, y] = B(t); return [x + 12 * Math.sin(6.283 * 1.8 * t) * t, y, -Math.pow(t, .9)]; };
+          o = { ease: smooth, far: .1, op: k => k < .72 ? 1 : 1 - (k - .72) / .28, dur: 1250 + r() * 400 };
+        } else if (pick === 'swirl') { // una giravolta contenta verso di te e via in fondo
+          const B = bez([a.x, a.y], [a.x + fx * 190, a.y + 60], [a.x - fx * 170, a.y - 180], [a.x + (r() - .5) * W * .5, H * .1]);
+          P = t => { const [x, y] = B(t); return [x, y, t < .35 ? .25 * Math.sin(t / .35 * 3.14) : -Math.pow((t - .35) / .65, 1.1)]; };
+          o = { ease: smooth, far: .1, op: k => k < .78 ? 1 : 1 - (k - .78) / .22, dur: 1550 };
+        } else if (pick === 'turn') { // si volta dall'altra parte e se ne va di lato
+          const dir = -fx, B = bez([a.x, a.y], [a.x + fx * 30, a.y + 12], [a.x + dir * W * .35, a.y - 30], [a.x + dir * (W * .55 + a.w), a.y - 60 - r() * 80]);
+          P = t => { const [x, y] = B(t); return [x, y, .3 * Math.sin(Math.min(1, t * 2.2) * 3.14)]; };
+          o = { ease: t => t * t * (2 - t * .8), far: .5, op: k => k < .85 ? 1 : 1 - (k - .85) / .15, dur: 1000 };
+        } else if (pick === 'flick') { // un colpo di coda e sparisce di lato
+          const dir = kind === 'cancel' ? -fx : (r() < .5 ? fx : -fx), B = bez([a.x, a.y], [a.x + dir * 25, a.y + 8], [a.x + dir * W * .4, a.y - 20], [a.x + dir * (W * .55 + a.w), a.y - 40 - r() * 90]);
+          P = t => { const [x, y] = B(t); return [x, y, dir === fx ? 0 : .25 * Math.sin(Math.min(1, t * 3) * 3.14)]; };
+          o = { ease: t => t * t, far: .5, op: k => k < .82 ? 1 : 1 - (k - .82) / .18, dur: kind === 'cancel' ? 520 : 700, pulse: 0 };
+        } else { // affonda piano all'indietro
+          const B = bez([a.x, a.y], [a.x - fx * 10, a.y + 20], [a.x + fx * 40, a.y - 50], [a.x + fx * (40 + r() * 60), a.y - H * .26]);
+          P = t => { const [x, y] = B(t); return [x, y, -Math.pow(t, 1.2)]; };
+          o = { ease: smooth, far: .12, op: k => 1 - k * k, dur: 1700 };
+        }
       }
-      const { fr } = swim3(P, { ...o, side: fx, yaw0: a.yaw });
-      fr[0].transform = tf(a.x, a.y, 1, a.yaw, 0); fr[0].filter = 'blur(0px)'; fr[0].opacity = 1;
-      if (anim) anim.cancel();
-      el.classList.add('swim');
-      anim = el.animate(fr, { duration: o.dur, easing: 'linear', fill: 'forwards' }); anim.onfinish = () => el.classList.remove('swim'); at = null;
+      const fr = swim3(P, { ...o, side: fx, yaw0: a.yaw });
+      fr.pos[0] = { transform: posT(a.x, a.y, 1), filter: 'blur(0px)', opacity: 1 }; fr.rot[0] = { transform: rotT(a.yaw, 0) };
+      if (back) { const yb = 360 * Math.round(fr.yaw / 360); fr.rot[fr.rot.length - 1] = { transform: rotT(yb, -16) }; } // al suo posto, come nel cerchio
+      play(fr, o.dur, end); at = null;
     };
     // prima la faccia giusta: contento se ha segnato, perplesso se non ha sentito, preoccupato se annulli
     let wait = 260;
@@ -2044,7 +2236,7 @@ const Fish = (() => {
     else setFace('mm');
     exitT = setTimeout(leave, wait);
   }
-  document.addEventListener('visibilitychange', () => { if (document.hidden && on) { on = false; mode = ''; stopAll(); clearTimeout(exitT); if (anim) anim.cancel(); at = null; deep.classList.remove('on'); document.body.classList.remove('listening'); el.classList.remove('idle'); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && on) { on = false; mode = ''; stopAll(); clearTimeout(exitT); stopAnims(); el.style.opacity = 0; at = null; deep.classList.remove('on'); document.body.classList.remove('listening'); el.classList.remove('idle', 'swim'); } });
   // il pesciolino è un di più: se qualcosa va storto, il microfono funziona lo stesso
   const safe = f => (...x) => { try { f(...x); } catch (e) { try { on = false; deep.classList.remove('on'); document.body.classList.remove('listening'); el.style.opacity = 0; } catch (e2) {} } };
   return { come: safe(come), hear: safe(hear), got: safe(got), think: safe(think), worry: safe(worry), go: safe(go) };
@@ -2126,32 +2318,48 @@ const PTT = (() => {
 })();
 
 // ================= Il pesciolino di passaggio =================
-// ogni tanto nuota sullo sfondo: una volta da una parte e la volta dopo dall'altra, avvicinandosi e allontanandosi,
-// a colpi di coda, mai due volte uguale. Non passa se il pesciolino è già al centro della home o se ti sta ascoltando.
+// ogni tanto nuota sullo sfondo: una volta da una parte e la volta dopo dall'altra. Va in profondità e torna: a volte si
+// avvicina tanto (grande e nitido), a volte si allontana (piccolo e sfocato), girandosi davvero verso di te o verso il fondo.
+// Non passa se il pesciolino è già al centro della home o se ti sta ascoltando: MeMo è uno solo.
 (() => {
-  const el = $('#swimmer'); let tm = null, anim = null, dir = Math.random() < .5 ? 1 : -1;
+  const el = $('#swimmer'), in3 = el && el.querySelector('.f3'); let tm = null, anims = [], cur = null, dir = Math.random() < .5 ? 1 : -1;
   if (!el || !el.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const { bez, swim3 } = Swim3, r = Math.random;
+  const { bez, swim3 } = Swim3, r = Math.random, BASE = 46;
+  el.style.setProperty('--zm', (BASE * .12).toFixed(1) + 'px');
   const later = ms => { clearTimeout(tm); tm = setTimeout(swim, ms); };
   const free = () => document.visibilityState === 'visible' && page === 'home' && $('#sheetWrap').hidden && !document.querySelector('.intro') && !document.body.classList.contains('listening')
     && window.scrollY < innerHeight * 0.4 && $('#heroKnot').hasAttribute('hidden');
+  const stop = () => { anims.forEach(a => a.cancel()); anims = []; cur = null; };
   function swim(force) {
     if (!force && !free()) { later(15000); return; }
-    if (anim) anim.cancel();
-    const W = innerWidth, H = innerHeight, size = 40 * (.95 + r() * .35);
-    const x0 = dir > 0 ? -60 : W + 60, x1 = dir > 0 ? W + 60 : -60;
-    const y0 = H * (.4 + r() * .3), y1 = H * (.28 + r() * .4);
+    stop();
+    const W = innerWidth, H = innerHeight, size = .95 + r() * .3;
+    const x0 = dir > 0 ? -70 : W + 70, x1 = dir > 0 ? W + 70 : -70, way = r();
+    const y0 = H * (.38 + r() * .32), y1 = H * (.26 + r() * .42);
     const B = bez([x0, y0], [x0 + dir * W * (.25 + r() * .2), y0 - H * (r() - .3) * .25], [x1 - dir * W * (.25 + r() * .2), y1 + H * (r() - .5) * .25], [x1, y1]);
-    // la profondità cambia lungo il tragitto: a volte si avvicina, a volte scende in fondo e poi risale
-    const zA = -.15 - r() * .35, zB = -.15 - r() * .35, dip = (r() - .35) * .7, wob = 6 + r() * 10, k = 2 + r() * 2, ph = r() * 6.28;
-    const P = t => { const [x, y] = B(t); return [x, y + wob * Math.sin(6.283 * k * t + ph), Math.min(.15, zA + (zB - zA) * t - dip * Math.sin(Math.PI * t))]; };
-    const { fr } = swim3(P, { n: 72, ease: t => t, side: dir, blur: 2.6, scale: z => size / 40 * (1 + z * .6),
-      op: (q, z) => Math.min(1, q * 9, (1 - q) * 9) * (.92 + z * .45) });
-    anim = el.animate(fr, { duration: 5200 + r() * 2600, easing: 'linear' });
-    anim.onfinish = () => { anim = null; };
+    const wob = 6 + r() * 12, k = 2 + r() * 2, ph = r() * 6.28;
+    // la profondità: viene vicino a metà strada, oppure scende in fondo e risale, oppure parte lontano e si avvicina
+    const zf = way < .4 ? (t => -.55 + 1.15 * Math.sin(Math.PI * t))         // si avvicina tanto e poi si allontana
+      : way < .7 ? (t => -.15 - .8 * Math.sin(Math.PI * t))                   // scende in fondo e torna
+      : (t => -.9 + 1.3 * t * t * (3 - 2 * t) - .2 * Math.sin(Math.PI * t * 2)); // parte lontano e arriva vicino
+    const P = t => { const [x, y] = B(t); return [x, y + wob * Math.sin(6.283 * k * t + ph), Math.max(-1, Math.min(.6, zf(t)))]; };
+    const fr = swim3(P, { n: 80, ease: t => t, side: dir, blur: 3.2, scale: z => size * (1 + z * .72),
+      op: (q, z) => Math.min(1, q * 9, (1 - q) * 9) * Math.min(1, .78 + z * .4) });
+    const dur = 6000 + r() * 3000;
+    const a = el.animate(fr.pos, { duration: dur, easing: 'linear' }), b = in3.animate(fr.rot, { duration: dur, easing: 'linear' });
+    anims = [a, b]; cur = { meta: fr.meta, a, dur };
+    a.onfinish = () => { anims = []; cur = null; };
     dir = -dir; // la prossima volta dall'altra parte
     if (!force) later((20 + r() * 20) * 1000);
   }
+  // se mentre nuota lo chiami con il microfono, è lui che viene da te: dove sta, quanto è grande, com'è girato
+  window.memoSwimTake = () => {
+    if (!cur || !cur.a || cur.a.playState !== 'running') return null;
+    const q = Math.min(1, Math.max(0, cur.a.currentTime / cur.dur)), m = cur.meta[Math.round(q * (cur.meta.length - 1))];
+    if (!m || m.x < -40 || m.x > innerWidth + 40) return null;
+    stop(); later((25 + r() * 20) * 1000);
+    return { x: m.x, y: m.y, z: m.z, yaw: m.yaw, px: BASE * m.s };
+  };
   later((7 + r() * 8) * 1000);
   window.memoSwim = () => swim(true);
 })();
@@ -2364,7 +2572,7 @@ function showIntro() {
   // poche pagine: chi sono, che ci penso io, e (se vuoi) le scadenze di tutti. Il resto l'app lo fa capire da sola
   const ic = id => { const c = $(id + ' .c'); return c ? c.innerHTML : ''; };
   const slides = [
-    { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${$('#diver .dv-head').innerHTML}</div>
+    { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${fishFlat()}</div>
         <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
       h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Una foto, due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
   ];
