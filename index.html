@@ -130,7 +130,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .chips.scroll{position:relative;flex-wrap:nowrap;overflow-x:auto;margin:0 -20px;padding:2px 20px 8px;scrollbar-width:none}
 .chips.scroll::-webkit-scrollbar{display:none}
 .install{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:14px 10px 14px 16px;margin:22px 0 0;font-size:15px;line-height:1.4;color:var(--ink-2)}
-.install p{margin:0;flex:1}.install b{color:var(--ink);font-weight:700}
+.install p{margin:0;flex:1}
+.install-go{display:block;margin-top:10px;padding:9px 16px;border-radius:12px;background:var(--brand-grad);color:#fff;font-weight:750;font-size:15px}.install b{color:var(--ink);font-weight:700}
 
 /* ---------- intestazione lista e calendario ---------- */
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 4px 18px}
@@ -331,6 +332,14 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 /* ---------- toast col nodo ---------- */
 .toast{position:fixed;left:14px;right:14px;bottom:calc(124px + env(safe-area-inset-bottom));z-index:30;max-width:520px;margin:0 auto;background:rgba(232,236,243,.94);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);color:var(--ink);border:1px solid rgba(18,24,38,.06);border-radius:16px;padding:8px 8px 8px 10px;display:flex;align-items:center;gap:10px;font-size:14.5px;line-height:1.3;transform:translateY(16px) scale(.98);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1.15),opacity .22s;pointer-events:none;box-shadow:0 8px 24px rgba(43,72,140,.14)}
 .toast.show{transform:none;opacity:1;pointer-events:auto}
+.g-steps{margin:0 0 18px;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:g}
+.g-steps li{counter-increment:g;display:grid;grid-template-columns:30px 1fr;gap:2px 10px;align-items:start}
+.g-steps li::before{grid-row:1 / span 2}
+.g-steps li::before{content:counter(g);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--field);color:var(--brand-ink);font-weight:800;font-size:14px}
+.g-steps li > b{display:block;font-size:16px;grid-column:2;grid-row:1}
+.g-steps li p{grid-column:2;margin:2px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.45}
+.g-steps li p b{color:var(--ink);font-weight:750}
+.g-steps code{font:600 13px ui-monospace,Menlo,monospace;background:var(--field);padding:1px 5px;border-radius:6px}
 .rep-row{display:flex;align-items:center;gap:10px;margin:-4px 0 18px;min-height:40px}
 .rep-row > span{flex:1;font-weight:700;font-size:15px;color:var(--ink-2)}
 .rep-sel{font:inherit;font-size:15px;font-weight:650;color:var(--brand-ink);background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%232F6FE0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;border:0;border-radius:12px;padding:8px 30px 8px 12px;max-width:62%;-webkit-appearance:none;appearance:none}
@@ -499,7 +508,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
     <div class="thread" id="list"></div>
     <p class="tip" id="swipeTip" hidden>Scorri una scadenza verso sinistra per segnarla come fatta.</p>
     <div class="install" id="installHint" hidden>
-      <p>Aggiungi MeMo alla Home: tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>. Così i dati restano al sicuro sul telefono.</p>
+      <p id="installTxt">Aggiungi MeMo alla Home: tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>. Così i dati restano al sicuro sul telefono.<button class="install-go" id="installGo" hidden>Installa</button></p>
       <button class="icon-btn" id="installClose" aria-label="Chiudi" style="width:32px;height:32px"><svg width="14" height="14" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
     </div>
   </div>
@@ -553,8 +562,17 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.35';
-const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const VERSION = '1.36';
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
+const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
+const PHONE = DEV === 'ios' ? (/iPhone|iPod/.test(navigator.userAgent) ? 'iPhone' : 'iPad') : DEV === 'android' ? 'telefono' : 'computer';
+const CLOUD = DEV === 'ios' ? 'su iCloud Drive' : DEV === 'android' ? 'su Google Drive' : 'in un posto sicuro';
+function notifDeniedText() {
+  if (DEV === 'ios') return `da Impostazioni dell'${PHONE} › Notifiche › MeMo`;
+  if (DEV === 'android') return isStandalone() ? 'da Impostazioni del telefono › App › MeMo › Notifiche' : "dal lucchetto accanto all'indirizzo › Autorizzazioni › Notifiche";
+  return "dal lucchetto accanto all'indirizzo › Notifiche › Consenti";
+}
 function clearBadge() { try { if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {}); } catch (e) {} }
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -1380,17 +1398,30 @@ function openVoice(opts = {}) {
   });
 }
 // quando l'iPhone non chiede nemmeno il permesso del microfono: i casi tipici e cosa fare
-const inAppBrowser = () => /FBAN|FBAV|Instagram|Line\/|Telegram|WhatsApp|GSA\//.test(navigator.userAgent) || (isIOS && !/Safari\//.test(navigator.userAgent) && !isStandalone());
+const inAppBrowser = () => /FBAN|FBAV|Instagram|Line\/|Telegram|WhatsApp|GSA\/|; wv\)/.test(navigator.userAgent) || (isIOS && !/Safari\//.test(navigator.userAgent) && !isStandalone());
+function micSteps() {
+  const browser = DEV === 'ios' ? 'Safari' : 'Chrome';
+  const inApp = inAppBrowser() ? `<li><b>Apri MeMo da ${browser}</b><p>Sei dentro un'altra app (WhatsApp, Instagram…): lì il microfono non funziona. Apri il link con ${browser}, oppure usa l'icona di MeMo.</p></li>` : '';
+  if (DEV === 'ios') return inApp + `
+      <li><b>Microfono per i siti</b><p>Impostazioni › App › <b>Safari</b> › scorri fino a «Impostazioni per i siti web» › <b>Microfono</b> › scegli <b>Chiedi</b> o <b>Consenti</b> (non «Rifiuta»).</p></li>
+      <li><b>Dettatura accesa</b><p>Impostazioni › Generali › Tastiera › attiva <b>Abilita dettatura</b>. MeMo usa la dettatura dell'${PHONE} per capirti.</p></li>
+      <li><b>Riapri MeMo</b><p>Chiudila del tutto (scorri verso l'alto dall'elenco delle app aperte) e riaprila: alla prima volta che tocchi Dimmi, l'${PHONE} ti chiede il permesso.</p></li>
+      <li><b>Tempo di utilizzo</b><p>Se hai limiti attivi: Impostazioni › Tempo di utilizzo › Restrizioni contenuti e privacy › <b>Microfono</b> › Consenti.</p></li>`;
+  if (DEV === 'android') return inApp + `
+      <li><b>Permesso del sito</b><p>${isStandalone() ? 'Impostazioni del telefono › App › <b>MeMo</b> › Autorizzazioni › <b>Microfono</b> › Consenti.' : "Tocca il <b>lucchetto</b> accanto all'indirizzo › Autorizzazioni › <b>Microfono</b> › Consenti."}</p></li>
+      <li><b>Permesso di Chrome</b><p>Impostazioni del telefono › App › <b>Chrome</b> › Autorizzazioni › <b>Microfono</b> › Consenti.</p></li>
+      <li><b>App Google aggiornata</b><p>Su Android a capirti è il riconoscimento vocale di Google: controlla che l'app <b>Google</b> sia installata e aggiornata dal Play Store.</p></li>
+      <li><b>Riapri MeMo</b><p>Chiudila e riaprila: alla prima volta che tocchi Dimmi, il telefono ti chiede il permesso.</p></li>`;
+  return inApp + `
+      <li><b>Permesso del sito</b><p>Clicca il <b>lucchetto</b> accanto all'indirizzo › <b>Microfono</b> › Consenti, poi ricarica la pagina.</p></li>
+      <li><b>Il microfono c'è?</b><p>Controlla che il computer abbia un microfono acceso e scelto nelle impostazioni audio.</p></li>
+      <li><b>Usa Chrome o Edge</b><p>Alcuni browser (come Firefox) non sanno ancora capire la voce.</p></li>`;
+}
 function micHelp(code) {
   const hint = $('#vHint'); if (!hint || hint.querySelector('button')) return;
   const b = document.createElement('button'); b.className = 'mic-help'; b.textContent = 'Come sblocco il microfono?';
-  b.onclick = () => openSheet(`<h2>Sblocchiamo il microfono</h2><p class="lead">L'iPhone non mi lascia ascoltare. Di solito basta una di queste cose:</p>
-    <ol class="g-steps">
-      ${inAppBrowser() ? '<li><b>Apri MeMo da Safari</b><p>Sei dentro un\'altra app (WhatsApp, Instagram…): lì il microfono non funziona. Apri il link con Safari, oppure usa l\'icona di MeMo sulla Home.</p></li>' : ''}
-      <li><b>Microfono per i siti</b><p>Impostazioni › App › <b>Safari</b> › scorri fino a «Impostazioni per i siti web» › <b>Microfono</b> › scegli <b>Chiedi</b> o <b>Consenti</b> (non «Rifiuta»).</p></li>
-      <li><b>Dettatura accesa</b><p>Impostazioni › Generali › Tastiera › attiva <b>Abilita dettatura</b>. MeMo usa la dettatura dell'iPhone per capirti.</p></li>
-      <li><b>Riapri MeMo</b><p>Chiudila del tutto (scorri verso l'alto dall'elenco delle app aperte) e riaprila: alla prima volta che tocchi Dimmi, l'iPhone ti chiede il permesso.</p></li>
-      <li><b>Tempo di utilizzo</b><p>Se hai limiti attivi: Impostazioni › Tempo di utilizzo › Restrizioni contenuti e privacy › <b>Microfono</b> › Consenti.</p></li>
+  b.onclick = () => openSheet(`<h2>Sblocchiamo il microfono</h2><p class="lead">${DEV === 'ios' ? `L'${PHONE}` : DEV === 'android' ? 'Il telefono' : 'Il browser'} non mi lascia ascoltare. Di solito basta una di queste cose:</p>
+    <ol class="g-steps">${micSteps()}
     </ol>
     <p class="lead" style="font-size:15px">Nel frattempo puoi sempre scrivere, oppure usare il microfono della tastiera.</p>`);
   hint.appendChild(document.createElement('br')); hint.appendChild(b);
@@ -1659,7 +1690,7 @@ function renderSettings() {
   const body = $('#setBody');
   body.innerHTML = `
     ${notifBlock()}
-    <div class="s-block"><h3>Backup</h3><p>Le foto e i documenti restano solo su questo iPhone: non li salvo da nessun'altra parte. Ogni tanto salva una copia su iCloud Drive.</p>
+    <div class="s-block"><h3>Backup</h3><p>Le foto e i documenti restano solo su questo ${PHONE}: non li salvo da nessun'altra parte. Ogni tanto salva una copia ${CLOUD}.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
     <div class="s-block"><h3>Quando ti avviso</h3><p>Lo scelgo io per ogni tipo di MeMo. Se preferisci, cambialo.</p>
       <button class="btn btn-ghost" id="sLeads">Cambia gli anticipi</button></div>
@@ -1686,8 +1717,8 @@ function notifBlock() {
     on: 'Ti avviso anche quando MeMo è chiusa.',
     off: 'Attivale per ricevere gli avvisi anche ad app chiusa, sulla schermata di blocco.',
     install: 'Per riceverle, aggiungi MeMo alla schermata Home (Condividi › «Aggiungi alla schermata Home») e aprila da lì.',
-    denied: "Sono bloccate. Riattivale da Impostazioni dell'iPhone › Notifiche › MeMo.",
-    nosupport: 'Questo telefono non le supporta. Serve iOS 16.4 o più recente.'
+    denied: `Sono bloccate. Riattivale ${notifDeniedText()}.`,
+    nosupport: DEV === 'ios' ? 'Questo telefono non le supporta. Serve iOS 16.4 o più recente.' : 'Questo browser non le supporta. Prova ad aprire MeMo con Chrome.'
   }[st];
   const week = st === 'on' ? `<div class="s-tgl"><div><b>Riepilogo della domenica</b><span>Alle 19 ti dico cosa c'è in settimana. Anche quando non c'è niente.</span></div><button class="tgl" id="sWeek" role="switch" aria-checked="${weeklyOn()}" aria-label="Riepilogo della domenica"><i></i></button></div>` : '';
   return `<div class="s-block"><h3>Notifiche${st === 'on' ? ' <span class="ok-pill">attive</span>' : ''}</h3><p>${txt}</p>${st === 'off' ? '<button class="btn btn-main" id="sNotif">Attiva le notifiche</button>' : ''}${week}</div>`;
@@ -1713,7 +1744,7 @@ $('#btnSettings').addEventListener('click', openSettings);
 function showIntro() {
   const slides = [
     { art: `<div class="photo-art"><div class="pdfdoc"><b>PDF</b><i></i><i></i><i style="width:60%"></i></div><div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div></div>`,
-      h: 'Fai una foto.', p: "Scatta o scegli una foto o un PDF. Leggo io cos'è e quando scade, e resta tutto sul tuo iPhone." },
+      h: 'Fai una foto.', p: `Scatta o scegli una foto o un PDF. Leggo io cos'è e quando scade, e resta tutto sul tuo ${PHONE}.` },
     { art: `<span class="bubble wide">Vino per Mattia domani alle 18, avvisami il giorno prima. E domattina il pane!</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`,
       h: 'Oppure dillo.', p: "Parla come con un amico, anche più cose insieme." },
     { art: `<div class="get-art"><div class="g-card"><span class="g-ic">🍷</span><div><b>Vino per Mattia</b><small>domani alle 18:00</small><em>🔔 ti avviso il giorno prima</em></div></div><div class="g-card"><span class="g-ic">🥖</span><div><b>Comprare il pane</b><small>domattina · a che ora?</small></div></div></div>`,
@@ -1728,7 +1759,7 @@ function showIntro() {
       off: forget,
       on: forget,
       install: forget + ' Mettimi nella Home e attiva le notifiche.',
-      denied: forget + " Riattiva le notifiche nelle Impostazioni dell'iPhone."
+      denied: forget + ` Riattiva le notifiche ${notifDeniedText()}.`
     }[pst];
     slides.push({ art: `<div class="lock-art"><b>9:41</b><span class="lk-date">venerdì 23 ottobre</span><div class="lk-note"><span class="lk-ic">${LOGO_SVG}</span><div><span class="lk-t">📞 Chiamare Luca adesso</span><span class="lk-b">Telefono in mano, sorriso pronto.</span></div><span class="lk-now">adesso</span></div></div>`,
       h: 'Ci penso io.', p: np, extra: pst === 'off' ? '<button class="btn btn-ghost i-notif" id="iNotif">Attiva le notifiche</button>' : '' });
@@ -1942,6 +1973,15 @@ function tick() {
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if (isIOS && !isStandalone() && store.get('installHint') !== '1') $('#installHint').hidden = false;
   $('#installClose').onclick = () => { $('#installHint').hidden = true; store.set('installHint', '1'); };
+  // Android (Chrome): MeMo si installa con un tocco, come un'app vera
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); installEvt = e; if (store.get('installHint') === '1') return;
+    $('#installTxt').innerHTML = 'Installa MeMo: si apre come un\'app, dalla Home, e i dati restano al sicuro sul telefono.<button class="install-go" id="installGo">Installa</button>';
+    $('#installGo').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; $('#installHint').hidden = true; };
+    $('#installHint').hidden = false;
+  });
+  window.addEventListener('appinstalled', () => { $('#installHint').hidden = true; store.set('installHint', '1'); });
   if (store.get('intro') !== '1' && !new URLSearchParams(location.search).has('nointro')) showIntro();
   openFromUrl(location.href);
   Push.refresh().finally(() => Push.sync());
