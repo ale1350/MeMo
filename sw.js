@@ -1,5 +1,5 @@
 /* MeMo — funziona anche offline. Cambia VERSION quando aggiorni i file su GitHub. */
-const VERSION = 'memo-v1.31';
+const VERSION = 'memo-v1.32';
 const SHELL = ['./', 'index.html', 'parser.js', 'notify.js', 'manifest.json', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
