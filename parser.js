@@ -379,6 +379,11 @@
     return null;
   }
 
+  const FIRST_PERSON = { esco: 'uscire', usciamo: 'uscire', vado: 'andare', andiamo: 'andare', vedo: 'vedere', vediamo: 'vedere', faccio: 'fare', facciamo: 'fare',
+    porto: 'portare', prendo: 'prendere', compro: 'comprare', chiamo: 'chiamare', sento: 'sentire', incontro: 'incontrare', ceno: 'cenare', ceniamo: 'cenare',
+    gioco: 'giocare', giochiamo: 'giocare', parto: 'partire', partiamo: 'partire', torno: 'tornare', passo: 'passare', mangio: 'mangiare', mangiamo: 'mangiare',
+    accompagno: 'accompagnare', ritiro: 'ritirare', pago: 'pagare', mando: 'mandare', scrivo: 'scrivere', finisco: 'finire', consegno: 'consegnare', prenoto: 'prenotare' };
+  const FIRST_PERSON_RE = new RegExp(`^(?:${Object.keys(FIRST_PERSON).join('|')})\\b`, 'i');
   /** Analizza una frase tipo "ricordami che il bollo scade a fine novembre" o "oggi alle 18 parrucchiere". */
   function parseOne(raw, now, opt) {
     opt = opt || {};
@@ -430,6 +435,15 @@
       const d = +(mm[1] || mm[4]), mo = +(mm[2] || mm[5]), yy = mm[3] || mm[6];
       if (yy) { const y = fullYear(yy); return valid(y, mo, d) ? iso(y, mo, d) : null; }
       return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? nextOccurrence(today, mo, d) : null;
+    });
+    // 1b) "venerdì 30", "mercoledì 28 ottobre": il giorno della settimana con il numero (il nome del giorno non resta nel titolo)
+    take(new RegExp(`\\b(?:(?:il|per|entro|da)\\s+)?(?:lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\\s+(\\d{1,2}|primo)(?:\\s*(?:di\\s+)?(${MONTH_RE})\\b\\.?(?:\\s+(\\d{4}))?)?(?!\\s*(?:[:.]\\d|e\\s+mezz|minut|or[ae]\\b))\\b`), mm => {
+      const d = /^\d+$/.test(mm[1]) ? +mm[1] : 1; if (d < 1 || d > 31) return null;
+      if (mm[2]) { if (mm[3]) { const y = +mm[3]; return valid(y, MONTHS[mm[2]], d) ? iso(y, MONTHS[mm[2]], d) : null; } return nextOccurrence(today, MONTHS[mm[2]], d); }
+      const y = +today.slice(0, 4), mo = +today.slice(5, 7);
+      let cand = iso(y, mo, Math.min(d, lastDay(y, mo)));
+      if (cand < today) { const nx = addMonths(iso(y, mo, 1), 1); cand = iso(+nx.slice(0, 4), +nx.slice(5, 7), Math.min(d, lastDay(+nx.slice(0, 4), +nx.slice(5, 7)))); }
+      return cand;
     });
     // 2) "12 marzo 2027", "il primo marzo", "3 di giugno"
     take(new RegExp(`(?:\\b(?:il|al|del|entro\\s+il|per\\s+il|dal)\\s+)?\\b(\\d{1,2}|primo|1o)\\s*(?:°|º)?\\s*(?:di\\s+)?(${MONTH_RE})\\b\\.?(?:\\s+(?:del\\s+)?(\\d{4}|\\d{2})\\b)?`), mm => {
@@ -529,11 +543,15 @@
         /^\s*(per\s+favore\s+)?(ricordami|ricordarmi|ricorda|ricordati|segnami|segna|segnati|aggiungi|metti|memorizza|promemoria|nota|devo|dovrei|bisogna|ho)\b\s*(di|che|per|:)?\s*/i,
         /^\s*(che|di|per|il|lo|la|i|gli|le|l'|un|uno|una|mio|mia|miei|mie|mi|ti|ci|sera|mattina|pomeriggio|notte)\s+/i,
         /^\s*(ho|abbiamo|l'ho|l'abbiamo)\s+(comprat[oaie]|acquistat[oaie]|pres[oaie]|preso)\s+/i,
-        /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto|domattina|stasera)\s*$/i
+        /^\s*(c'[eè]|c'[eè]'|ci\s+sono|ci\s+sar[aà]|ci\s+saranno|c'era)\s+/i,
+        /\s+(che\s+)?(scade|scadono|scadra|scadrà|va\s+fatt[oa]|va\s+pagat[oa]|da\s+pagare|da\s+rinnovare|si\s+rinnova|e|ed|il|lo|la|l'|al|alla|entro|per|di|del|della|a|ad|che|comprat[oaie]|acquistat[oaie]|l'ho\s+comprat[oaie]|l'ho\s+pres[oaie]|ho\s+comprato|pres[oaie]|sera|mattina|pomeriggio|parte|parto|domattina|stasera|è|e')\s*$/i
       ];
       for (let i = 0; i < 6; i++) { for (const f of fillers) s = s.replace(f, ' ').trim(); }
+      s = s.replace(/\b(?:di|del|della|dello|dei|delle)\s+(?=(?:con|per|a|ad|da|in|su|tra|fra)\b)/gi, '').replace(/^\s*l'(?=[a-zà-ÿ])/i, '');
       s = s.replace(/\s{2,}/g, ' ').replace(/[\s,.;:!]+$/, '').trim();
       const T2 = TYPE_BY_ID[typeId];
+      // "esco con Monica" → "Uscire con Monica": il titolo parla come una cosa da fare
+      s = s.replace(FIRST_PERSON_RE, w => FIRST_PERSON[norm(w)] || w);
       if (typeId !== 'garanzia') s = summarize(s, opt.ctx != null ? opt.ctx : src);
       const dt = docTitle(typeId, src); if (dt) s = dt;
       if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:ho|abbiamo)\s+)?(?:comprat[oaie]|acquistat[oaie]|pres[oaie])\s+/i, '').replace(/^(?:(?:il|lo|la|i|gli|le|un|uno|una)\s+|l'|un')/i, '');
@@ -642,6 +660,12 @@
   // "…perché poi stasera vedo Mattia alle 18": la spiegazione non decide quando avvisare
   const REASON_RE = /\s*[,;.]?\s*\b(?:perche|siccome|visto\s+che|dato\s+che|tanto\s+poi|che\s+poi|cosi\s+poi)\b/;
   function parseSpeech(raw, now) {
+    const A = anchorOf(raw, now);
+    if (A) {
+      const out = parseSpeechOnce(A.content, now); out.type = out.typeScore >= 2 ? out.type : detectType(raw).score >= 2 ? detectType(raw).type : out.type;
+      if (out.needTitle && out.title === 'MeMo') return out;
+      return withAnchor(out, A);
+    }
     const R = extractRep(String(raw || '').trim().replace(/\s+/g, ' '));
     if (R) { const out = parseSpeechOnce(R.rest, now); return withRep(out, R, now); }
     return parseSpeechOnce(raw, now);
@@ -775,7 +799,7 @@
     while (k++ < 800) {
       const due = dueAt(item), grace = item.time ? 60 * 60000 : 0;
       if (due.getTime() + grace >= nowD.getTime()) break;
-      item.due = nextRep(item); moved = true;
+      item.due = nextRep(item); delete item.remindOn; moved = true;
     }
     return moved;
   }
@@ -810,6 +834,68 @@
   }
   const REP_WORDS_RE = /\s*\b(?:ogni|tutti\s+i|tutte\s+le|tutti\s+gli)\s+(?:\d+\s+|due\s+|tre\s+)?(?:giorn[oi]|settiman[ae]|mes[ei]|ann[oi]|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|lunedi|martedi|mercoledi|giovedi|venerdi|mattin[ae]|ser[ae])\b/gi;
 
+  // ---------- Quando avvisare, detto a parte dal quando succede ----------
+  // "Ricordami mercoledì che venerdì esco con Monica", "Mercoledì ricordami che venerdì…", "Venerdì esco con Monica, ricordamelo mercoledì",
+  // "Avvisami lunedì alle 18 che martedì devo portare i documenti": la cosa è venerdì, l'avviso è mercoledì.
+  const ANCHOR_TRIGGER = /(?:^|[\s,.;:!?]+)(?:(?:e|quindi|allora|poi|ma|pero)\s+)?(?:per\s+favore\s+)?(ricordami|ricordarmi|ricordamelo|ricordamela|ricordameli|avvisami|avvisamelo|avvisamela|avvertimi|notificami|fammelo\s+presente|fammi\s+presente|dimmelo|scrivimelo|scrivimi|fammi\s+(?:un\s+fischio|uno\s+squillo)|dammi\s+un\s+(?:colpo|colpetto|fischio)|mandami\s+un\s+messaggio|mandami\s+(?:un\s+)?(?:promemoria|avviso|reminder|notifica)|(?:metti|mettimi|fammi|imposta|impostami|programma|programmami|crea|creami)\s+(?:un|una)\s+(?:reminder|promemoria|avviso|notifica|allarme))\b/;
+  const WHEN_WORD = /^(?:(?:il|la|lo|per|entro|da|di|alle|all'|verso|tra|fra|ore|domani|dopodomani|oggi|stasera|stamattina|domattina|stanotte|mattina|sera|pomeriggio|notte|prossim[oa]|mattino|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mezzogiorno|mezzanotte|e|mezza|mezzo|un|una|quarto|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|minut[oi]|or[ae]|giorn[oi]|settiman[ae]|mes[ei]|primo|inizio|fine|meta|del|della|mese|sett|\d{1,2}(?::\d{2})?|\d{4}|in|mattinata|serata|ottobre|novembre|dicembre|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)[\s,.']*)+$/;
+  const PART_HOUR = { mattina: '09:00', pomeriggio: '15:00', sera: '19:00', notte: '21:00' };
+  // è solo un "quando"? ("mercoledì prossimo", "domani sera", "lunedì alle 18", "il 28")
+  function onlyWhen(text, nowD) {
+    const t = norm(text).replace(/[\s,.;:!?]+$/, '').trim(); if (!t || t.length > 48 || !WHEN_WORD.test(t + ' ')) return null;
+    const r = parseOne(text, nowD, { noDefault: true }); if (!r.date && !r.time) return null;
+    if (r.leadMin != null) return null; // "il giorno prima": è un anticipo, lo gestisce già il motore
+    let date = r.date, time = r.time;
+    if (!date && time) { const [h, mi] = time.split(':').map(Number), c = new Date(nowD); c.setHours(h, mi, 0, 0); date = c > nowD ? todayISO(nowD) : addDays(todayISO(nowD), 1); }
+    return { date, time, part: r.askTime ? r.askTime.part : null };
+  }
+  function anchorOf(raw, now) {
+    const nowD = now || new Date();
+    const src = String(raw || '').trim().replace(/\s+/g, ' '), t = norm(src);
+    if (t.length !== src.length) return null;
+    const m = ANCHOR_TRIGGER.exec(t); if (!m) return null;
+    const at = m.index + m[0].length;
+    const before = src.slice(0, m.index).replace(/[\s,.;:!?]+$/, ''), after = src.slice(at);
+    let R = null, content = '';
+    // 1) subito dopo la richiesta, fino a "che"/"di"/":": "ricordami mercoledì prossimo che venerdì…"
+    const cm = /^\s*([^]*?)\s*(?:\b(?:che|di|del|della|dello|dei|delle|per)\b|[:,;])\s*([^]*)$/.exec(norm(after));
+    let viaDi = false;
+    if (cm && cm[1].trim()) { const w = onlyWhen(after.slice(0, cm[1].length + (after.length - after.trimStart().length)), nowD); if (w) { R = w; content = after.slice(after.length - cm[2].length); viaDi = /\bdi\s*$/.test(norm(after.slice(0, after.length - cm[2].length))); } }
+    // 2) subito prima: "mercoledì ricordami che venerdì…" (con l'eventuale "allora", "ok" davanti)
+    if (!R && before) {
+      const lead = before.replace(/^\s*(?:ehi|ok|okay|ciao|senti|allora|memo)[\s,]+/i, '');
+      const w = onlyWhen(lead, nowD); if (w) { R = w; viaDi = /^\s*di\b/i.test(after); content = after.replace(/^\s*(?:che|di|:)\s*/i, ''); }
+    }
+    // 3) in coda: "venerdì esco con Monica, ricordamelo mercoledì"
+    if (!R && before && after.trim()) { const w = onlyWhen(after, nowD); if (w) { R = w; content = before; } }
+    if (!R || !content.trim()) return null;
+    // "ricordami domani alle 9 di chiamare il dentista per la visita di martedì": una cosa da fare a quell'ora, martedì è solo il motivo
+    if (viaDi && R.time) return null;
+    const E = parseOne(content, nowD, { noDefault: true });
+    if (!E.date) return null; // nella frase non c'è un altro "quando": allora il quando detto è proprio quello della cosa
+    // "giovedì ricordami che sabato…": se il giorno della settimana viene prima dell'avviso, è quello della settimana dopo
+    if (E.date < R.date && /\b(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b/.test(norm(content))) {
+      const noWd = norm(content).replace(/\b(?:lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b/g, ' ');
+      if (!parseOne(noWd, nowD, { noDefault: true }).date) { let k = 0; while (E.date < R.date && k++ < 3) E.date = addDays(E.date, 7); }
+    }
+    let rTime = R.time || (R.part ? null : '09:00');
+    const remDate = parseISO(R.date); if (rTime) { const [h, mi] = rTime.split(':').map(Number); remDate.setHours(h, mi, 0, 0); } else remDate.setHours(+PART_HOUR[R.part].slice(0, 2), 0, 0, 0);
+    const due = parseISO(E.date); if (E.time) { const [h, mi] = E.time.split(':').map(Number); due.setHours(h, mi, 0, 0); } else due.setHours(23, 59, 0, 0);
+    if (remDate >= due || R.date > E.date) return null; // un avviso dopo la cosa non ha senso: decide il motore
+    if (R.date === E.date && !R.time && !R.part) return null;
+    return { content, date: E.date, time: E.time || null, remindDate: R.date, remindTime: rTime, remindPart: rTime ? null : R.part };
+  }
+  // applica l'avviso "a parte" al risultato (del motore o dell'AI)
+  function withAnchor(out, A) {
+    if (!A || !out) return out;
+    out.date = A.date; out.time = A.time || (out.date === A.date ? out.time : null) || null;
+    delete out.leadMin; delete out.askTime; delete out.leadEve;
+    if (A.remindTime) out.remindOn = `${A.remindDate}T${A.remindTime}`;
+    else out.remindAsk = { date: A.remindDate, part: A.remindPart };
+    out.confident = true;
+    return out;
+  }
+
   // ---------- Dall'AI al MeMo ----------
   // L'AI dice cosa, quando e quanto prima avvisare (a parole); qui si calcolano date e orari con il nostro motore.
   function leadFrom(text, item, now) {
@@ -839,13 +925,23 @@
     if (!time && w && w.askTime) askTime = w.askTime;
     if (!time && ai.ask === 'time' && !askTime) askTime = { part: null };
     if (time && ai.exact) leadMin = 0;
+    let remindOn = null, remindAsk = null;
     if (ai.remind && date) {
+      // l'AI può dire un momento preciso per l'avviso ("mercoledì", "lunedì alle 18:00", "domani sera"): lo si tiene com'è, al giorno giusto
+      const w = onlyWhen(ai.remind, nowD);
+      if (w && w.date) {
+        const due = parseISO(date); if (time) { const [h, mi] = time.split(':').map(Number); due.setHours(h, mi, 0, 0); } else due.setHours(23, 59, 0, 0);
+        const rt = w.time || (w.part ? null : '09:00'), rd = parseISO(w.date); const [rh, rmi] = (rt || PART_HOUR[w.part] || '09:00').split(':').map(Number); rd.setHours(rh, rmi, 0, 0);
+        if (rd < due && w.date !== date || rd < due && (w.time || w.part)) { if (rt) remindOn = `${w.date}T${rt}`; else remindAsk = { date: w.date, part: w.part }; }
+      }
+    }
+    if (ai.remind && date && !remindOn && !remindAsk) {
       let lm = leadFrom(ai.remind, { due: date, time, type }, nowD);
       if (lm == null) { const loc = parseOne(said, nowD, { noDefault: true }); if (loc.leadMin != null) lm = loc.leadEve && time ? (() => { const [hh, mm] = time.split(':').map(Number); return hh * 60 + mm + 24 * 60 - 19 * 60; })() : loc.leadMin; }
       if (lm != null) { leadMin = lm; askTime = null; }
     }
     // rete di sicurezza: se l'AI si è persa un "il giorno prima" o il tipo, li prendo dalla frase intera
-    if (leadMin == null && !ai.remind && date) {
+    if (leadMin == null && !ai.remind && date && !remindOn && !remindAsk) {
       const loc = parseOne(said, nowD, { noDefault: true });
       if (loc.leadMin != null) leadMin = loc.leadEve && time ? (() => { const [hh, mm] = time.split(':').map(Number); return hh * 60 + mm + 24 * 60 - 19 * 60; })() : loc.leadMin;
       else { const mb = minutesBefore(norm(said)); if (mb != null && time) leadMin = mb; }
@@ -860,6 +956,9 @@
     if (leadMin != null && (time || leadMin % 1440 === 0)) out.leadMin = leadMin;
     if (!title || ai.ask === 'title') out.needTitle = true;
     if (askTime && date && !time) out.askTime = askTime;
+    if (remindOn || remindAsk) { if (remindOn) out.remindOn = remindOn; else out.remindAsk = remindAsk; delete out.leadMin; delete out.askTime; }
+    const A = R ? null : anchorOf(said, nowD);
+    if (A) { if (!out.time || out.date !== A.date) out.time = A.time; return withAnchor(out, A); }
     return R ? withRep(out, R, nowD) : out;
   }
 
@@ -901,7 +1000,9 @@
     if (item.time && T.leadMin != null) return T.leadMin;
     return null; // si usa T.lead in giorni
   }
+  const remindOnDate = item => { const [d, tm] = item.remindOn.split('T'); const r = parseISO(d); const [h, mi] = (tm || '09:00').split(':').map(Number); r.setHours(h, mi, 0, 0); return r; };
   function remindAt(item) {
+    if (item.remindOn) { const r = remindOnDate(item); if (r < dueAt(item)) return r; }
     const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
     const lm = leadOf(item);
     if (lm != null && item.time) return new Date(dueAt(item).getTime() - lm * 60000);
@@ -920,6 +1021,12 @@
     const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
     const first = remindAt(item), due = dueAt(item), out = [first];
     const at = (iso, h, m) => { const d = parseISO(iso); d.setHours(h, m || 0, 0, 0); return d; };
+    if (item.remindOn && first < due) {
+      // avviso scelto da te: poi solo un ultimo richiamo vicino alla cosa (la mattina stessa, o poco prima dell'orario)
+      const near = item.time ? new Date(due.getTime() - (T.leadMin != null ? Math.max(T.leadMin, 15) : 60) * 60000) : at(item.due, 9);
+      if (near > first) out.push(near);
+      return out;
+    }
     if (!item.time) {
       for (const d of [30, 7, 1, 0]) { const r = at(addDays(item.due, -d), 9); if (r > first) out.push(r); }
     } else if (T.lead >= 1) {
@@ -941,6 +1048,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
+    phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, anchorOf, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);

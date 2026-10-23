@@ -562,7 +562,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.36';
+const VERSION = '1.37';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -629,18 +629,23 @@ const fmtMonth = s => P.parseISO(s).toLocaleDateString('it-IT', { month: 'long',
 const hm = d => `${d.getHours()}:${pad(d.getMinutes())}`;
 const timeLbl = t => t ? t.replace(/^0(\d)/, '$1') : '';
 function dayWord(iso) { const d = P.diffDays(P.todayISO(), iso); return d === 0 ? 'oggi' : d === 1 ? 'domani' : d === -1 ? 'ieri' : null; }
+// "venerdì 30 ottobre" (con il giorno della settimana); molto in là: "il 12 marzo 2031"
+function dayRef(iso) {
+  const dd = Math.abs(P.diffDays(P.todayISO(), iso));
+  if (dd > 400) return `il ${fmtDay(iso)}`;
+  const d = P.parseISO(iso), sameYear = iso.slice(0, 4) === P.todayISO().slice(0, 4);
+  return d.toLocaleDateString('it-IT', sameYear ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
 function whenText(it) {
-  const dd = P.diffDays(P.todayISO(), it.due);
-  const w = dayWord(it.due) || (dd >= 2 && dd <= 6 ? P.parseISO(it.due).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }) : null);
-  if (it.time) return `${w || 'il ' + fmtDay(it.due)} alle ${timeLbl(it.time)}`;
-  return w || `il ${fmtDay(it.due)}`;
+  const w = dayWord(it.due) || dayRef(it.due);
+  return it.time ? `${w} alle ${timeLbl(it.time)}` : w;
 }
 function remindText(d, timed) {
   const iso = P.toISO(d), w = dayWord(iso), nine = !timed && d.getHours() === 9 && d.getMinutes() === 0;
   if (w === 'oggi') return `alle ${hm(d)}`;
   if (w === 'domani') return `domani alle ${hm(d)}`;
   if (P.diffDays(P.todayISO(), iso) > 300) return `a ${fmtMonth(iso)}`;
-  return nine ? `il ${fmtDay(iso)}` : `il ${fmtDay(iso)} alle ${hm(d)}`;
+  return nine ? dayRef(iso) : `${dayRef(iso)} alle ${hm(d)}`;
 }
 // solo le vere scadenze "scadono": un parrucchiere o una commissione no
 const DEADLINE = new Set(['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'caldaia', 'abbonamento', 'bolletta', 'garanzia', 'tasse']);
@@ -669,11 +674,11 @@ function rowSub(it, st) {
   if (st.key === 'now') {
     if (it.time) return st.minutesLeft >= 0 ? cap(whenText(it)) : `Era ${whenText(it)}`;
     const exp = DEADLINE.has(it.type) && it.type !== 'caldaia';
-    if (st.left < 0) return exp ? `Scaduto il ${fmtDay(it.due)}` : `Era il ${fmtDay(it.due)}`;
+    if (st.left < 0) return exp ? `Scaduto ${dayRef(it.due)}` : `Era ${dayRef(it.due)}`;
     if (st.left <= 1) return exp ? `Scade ${dayWord(it.due)}` : cap(dayWord(it.due));
-    return exp ? `Scade il ${fmtDay(it.due)}` : `Il ${fmtDay(it.due)}`;
+    return exp ? `Scade ${dayRef(it.due)}` : cap(dayRef(it.due));
   }
-  return `Ti avviso ${remindText(st.remind, !!it.time)}`;
+  return `Ti avviso ${remindText(st.remind, !!(it.time || it.remindOn))}`;
 }
 
 // ================= Home =================
@@ -1031,7 +1036,7 @@ function savedLine(it) {
   const w = it.rep ? `${cap(P.repText(it.rep))}${it.time ? ' alle ' + timeLbl(it.time) : ''} · si parte ${day}` : cap(whenText(it));
   if (st.key === 'now') return `${w} · lo trovi in cima`;
   if (P.remindAt(it).getTime() === P.dueAt(it).getTime() || it.rep && P.toISO(st.remind) === it.due) return w; // avviso puntuale: basta il quando
-  const r = P.toISO(st.remind) === it.due && it.time ? `alle ${hm(st.remind)}` : remindText(st.remind, !!it.time);
+  const r = P.toISO(st.remind) === it.due && it.time ? `alle ${hm(st.remind)}` : remindText(st.remind, !!(it.time || it.remindOn));
   return `${w} · avviso ${r}`;
 }
 function savedToast(it) {
@@ -1170,7 +1175,8 @@ function leadLabel(min, timed) {
 }
 function openEditor(draft, opts = {}) {
   const state = { photo: null, time: null, leadMin: null, ...draft };
-  { const ex = draft.id ? items.find(x => x.id === draft.id) : null; state.rep = 'rep' in draft ? draft.rep || null : ex ? ex.rep || null : null; }
+  { const ex = draft.id ? items.find(x => x.id === draft.id) : null; state.rep = 'rep' in draft ? draft.rep || null : ex ? ex.rep || null : null;
+    state.remindOn = 'remindOn' in draft ? draft.remindOn || null : ex ? ex.remindOn || null : null; }
   state.typeManual = !!opts.typeLocked;
   state.autoTitle = !state.title || state.title === T(state.type).label || /^Garanzia acquisto$/.test(state.title);
   let showLeads = false;
@@ -1231,12 +1237,14 @@ function openEditor(draft, opts = {}) {
       state.due = ty.dateKind === 'purchase' ? (state.purchase ? P.addMonths(state.purchase, 24) : null) : state.date;
       const sum = body.querySelector('#eSum'); sum.hidden = !state.due;
       if (state.due) {
-        const it = { type: state.type, due: state.due, time: ty.dateKind === 'purchase' ? null : state.time, leadMin: state.leadMin };
+        const it = { type: state.type, due: state.due, time: ty.dateKind === 'purchase' ? null : state.time, leadMin: state.leadMin, remindOn: state.rep ? null : state.remindOn };
         const rem = P.remindAt(it), timed = !!it.time;
-        const lead = state.leadMin != null ? state.leadMin : P.defaultLeadMin(it);
+        const lead = it.remindOn && rem < P.dueAt(it) ? (timed ? Math.round((P.dueAt(it) - rem) / 60000) : P.diffDays(P.toISO(rem), it.due) * 1440)
+          : state.leadMin != null ? state.leadMin : P.defaultLeadMin(it);
         const pre = ty.dateKind === 'purchase' ? `Garanzia valida fino al ${fmtLong(state.due)}. ` : '';
         const fol = followText(it);
-        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(rem, timed)}, ${leadLabel(lead, timed)}.`) + (fol ? ' ' + fol : '');
+        const remTxt = it.remindOn ? `${remindText(rem, true)}, ${leadLabel(lead, timed)}` : `${remindText(rem, timed)}, ${leadLabel(lead, timed)}`;
+        body.querySelector('#eSumTxt').textContent = pre + (rem <= new Date() ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remTxt}.`) + (fol ? ' ' + fol : '');
         const leads = body.querySelector('#eLeads'); leads.hidden = !showLeads;
         leads.innerHTML = (timed ? LEADS_TIMED : LEADS_DAYS).map(([m, l]) => `<button class="chip" data-m="${m}" aria-pressed="${m === lead}">${l}</button>`).join('');
       }
@@ -1274,7 +1282,7 @@ function openEditor(draft, opts = {}) {
     body.querySelector('#eRep').addEventListener('change', e => { const v = e.target.value; if (v === 'custom') return; state.rep = repFor(v); haptic(); sync(); });
     // un interruttore: acceso = ogni settimana (o ogni mese per i pagamenti), poi si cambia dal menu accanto
     body.querySelector('#eRepT').onclick = () => { state.rep = state.rep ? null : repFor(state.type === 'bolletta' || state.type === 'tasse' ? 'm' : 'w'); haptic(); sync(); };
-    body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; sync(); });
+    body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; state.remindOn = null; sync(); });
     const drop = body.querySelector('#eDrop');
     if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); if (calOpen) renderCal(); toast(say('drop')); };
     body.querySelector('#eSave').onclick = async () => {
@@ -1284,6 +1292,7 @@ function openEditor(draft, opts = {}) {
       it.time = kindP ? null : (state.time || null);
       if (state.leadMin != null) it.leadMin = state.leadMin; else delete it.leadMin;
       if (state.rep && !T(state.type).recur && !kindP) { it.rep = state.rep; P.rollRep(it); } else delete it.rep;
+      if (state.remindOn && !it.rep) it.remindOn = state.remindOn; else delete it.remindOn;
       if (state.photo) { it.photoId = it.photoId || uid(); await DB.photoPut(it.photoId, state.photo); }
       else if (state.photoRemoved && it.photoId) { await DB.photoDel(it.photoId); delete it.photoId; }
       await DB.put(it); if (!items.includes(it)) items.push(it);
@@ -1354,7 +1363,7 @@ function openVoice(opts = {}) {
     const idle = msg => { on = false; mic.classList.remove('on'); mic.setAttribute('aria-label', 'Parla'); if (msg) say(msg); };
     const send = () => { clear(); if (closed || !ta.value.trim()) return; Ear.stop(); idle('Ho capito.'); sendT = setTimeout(() => { if (!closed && $('#vText') === ta) submitSpeech(ta.value); }, 150); };
     // dopo che hai parlato, aspetta 2 secondi e mezzo di silenzio prima di creare il MeMo
-    const armQuiet = (ms = 2500) => { clearTimeout(quiet); quiet = setTimeout(() => {
+    const armQuiet = (ms = 1800) => { clearTimeout(quiet); quiet = setTimeout(() => {
       if (ta.value.trim()) send();
       else { Ear.stop(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); }
     }, ms); };
@@ -1376,7 +1385,7 @@ function openVoice(opts = {}) {
         },
         // il telefono ha chiuso il microfono da solo: quello che hai detto resta, puoi aggiungere altro
         end: () => { if (!on || closed) return;
-          if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(2500); }
+          if (ta.value.trim()) { idle('Vuoi aggiungere altro? Tocca il microfono. Altrimenti lo segno tra un attimo.'); armQuiet(1800); }
           else { clear(); Ear.reset(); idle('Non ti ho sentito. Tocca il microfono e riprova.'); } }
       });
       if (!ok) { Ear.reset(); idle(auto ? 'Tocca il microfono e parla.' : 'Non riesco ad aprire il microfono. Tocca qui e riprova, oppure scrivi.'); auto = false; return; }
@@ -1454,6 +1463,7 @@ async function submitSpeech(text) {
     return;
   }
   if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
+  if (res.remindAsk) { askRemind(res, text); return; }
   if (res.askTime && !res.time) { askTime(res, text); return; }
   saveSpoken(res, text);
 }
@@ -1461,6 +1471,7 @@ async function saveSpoken(res, text) {
   const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
   if (res.leadMin != null && it.time) it.leadMin = res.leadMin;
   if (res.rep && !T(it.type).recur) { it.rep = res.rep; P.rollRep(it); }
+  if (res.remindOn && !it.rep) it.remindOn = res.remindOn; // l'avviso detto a parte: "ricordamelo mercoledì"
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
   const st = P.statusOf(it);
   toast(it.title, savedLine(it), [
@@ -1500,6 +1511,24 @@ function askTime(res, text) {
     t.addEventListener('input', () => { go.disabled = !t.value; });
     go.onclick = () => t.value && done(t.value);
     body.querySelector('#aNo').onclick = () => saveSpoken({ ...res, time: null }, text);
+  });
+}
+// "…ricordamelo domani sera": la cosa ha già il suo giorno, l'ora dell'avviso la scegli tu
+function askRemind(res, text) {
+  const { date, part } = res.remindAsk, now = new Date();
+  const opts = (PART_TIMES[part] || ['09:00', '13:00', '18:00']).filter(v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(date); d.setHours(h, m, 0, 0); return d > now; });
+  const what = whenText({ due: res.date, time: res.time });
+  openSheet(`<h2>A che ora te lo ricordo?</h2>
+    <p class="lead"><b>${esc(res.title)}</b> è ${esc(what)}. Te lo ricordo ${esc(whenPart(date, part))}.</p>
+    ${opts.length ? `<div class="time-picks" id="rPicks">${opts.map(v => `<button class="tpick" data-v="${v}"><b>${timeLbl(v)}</b></button>`).join('')}</div>` : ''}
+    <div class="field"><label for="rTime">Un altro orario</label><input class="input" type="time" id="rTime"></div>
+    <button class="btn btn-main" id="rGo" disabled>Ricordamelo</button>`, body => {
+    const t = body.querySelector('#rTime'), go = body.querySelector('#rGo');
+    const done = v => { const r = { ...res, remindOn: `${date}T${v}` }; delete r.remindAsk; saveSpoken(r, text); };
+    const picks = body.querySelector('#rPicks');
+    if (picks) picks.addEventListener('click', e => { const b = e.target.closest('.tpick'); if (!b) return; haptic(); done(b.dataset.v); });
+    t.addEventListener('input', () => { go.disabled = !t.value; });
+    go.onclick = () => t.value && done(t.value);
   });
 }
 $('#btnVoice').addEventListener('click', openVoice);
@@ -1553,10 +1582,10 @@ async function doneItem(it) {
   if (ty.done === 'renew') { openEditor({ id: it.id, type: it.type, title: it.title, date: null }, { head: 'Ottimo. Quando scade il nuovo?', sub: 'Inserisci la nuova scadenza e te la ricordo io. Se non ti serve più, toglilo.', typeLocked: true, markMissing: true, renew: true }); return false; }
   haptic();
   if (it.rep) {
-    const old = it.due; it.due = P.nextRep(it); P.rollRep(it); await DB.put(it); render();
+    const old = it.due; it.due = P.nextRep(it); delete it.remindOn; P.rollRep(it); await DB.put(it); render();
     toast(say('again'), `${it.title} · la prossima ${whenText(it)}`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
   } else if (ty.done === 'reschedule') {
-    const old = it.due; it.due = P.addMonths(it.due, ty.recur); await DB.put(it); render();
+    const old = it.due; it.due = P.addMonths(it.due, ty.recur); delete it.remindOn; await DB.put(it); render();
     toast(say('again'), `${it.title} · di nuovo ${whenText(it)}`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
   } else {
     const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
@@ -1597,7 +1626,7 @@ async function openDetail(id) {
     : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `${DEADLINE.has(it.type) ? 'Scade ' : ''}<b>${esc(DEADLINE.has(it.type) ? whenText(it) : cap(whenText(it)))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
   const nextList = allRemindText(it);
   const onTime = P.remindAt(it).getTime() === P.dueAt(it).getTime();
-  const remind = (it.rep ? ` Si ripete ${P.repText(it.rep)}.` : '') + (st.key === 'now' ? ' Te lo sto ricordando adesso.' : onTime ? ' Ti avviso all\'ora giusta.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`);
+  const remind = (it.rep ? ` Si ripete ${P.repText(it.rep)}.` : '') + (st.key === 'now' ? ' Te lo sto ricordando adesso.' : onTime ? ' Ti avviso all\'ora giusta.' : ` Ti avviso ${remindText(st.remind, !!(it.time || it.remindOn))}.`);
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
   const doneSub = it.rep ? `Poi te lo ricordo ${P.repText(it.rep)}.` : ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
@@ -1797,7 +1826,7 @@ function followText(it) {
 }
 function allRemindText(it) {
   const now = new Date(), next = P.remindersOf(it).filter(r => r > now);
-  return next.map(r => remindText(r, !!it.time).replace(/^il /, '').replace(/^alle /, 'oggi alle ')).join(' · ');
+  return next.map(r => cap(remindText(r, !!(it.time || it.remindOn) && r.getTime() === P.remindAt(it).getTime()).replace(/^il /, '').replace(/^alle /, 'oggi alle '))).join(' · ');
 }
 
 // ================= Notifiche: la voce di MeMo =================

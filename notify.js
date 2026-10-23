@@ -22,6 +22,7 @@
     if (d === 0) return item.time ? `oggi alle ${t}` : 'oggi';
     if (d === 1) return item.time ? `domani alle ${t}` : 'domani';
     if (d < 0) return 'già passato';
+    if (d >= 2 && d <= 6) { const wd = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'][P.parseISO(item.due).getDay()]; return item.time ? `${wd} alle ${t}` : wd; }
     if (d < 45) return `tra ${d} giorni`;
     const m = Math.round(d / 30.44);
     if (m < 18) return `tra ${m} mesi`;
@@ -140,7 +141,9 @@
     // "commissione" con le frasi della spesa solo se è davvero qualcosa da prendere
     const shop = /compr|spesa|prend|ritir|acquist|regal|pane|vino|latte|farmac|pacco|fiori|torta/i.test(item.title || '');
     const set = item.type === 'commissione' && !shop ? L.altro : L[item.type] || L.altro;
-    const tf = pick(set.T, seed), title = tf(c), named = title.includes(fake);
+    const tf = pick(set.T, seed); let title = tf(c); const named = title.includes(fake);
+    // il quando deve esserci sempre: un avviso in anticipo senza il giorno non serve a niente
+    if (c.q && c.q !== 'adesso' && !title.toLowerCase().includes(c.q.toLowerCase()) && !/scade|rinnov|garanzia/i.test(title)) title = `${title} · ${c.q}`;
     const jokes = set.B.filter(x => x && x.j), plain = set.B.filter(x => !(x && x.j));
     let bf = named && jokes.length && (seed >> 19) % 2 === 0 ? pick(jokes, seed >> 9) : (seed >> 11) % 4 === 0 ? pick(ANY, seed >> 13) : pick(plain, seed >> 9);
     if (named && (seed >> 21) % 3 === 0) bf = pick(JOKE, seed >> 5)(fake);
