@@ -616,7 +616,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.41';
+const VERSION = '1.42';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -671,9 +671,16 @@ function emojiOf(it) {
   }
   return T(it.type).emoji;
 }
-const haptic = (() => { let lbl; return () => { try { if (navigator.vibrate) { navigator.vibrate(12); return; }
-  if (!lbl) { const inp = document.createElement('input'); inp.type = 'checkbox'; inp.setAttribute('switch', ''); inp.id = 'hapticSwitch'; inp.style.display = 'none'; lbl = document.createElement('label'); lbl.htmlFor = 'hapticSwitch'; lbl.style.display = 'none'; document.body.append(inp, lbl); }
-  lbl.click(); } catch (e) {} }; })();
+// vibrazione: su Android c'è navigator.vibrate; sull'iPhone (iOS 18+) l'unico modo da una webapp è "toccare" un interruttore
+// di sistema invisibile, creato al momento dentro il suo label, che fa vibrare il telefono come gli interruttori veri
+const haptic = () => {
+  try {
+    if (navigator.vibrate && !isIOS) { navigator.vibrate(14); return; }
+    const label = document.createElement('label'); label.ariaHidden = 'true'; label.style.display = 'none';
+    const input = document.createElement('input'); input.type = 'checkbox'; input.setAttribute('switch', ''); label.appendChild(input);
+    document.head.appendChild(label); label.click(); document.head.removeChild(label);
+  } catch (e) {}
+};
 
 // ================= Date e orari in parole =================
 const pad = n => String(n).padStart(2, '0');
@@ -1525,10 +1532,12 @@ const Ear = (() => {
   function stop() { h = null; queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } }
   // chiude ma aspetta le ultime parole: il risultato finale arriva prima della fine
   function finish() { queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } else if (h && h.end) h.end(); }
+  // come finish, ma senza il "din" di chiusura dell'iPhone: si interrompe (abort) dopo aver lasciato arrivare le ultime parole
+  function quietFinish(after) { queued = null; const cb = h && h.end; setTimeout(() => { if (r && busy) { h = null; try { r.abort(); } catch (e) {} busy = false; } if (cb) cb(); }, after || 350); }
   // se qualcosa si è inceppato, la prossima volta si riparte con un orecchio nuovo
   function reset() { const old = r; r = null; busy = false; h = null; queued = null;
     if (old) { old.onresult = old.onend = old.onerror = old.onstart = null; try { old.abort(); } catch (e) {} } }
-  return { start, stop, finish, reset };
+  return { start, stop, finish, quietFinish, reset };
 })();
 // iPhone a volte ripete nei risultati tutto quello che hai già detto: qui si tiene una copia sola
 function joinResults(results) {
@@ -1782,7 +1791,7 @@ const PTT = (() => {
   }
   function finish() {
     if (mode === 'off' || mode === 'finishing') return; clear(); mode = 'finishing'; el.classList.add('idle');
-    hint(text ? 'Ho capito' : 'Un attimo…'); Ear.finish(); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
+    hint(text ? 'Ho capito' : 'Un attimo…'); Ear.quietFinish(400); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
   }
   async function finalize() {
     if (done) return; done = true; clear(); const said = text.trim();
@@ -2072,7 +2081,7 @@ function showIntro() {
   const sc = el.querySelector('.slides'), dots = el.querySelectorAll('.dots i'), next = el.querySelector('#iNext');
   const idx = () => Math.round(sc.scrollLeft / sc.clientWidth);
   sc.addEventListener('scroll', () => requestAnimationFrame(() => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); next.textContent = i === slides.length - 1 ? 'Inizia' : 'Avanti'; }), { passive: true });
-  const close = () => { store.set('intro', '1'); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
+  const close = () => { store.set('intro', '1'); window.dispatchEvent(new Event('memo:introdone')); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
   next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
   bindPresets(el);
@@ -2269,6 +2278,11 @@ function tick() {
 (async function init() {
   try { items = await DB.all(); } catch (e) { items = []; }
   await rollAll();
+  // l'iPhone, per le webapp, chiede il permesso del microfono una volta per ogni apertura: lo chiedo subito,
+  // così quando tieni premuto il tasto parti a parlare senza interruzioni
+  const warmMic = () => { if (!SR || inAppBrowser() || store.get('micWarm') === '0' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(st => st.getTracks().forEach(t => t.stop())).catch(() => {}); };
+  if (store.get('intro') === '1') setTimeout(warmMic, 600); else window.addEventListener('memo:introdone', warmMic, { once: true });
   render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if (isIOS && !isStandalone() && store.get('installHint') !== '1') $('#installHint').hidden = false;
