@@ -187,16 +187,7 @@ html{overflow-x:hidden}
 .setp .s-block{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7)}
 .setp .s-block .btn{background:rgba(255,255,255,.6)}
 .setp .s-block .btn.btn-main{background:var(--brand-grad);color:#fff}
-.g-steps{margin:0 0 18px;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:g}
-.g-steps li{counter-increment:g;display:grid;grid-template-columns:30px 1fr;gap:2px 10px;align-items:start}
-.g-steps li::before{grid-row:1 / span 2}
-.g-steps li::before{content:counter(g);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--field);color:var(--brand-ink);font-weight:800;font-size:14px}
 .g-alt li::before{content:'•'}
-.g-steps li > b{display:block;font-size:16px;grid-column:2;grid-row:1}
-.g-steps li p{grid-column:2;margin:2px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.45}
-.g-steps li p b{color:var(--ink);font-weight:750}
-.g-steps code{font:600 13px ui-monospace,Menlo,monospace;background:var(--field);padding:1px 5px;border-radius:6px}
-.g-h{font-size:18px;margin:6px 0 12px}
 .mic-help{margin-top:8px;padding:8px 14px;border-radius:999px;background:var(--field);color:var(--brand-ink);font-weight:700;font-size:14px}
 .s-row{display:flex;gap:14px;align-items:center;justify-content:space-between}
 .s-row p{margin-bottom:0}
@@ -338,16 +329,24 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .nb .nbo{display:block;font-size:15px;line-height:1.32;color:rgba(0,0,0,.85)}
 
 /* ---------- toast col nodo ---------- */
-.toast{position:fixed;left:14px;right:14px;bottom:calc(100px + env(safe-area-inset-bottom));z-index:30;max-width:560px;margin:0 auto;background:var(--toast-bg);color:var(--toast-ink);border-radius:22px;padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;font-size:15.5px;line-height:1.35;transform:translateY(24px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1.2),opacity .25s;pointer-events:none;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.toast{position:fixed;left:14px;right:14px;bottom:calc(124px + env(safe-area-inset-bottom));z-index:30;max-width:520px;margin:0 auto;background:rgba(232,236,243,.94);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);color:var(--ink);border:1px solid rgba(18,24,38,.06);border-radius:16px;padding:8px 8px 8px 10px;display:flex;align-items:center;gap:10px;font-size:14.5px;line-height:1.3;transform:translateY(16px) scale(.98);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1.15),opacity .22s;pointer-events:none;box-shadow:0 8px 24px rgba(43,72,140,.14)}
 .toast.show{transform:none;opacity:1;pointer-events:auto}
+.s-tgl{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--stroke)}
+.s-tgl div{flex:1;display:flex;flex-direction:column;gap:2px}
+.s-tgl b{font-size:15.5px;font-weight:750}
+.s-tgl span{font-size:13.5px;color:var(--ink-2);line-height:1.35}
+.tgl{flex:none;width:51px;height:31px;border-radius:16px;border:0;padding:0;background:rgba(18,24,38,.14);position:relative;transition:background .25s}
+.tgl i{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.3,.8,.3,1.2)}
+.tgl[aria-checked="true"]{background:#34C759}
+.tgl[aria-checked="true"] i{transform:translateX(20px)}
 .toast .msg{flex:1;min-width:0}
-.toast .msg b{display:block;font-weight:800}
-.toast .msg span{opacity:.65;font-size:14.5px}
-#toastActions{flex:1 0 100%;display:flex;gap:8px;justify-content:flex-end}
+.toast .msg b{display:block;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast .msg span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink-2);font-size:13px}
+#toastActions{flex:none;display:flex;gap:4px}
 #toastActions:empty{display:none}
-.toast button{color:inherit;font-weight:800;padding:9px 14px;border-radius:14px;font-size:15px;background:color-mix(in srgb, currentColor 10%, transparent)}
-.toast .tie{flex:0 0 34px;height:34px;border-radius:9px;overflow:hidden}
-.toast .tie svg{width:34px;height:34px;display:block}
+.toast button{color:var(--brand-ink);font-weight:750;padding:7px 10px;border-radius:10px;font-size:14px;background:rgba(255,255,255,.7)}
+.toast .tie{flex:0 0 26px;height:26px;border-radius:7px;overflow:hidden}
+.toast .tie svg{width:26px;height:26px;display:block}
 .tie use{stroke-dasharray:240;stroke-dashoffset:240}
 .toast.show .tie use{animation:tie .9s .1s cubic-bezier(.6,0,.2,1) forwards}
 @keyframes tie{to{stroke-dashoffset:0}}
@@ -411,7 +410,9 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .swipe-art .hand{position:absolute;z-index:3;bottom:-14px;left:50%;font-size:34px;animation:swipeHint 2.6s ease-in-out infinite}
 @keyframes swipeHint{0%,100%{transform:translateX(-50%)}30%{transform:translateX(10%)}65%{transform:translateX(-110%)}}
 .start-art{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:330px;margin-bottom:14px}
-.start-art span{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);font-weight:700;font-size:13.5px;box-shadow:0 6px 18px rgba(43,72,140,.08)}
+.start-art button{font:inherit;color:inherit;cursor:pointer}
+.start-art button[aria-pressed="true"]{color:var(--brand-ink);background:color-mix(in srgb, var(--azure) 14%, #fff)}
+.start-art span,.start-art button{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);font-weight:700;font-size:13.5px;box-shadow:0 6px 18px rgba(43,72,140,.08)}
 .share-art span{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:var(--card);border:1px solid var(--stroke)}
 .intro-foot{padding:10px 24px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:18px}
 .dots{display:flex;gap:8px}
@@ -548,7 +549,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.33';
+const VERSION = '1.34';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 function clearBadge() { try { if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {}); } catch (e) {} }
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -607,7 +608,8 @@ const hm = d => `${d.getHours()}:${pad(d.getMinutes())}`;
 const timeLbl = t => t ? t.replace(/^0(\d)/, '$1') : '';
 function dayWord(iso) { const d = P.diffDays(P.todayISO(), iso); return d === 0 ? 'oggi' : d === 1 ? 'domani' : d === -1 ? 'ieri' : null; }
 function whenText(it) {
-  const w = dayWord(it.due);
+  const dd = P.diffDays(P.todayISO(), it.due);
+  const w = dayWord(it.due) || (dd >= 2 && dd <= 6 ? P.parseISO(it.due).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }) : null);
   if (it.time) return `${w || 'il ' + fmtDay(it.due)} alle ${timeLbl(it.time)}`;
   return w || `il ${fmtDay(it.due)}`;
 }
@@ -619,7 +621,7 @@ function remindText(d, timed) {
   return nine ? `il ${fmtDay(iso)}` : `il ${fmtDay(iso)} alle ${hm(d)}`;
 }
 // solo le vere scadenze "scadono": un parrucchiere o una commissione no
-const DEADLINE = new Set(['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'caldaia', 'abbonamento', 'bolletta', 'garanzia']);
+const DEADLINE = new Set(['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'caldaia', 'abbonamento', 'bolletta', 'garanzia', 'tasse']);
 function inWords(min) {
   if (min < 0) return '';
   if (min < 60) return min <= 1 ? 'tra un minuto' : `tra ${min} minuti`;
@@ -641,9 +643,10 @@ function countParts(it, st) {
   const y = Math.round(left / 365.25); return [y, y === 1 ? 'anno' : 'anni'];
 }
 function rowSub(it, st) {
+  if (it.rep) return st.key === 'now' ? `${cap(whenText(it))} · ${P.repText(it.rep)}` : `${cap(P.repText(it.rep))}${it.time ? ' alle ' + timeLbl(it.time) : ''}`;
   if (st.key === 'now') {
     if (it.time) return st.minutesLeft >= 0 ? cap(whenText(it)) : `Era ${whenText(it)}`;
-    const exp = ['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'abbonamento', 'bolletta', 'garanzia'].includes(it.type);
+    const exp = DEADLINE.has(it.type) && it.type !== 'caldaia';
     if (st.left < 0) return exp ? `Scaduto il ${fmtDay(it.due)}` : `Era il ${fmtDay(it.due)}`;
     if (st.left <= 1) return exp ? `Scade ${dayWord(it.due)}` : cap(dayWord(it.due));
     return exp ? `Scade il ${fmtDay(it.due)}` : `Il ${fmtDay(it.due)}`;
@@ -662,13 +665,19 @@ function countUp(el, to) {
 let rowObserver = null;
 // il logo serve ancora per gli avvisi dentro l'app, ma in alto resta solo la scritta MeMo
 const LOGO_SVG = (() => { const el = document.querySelector('.brand svg'); const h = el ? el.outerHTML.replace(/display:\s*none;?/, '') : ''; if (el) el.remove(); return h; })();
-const CALM_LINES = ['Tutto sotto controllo.', 'Ho tutto sotto pinna.', 'Me lo sono segnato io.', 'Tranquillo, ce l\'ho io.', 'Lascia fare a me.', 'Tu vivi, io ricordo.', 'Nessun pensiero: ci sono io.'];
+const CALM_LINES = ['Tutto sotto controllo.', 'Ho tutto sotto pinna.', 'Me lo sono segnato io.', 'Tranquillo, ce l\'ho io.', 'Lascia fare a me.', 'Tu vivi, io ricordo.', 'Nessun pensiero: ci sono io.',
+  'Mare calmo.', 'Va tutto liscio.', 'Testa leggera, oggi.', 'Ci sono io di guardia.', 'Rilassati, nuoto io.', 'Tutto in ordine.', 'Niente di cui preoccuparsi.', 'Acque tranquille.', 'Io tengo il conto.', 'Pensa ad altro, al resto ci sono io.', 'Tutto sotto pinna, come sempre.'];
 const CALM_LINE = CALM_LINES[Math.floor(Math.random() * CALM_LINES.length)];
 // la frase sotto: parla come un amico che ti avvisa, e cambia parole ogni volta che apri l'app
-const SAY_LEAD = ['Ricordati {x}.', 'Non scordarti {x}.', 'Mi raccomando: ricordati {x}.', 'Non dimenticarti {x}.'];
-const SAY_TAIL1 = ['Te lo ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, con calma.'];
-const SAY_TAILN = ['Te li ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, uno alla volta.'];
-const SAY_SEED = [Math.random(), Math.random()];
+const SAY_LEAD = ['Ricordati {x}.', 'Non scordarti {x}.', 'Mi raccomando: ricordati {x}.', 'Non dimenticarti {x}.', 'Prossima tappa: ricordarti {x}.', 'In arrivo: ricordarti {x}.', 'Tieni a mente {x}.', 'Occhio a non scordarti {x}.', 'Tra le prossime cose: ricordarti {x}.'];
+const SAY_TAIL1 = ['Te lo ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, con calma.', 'Fino ad allora, testa libera.', 'Puoi anche scordartelo: io no.', 'Ci risentiamo al momento giusto.', 'Io aspetto, tu vivi.', 'Ti do un colpetto quando serve.'];
+const SAY_TAILN = ['Te li ricordo io al momento giusto.', 'Quando sarà ora, ti avviso io.', 'Tu non pensarci: ti faccio un fischio io.', 'Al momento giusto ci penso io.', 'Ti avviso io, uno alla volta.', 'Fino ad allora, testa libera.', 'Puoi anche scordarteli: io no.', 'Uno alla volta, senza fretta.', 'Io li tengo in fila, tu rilassati.', 'Ti do un colpetto per ognuno.'];
+const NOW_TAIL = ['Ci penso io.', 'Te lo sto ricordando adesso.', 'È il momento giusto.', 'Lo tengo in cima per te.', 'Quando è fatto, segnalo.', 'Con calma, ma è ora.', 'Eccolo qui, come promesso.'];
+const NOW_TAILN = ['Li trovi qui sotto. Ci penso io.', 'Sono qui sotto, uno alla volta.', 'Te li tengo in cima.', 'Qui sotto, con calma.', 'Uno per volta e sono fatti.'];
+const FAR_H = ['Troppo in là anche solo per ricordartelo.', 'Niente all\'orizzonte.', 'Per ora, mare aperto.', 'Lontano, lontanissimo.', 'Nessuna onda in vista.', 'Tempo libero a volontà.'];
+const EMPTY_P = ['Scadenze, appuntamenti, documenti. Te li ricordo io.', 'Una foto o una frase, e me ne occupo io.', 'Documenti, bollette, compleanni: dimmeli e dimenticali.', 'Parla, scatta o scrivi. Al resto ci penso io.'];
+const HOME_PICK = (arr, k) => arr[Math.floor(SAY_SEED[k % SAY_SEED.length] * arr.length)];
+const SAY_SEED = [Math.random(), Math.random(), Math.random(), Math.random()];
 const sayPick = (arr, k) => arr[Math.floor(SAY_SEED[k] * arr.length)];
 function tellLine(list) {
   const two = list.slice().sort((a, b) => P.dueAt(a) - P.dueAt(b)).slice(0, 2);
@@ -689,7 +698,7 @@ function render() {
   if (!active.length) {
     showNum(false); fill = 100;
     h.innerHTML = 'Dimmi cosa ricordarti.<span class="h2l">Al resto ci pensa <span class="brandw">MeMo</span>.</span>';
-    p.textContent = 'Scadenze, appuntamenti, documenti. Te li ricordo io.';
+    p.textContent = HOME_PICK(EMPTY_P, 2);
     mini.textContent = 'Nessuna scadenza';
   } else if (groups.now.length) {
     const n = groups.now.length, first = groups.now[0];
@@ -697,7 +706,7 @@ function render() {
     showNum(true); fill = 100; countUp(num, n);
     unit.textContent = allToday ? 'MeMo per oggi' : (n === 1 ? 'MeMo da ricordare' : 'MeMo da ricordare');
     h.textContent = n === 1 ? first.i.title : `${first.i.title} e ${n === 2 ? "un'altra cosa" : (n - 1) + ' altre cose'}`;
-    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. Ci penso io.` : 'Li trovi qui sotto. Ci penso io.';
+    p.textContent = n === 1 ? `${rowSub(first.i, first.s)}. ${HOME_PICK(NOW_TAIL, 2)}` : HOME_PICK(NOW_TAILN, 3);
     mini.textContent = `${n} MeMo ${allToday ? 'per oggi' : 'da ricordare'}`;
   } else {
     // quanti MeMo ci sono nel prossimo giorno che ne ha: oggi, domani, oppure tra qualche giorno
@@ -707,8 +716,8 @@ function render() {
     fill = 100;
     if (days > 183) {
       showNum(false);
-      h.textContent = 'Troppo in là anche solo per ricordartelo.';
-      p.textContent = `Il prossimo MeMo è a ${fmtMonth(day)}. Ci penso io.`;
+      h.textContent = HOME_PICK(FAR_H, 3);
+      p.textContent = `Il prossimo MeMo è a ${fmtMonth(day)}. ${HOME_PICK(['Ci penso io.', 'Te lo ricordo io.', 'Fino ad allora, niente.', 'Goditi la calma.'], 2)}`;
       mini.textContent = 'Niente in vista';
     } else {
       showNum(true); countUp(num, n);
@@ -877,6 +886,8 @@ window.addEventListener('resize', () => goPage(page, 0, true));
 })();
 // le scadenze che si ripetono (bollo, compleanno...) compaiono in tutti gli anni
 function occurrencesIn(it, y, m) {
+  if (it.rep) { const start = `${monthKey(y, m)}-01`, end = `${monthKey(y, m)}-${pad(P.lastDay(y, m + 1))}`;
+    return P.occurrences(it, end, 1200).map((d, k) => ({ date: d, rep: k > 0 })).filter(o => o.date >= start); }
   const rec = T(it.type).recur, start = `${monthKey(y, m)}-01`, end = `${monthKey(y, m)}-${pad(P.lastDay(y, m + 1))}`, out = [];
   let d = it.due, k = 0;
   while (d <= end && k < 300) { if (d >= start) out.push({ date: d, rep: k > 0 }); if (!rec) break; k++; d = P.addMonths(it.due, rec * k); }
@@ -893,7 +904,7 @@ function goMonth(delta, anim, target) {
   renderCal(anim);
 }
 function calRow(it, st, rep) {
-  const sub = rep ? `Si ripete${T(it.type).recur === 12 ? ' ogni anno' : ''}` : it.time ? `Alle ${timeLbl(it.time)}. ${rowSub(it, st)}` : rowSub(it, st);
+  const sub = rep ? `Si ripete${it.rep ? ' ' + P.repText(it.rep) : T(it.type).recur === 12 ? ' ogni anno' : ''}` : it.time ? `Alle ${timeLbl(it.time)}. ${rowSub(it, st)}` : rowSub(it, st);
   return `<div class="row-wrap in"><button class="row" data-s="${rep ? 'calm' : st.key}" data-id="${it.id}">
     <span class="orb" aria-hidden="true">${emojiOf(it)}</span>
     <span class="txt"><span class="t">${esc(it.title)}</span><span class="s">${esc(sub)}</span></span></button></div>`;
@@ -979,8 +990,9 @@ $('#sheetWrap').addEventListener('touchmove', e => {
 
 // ================= Toast =================
 let toastTimer;
-function toast(title, sub, actions = []) {
-  const el = $('#toast');
+let toastTap = null;
+function toast(title, sub, actions = [], onTap = null) {
+  const el = $('#toast'); toastTap = onTap; el.classList.toggle('tap', !!onTap);
   $('#toastMsg').innerHTML = `<b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}`;
   const box = $('#toastActions'); box.innerHTML = '';
   actions.forEach(a => { const b = document.createElement('button'); b.textContent = a.label; b.onclick = () => { hideToast(); a.fn(); }; box.appendChild(b); });
@@ -988,9 +1000,20 @@ function toast(title, sub, actions = []) {
   clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, actions.length ? 3800 : 2200);
 }
 function hideToast() { $('#toast').classList.remove('show'); }
-function savedToast(it) {
+$('#toastMsg').addEventListener('click', () => { if (toastTap) { const f = toastTap; toastTap = null; hideToast(); f(); } });
+// "Domani alle 18:00 · avviso alle 17:30": cosa hai salvato e quando ti avviso, in una riga
+function savedLine(it) {
   const st = P.statusOf(it);
-  toast(say('saved'), st.key === 'now' ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`);
+  if (it.purchase) return `Garanzia fino al ${fmtLong(it.due)}`;
+  const day = it.rep ? (dayWord(it.due) || P.parseISO(it.due).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })) : '';
+  const w = it.rep ? `${cap(P.repText(it.rep))}${it.time ? ' alle ' + timeLbl(it.time) : ''} · si parte ${day}` : cap(whenText(it));
+  if (st.key === 'now') return `${w} · lo trovi in cima`;
+  if (P.remindAt(it).getTime() === P.dueAt(it).getTime() || it.rep && P.toISO(st.remind) === it.due) return w; // avviso puntuale: basta il quando
+  const r = P.toISO(st.remind) === it.due && it.time ? `alle ${hm(st.remind)}` : remindText(st.remind, !!it.time);
+  return `${w} · avviso ${r}`;
+}
+function savedToast(it) {
+  toast(it.title, savedLine(it), [{ label: 'Annulla', fn: async () => { await removeItem(it); render(); } }], () => openDetail(it.id));
 }
 
 // ================= Foto =================
@@ -1125,6 +1148,7 @@ function leadLabel(min, timed) {
 }
 function openEditor(draft, opts = {}) {
   const state = { photo: null, time: null, leadMin: null, ...draft };
+  { const ex = draft.id ? items.find(x => x.id === draft.id) : null; state.rep = 'rep' in draft ? draft.rep || null : ex ? ex.rep || null : null; }
   state.typeManual = !!opts.typeLocked;
   state.autoTitle = !state.title || state.title === T(state.type).label || /^Garanzia acquisto$/.test(state.title);
   let showLeads = false;
@@ -1136,6 +1160,7 @@ function openEditor(draft, opts = {}) {
       <div class="pair"><div style="flex:1.45"><input class="input" type="date" id="eDate" aria-label="Giorno"></div>
       <div style="flex:1" id="eTimeBox"><input class="input" type="time" id="eTime" aria-label="Ora, se c'è"></div></div>
       <div class="chips" id="eQuick" style="margin-top:10px"></div></div>
+    <div class="field" id="eRepBox"><label for="eRep">Si ripete?</label><select class="input" id="eRep"></select></div>
     <div class="field"><span class="lbl">Foto o documento <span style="font-weight:600;color:var(--ink-3)">(facoltativo)</span></span><div id="ePhoto"></div></div>
     <div class="summary" id="eSum" hidden><div class="row1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2.2 2.2 0 0 0 4 0"/></svg><p id="eSumTxt"></p><button class="chg" id="eChg">Cambia</button></div><div class="chips" id="eLeads" hidden></div></div>
     <button class="btn btn-main" id="eSave">Ricordamelo</button>
@@ -1193,6 +1218,17 @@ function openEditor(draft, opts = {}) {
         const leads = body.querySelector('#eLeads'); leads.hidden = !showLeads;
         leads.innerHTML = (timed ? LEADS_TIMED : LEADS_DAYS).map(([m, l]) => `<button class="chip" data-m="${m}" aria-pressed="${m === lead}">${l}</button>`).join('');
       }
+      // ripetizione: per i tipi che si ripetono già da soli (bollo, compleanni...) non serve
+      const repBox = body.querySelector('#eRepBox'), repEl = body.querySelector('#eRep');
+      repBox.hidden = ty.dateKind === 'purchase' || !!ty.recur;
+      if (!repBox.hidden) {
+        const d = state.date ? P.parseISO(state.date) : null, wd = d ? d.getDay() : null, dom = d ? d.getDate() : null;
+        if (state.rep && d) { if (state.rep.u === 'w' && state.rep.wd && state.rep.wd.length === 1) state.rep.wd = [wd]; if (state.rep.u === 'm' && state.rep.dom != null && state.rep.dom !== 'last') state.rep.dom = dom; }
+        const opts = [['no', 'No'], ['d', 'Ogni giorno'], ['w', d ? `Ogni ${['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'][wd]}` : 'Ogni settimana'], ['m', d ? (dom === 1 ? 'Il primo di ogni mese' : `Il ${dom} di ogni mese`) : 'Ogni mese'], ['y', 'Ogni anno']];
+        const cur = !state.rep ? 'no' : (state.rep.n === 1 && !(state.rep.wd && state.rep.wd.length > 1) && state.rep.dom !== 'last') ? state.rep.u : 'custom';
+        if (cur === 'custom') opts.splice(1, 0, ['custom', cap(P.repText(state.rep))]);
+        repEl.innerHTML = opts.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`).join('');
+      }
       body.querySelector('#eSave').disabled = !state.due || !titleEl.value.trim();
     };
     const setType = id => {
@@ -1210,6 +1246,13 @@ function openEditor(draft, opts = {}) {
     timeEl.addEventListener('change', () => { state.time = timeEl.value || null; state.leadMin = null; if (state.time && !state.date) state.date = P.todayISO(); sync(); });
     body.querySelector('#eQuick').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; if (T(state.type).dateKind === 'purchase') state.purchase = c.dataset.d; else state.date = c.dataset.d; sync(); });
     body.querySelector('#eChg').onclick = () => { showLeads = !showLeads; sync(); };
+    body.querySelector('#eRep').addEventListener('change', e => {
+      const v = e.target.value; if (v === 'custom') return;
+      if (!state.date) state.date = P.todayISO();
+      const d = P.parseISO(state.date);
+      state.rep = v === 'no' ? null : v === 'w' ? { u: 'w', n: 1, wd: [d.getDay()] } : v === 'm' ? { u: 'm', n: 1, dom: d.getDate() } : { u: v, n: 1 };
+      haptic(); sync();
+    });
     body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; sync(); });
     const drop = body.querySelector('#eDrop');
     if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); if (calOpen) renderCal(); toast(say('drop')); };
@@ -1219,6 +1262,7 @@ function openEditor(draft, opts = {}) {
       it.type = state.type; it.title = titleEl.value.trim(); it.due = state.due; it.purchase = kindP ? state.purchase : null;
       it.time = kindP ? null : (state.time || null);
       if (state.leadMin != null) it.leadMin = state.leadMin; else delete it.leadMin;
+      if (state.rep && !T(state.type).recur && !kindP) { it.rep = state.rep; P.rollRep(it); } else delete it.rep;
       if (state.photo) { it.photoId = it.photoId || uid(); await DB.photoPut(it.photoId, state.photo); }
       else if (state.photoRemoved && it.photoId) { await DB.photoDel(it.photoId); delete it.photoId; }
       await DB.put(it); if (!items.includes(it)) items.push(it);
@@ -1382,12 +1426,12 @@ async function submitSpeech(text) {
 async function saveSpoken(res, text) {
   const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
   if (res.leadMin != null && it.time) it.leadMin = res.leadMin;
+  if (res.rep && !T(it.type).recur) { it.rep = res.rep; P.rollRep(it); }
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
   const st = P.statusOf(it);
-  toast(`${it.title}, ${it.purchase ? 'garanzia fino al ' + fmtLong(it.due) : whenText(it)}`, st.key === 'now' ? 'Te lo ricordo da subito: lo trovi in cima.' : `Ti avviso ${remindText(st.remind, !!it.time)}.`, [
-    { label: 'Modifica', fn: () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase }, { head: 'Modifica', typeLocked: true }) },
+  toast(it.title, savedLine(it), [
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
-  ]);
+  ], () => openDetail(it.id));
 }
 // "domattina", "domani sera", oppure un impegno con un orario che non è quello dell'avviso: l'ora dell'avviso la scegli tu
 const PART_TIMES = { mattina: ['07:30', '08:00', '08:30', '09:00', '10:00', '11:00'], pomeriggio: ['14:00', '15:00', '16:00', '17:00'], sera: ['18:00', '19:00', '20:00', '21:00'], notte: ['21:00', '22:00', '23:00'] };
@@ -1407,10 +1451,10 @@ function askTime(res, text) {
   }
   for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '13:00', '18:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
   const future = v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(res.date); d.setHours(h, m, 0, 0); return d > now; };
-  opts = opts.filter(([v]) => future(v));
+  if (!res.rep) opts = opts.filter(([v]) => future(v));
   const when = whenPart(res.date, part);
   openSheet(`<h2>A che ora te lo ricordo?</h2>
-    <p class="lead"><b>${esc(res.title)}</b>, ${esc(when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ''}</p>
+    <p class="lead"><b>${esc(res.title)}</b>, ${esc(res.rep ? P.repText(res.rep) : when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ''}</p>
     ${opts.length ? `<div class="time-picks" id="aPicks">${opts.map(([v, l]) => `<button class="tpick" data-v="${v}"><b>${timeLbl(v)}</b>${l ? `<span>${esc(l)}</span>` : ''}</button>`).join('')}</div>` : ''}
     <div class="field"><label for="aTime">Un altro orario</label><input class="input" type="time" id="aTime"></div>
     <button class="btn btn-main" id="aGo" disabled>Ricordamelo</button>
@@ -1462,10 +1506,11 @@ $('#btnVoice').addEventListener('click', openVoice);
 // ================= Fatto =================
 // lo stesso concetto, con parole sempre diverse (e mai due volte di fila la stessa)
 const SAYINGS = {
-  done: ['Fatto. Una cosa in meno.', 'Fatto! Testa più leggera.', 'Ecco fatto. Una in meno.', 'Bravo, spuntato.', 'Fatto. Me lo scordo anche io.', 'Una cosa in meno a cui pensare.', 'Fatto. Avanti il prossimo.', 'Ottimo, archiviato.', 'Fatto e dimenticato.'],
-  drop: ['Tolto. Una cosa in meno.', 'Via, non ci pensiamo più.', 'Tolto. Più spazio in testa.', 'Sparito. Come se non fosse mai esistito.', 'Tolto di mezzo.'],
-  again: ['Fatto. Alla prossima.', 'Fatto. Ci rivediamo al prossimo giro.', 'Fatto. Il prossimo lo tengo io.', 'Spuntato. Alla prossima volta.'],
-  saved: ['Fatto. Puoi dimenticartelo.', 'Segnato. Ora non ci pensare più.', 'Ce l\'ho io. Tu pensa ad altro.', 'Fatto. Da qui ci penso io.', 'Preso nota. Puoi lasciarlo andare.']
+  done: ['Fatto. Una cosa in meno.', 'Fatto! Testa più leggera.', 'Ecco fatto. Una in meno.', 'Bravo, spuntato.', 'Fatto. Me lo scordo anche io.', 'Una cosa in meno a cui pensare.', 'Fatto. Avanti il prossimo.', 'Ottimo, archiviato.', 'Fatto e dimenticato.',
+    'Spuntato con stile.', 'Missione compiuta.', 'Via dalla lista.', 'Fatto. Leggero come una bolla.', 'Uno di meno. Bel lavoro.', 'Fatto! Il pesciolino approva.', 'Cancellato dalla testa.', 'Fatto. Te lo sei tolto.', 'Ottimo. Pagina pulita.'],
+  drop: ['Tolto. Una cosa in meno.', 'Via, non ci pensiamo più.', 'Tolto. Più spazio in testa.', 'Sparito. Come se non fosse mai esistito.', 'Tolto di mezzo.', 'Eliminato. Nessun rimpianto.', 'Via, come una bolla.', 'Tolto. Si respira meglio.'],
+  again: ['Fatto. Alla prossima.', 'Fatto. Ci rivediamo al prossimo giro.', 'Fatto. Il prossimo lo tengo io.', 'Spuntato. Alla prossima volta.', 'Fatto. Il giro ricomincia.', 'Fatto. Ci risentiamo.', 'Spuntato. Al prossimo appuntamento ci penso io.', 'Fatto. Ti richiamo io la prossima volta.'],
+  saved: ['Fatto. Puoi dimenticartelo.', 'Segnato. Ora non ci pensare più.', 'Ce l\'ho io. Tu pensa ad altro.', 'Fatto. Da qui ci penso io.', 'Preso nota. Puoi lasciarlo andare.', 'Segnato. Testa libera.', 'Me lo tengo io.', 'Archiviato in memoria (la mia).', 'Fatto. Ora è un problema mio.', 'Preso. Tu vai tranquillo.']
 };
 const lastSaid = {};
 function say(kind) { const a = SAYINGS[kind]; let k; do { k = Math.floor(Math.random() * a.length); } while (a.length > 1 && k === lastSaid[kind]); lastSaid[kind] = k; return a[k]; }
@@ -1473,13 +1518,16 @@ async function doneItem(it) {
   const ty = T(it.type);
   if (ty.done === 'renew') { openEditor({ id: it.id, type: it.type, title: it.title, date: null }, { head: 'Ottimo. Quando scade il nuovo?', sub: 'Inserisci la nuova scadenza e te la ricordo io. Se non ti serve più, toglilo.', typeLocked: true, markMissing: true, renew: true }); return false; }
   haptic();
-  if (ty.done === 'reschedule') {
+  if (it.rep) {
+    const old = it.due; it.due = P.nextRep(it); P.rollRep(it); await DB.put(it); render();
+    toast(say('again'), `${it.title} · la prossima ${whenText(it)}`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
+  } else if (ty.done === 'reschedule') {
     const old = it.due; it.due = P.addMonths(it.due, ty.recur); await DB.put(it); render();
-    toast(say('again'), `Te lo ricordo di nuovo: ${whenText(it)}.`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
+    toast(say('again'), `${it.title} · di nuovo ${whenText(it)}`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
   } else {
     const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
     await removeItem(it); render();
-    toast(say('done'), null, [{ label: 'Annulla', fn: async () => { await DB.put(it); if (photo) await DB.photoPut(it.photoId, photo); items.push(it); render(); } }]);
+    toast(say('done'), it.title, [{ label: 'Annulla', fn: async () => { await DB.put(it); if (photo) await DB.photoPut(it.photoId, photo); items.push(it); render(); } }]);
   }
   return true;
 }
@@ -1514,50 +1562,24 @@ async function openDetail(id) {
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
     : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `${DEADLINE.has(it.type) ? 'Scade ' : ''}<b>${esc(DEADLINE.has(it.type) ? whenText(it) : cap(whenText(it)))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
   const nextList = allRemindText(it);
-  const remind = st.key === 'now' ? ' Te lo sto ricordando adesso.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`;
+  const onTime = P.remindAt(it).getTime() === P.dueAt(it).getTime();
+  const remind = (it.rep ? ` Si ripete ${P.repText(it.rep)}.` : '') + (st.key === 'now' ? ' Te lo sto ricordando adesso.' : onTime ? ' Ti avviso all\'ora giusta.' : ` Ti avviso ${remindText(st.remind, !!it.time)}.`);
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
-  const doneSub = ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
+  const doneSub = it.rep ? `Poi te lo ricordo ${P.repText(it.rep)}.` : ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
     ${photo ? `<img class="thumb" id="dPhoto" src="${photo}" alt="Foto salvata, tocca per ingrandire">` : ''}
-    ${ty.todo ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(ty.todo)}</p>${ty.link ? `<a class="link" href="${ty.link.url}" target="_blank" rel="noopener">${esc(ty.link.label)}</a>` : ''}</div>` : ''}
+    ${(it.todo || ty.todo) ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(it.todo || ty.todo)}</p>${(it.link || ty.link) ? `<a class="link" href="${(it.link || ty.link).url}" target="_blank" rel="noopener">${esc((it.link || ty.link).label)}</a>` : ''}</div>` : ''}
     ${nextList ? `<div class="d-card"><span class="lbl">I prossimi avvisi</span><p class="todo" style="margin:0">${esc(nextList)}</p></div>` : ''}
     ${it.said ? `<div class="d-card"><span class="lbl">Mi avevi detto</span><p class="todo" style="margin:0">«${esc(it.said)}»</p></div>` : ''}
     <button class="btn btn-main" id="dDone">${doneLabel}</button>${doneSub ? `<p class="fine">${doneSub}</p>` : ''}
     <div class="btn-row"><button class="btn btn-ghost" id="dEdit">Modifica</button><button class="btn btn-ghost btn-danger" id="dDel">Elimina</button></div>`, body => {
     const ph = body.querySelector('#dPhoto'); if (ph) ph.onclick = () => openViewer(photo);
-    body.querySelector('#dEdit').onclick = () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase, photo }, { head: 'Modifica', typeLocked: true });
+    body.querySelector('#dEdit').onclick = () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase, rep: it.rep || null, photo }, { head: 'Modifica', typeLocked: true });
     body.querySelector('#dDel').onclick = async () => { if (!confirm(`Elimino «${it.title}»?`)) return; await removeItem(it); closeSheet(); render(); toast('Eliminato.'); };
     body.querySelector('#dDone').onclick = async () => { if (ty.done !== 'renew') closeSheet(); await doneItem(it); };
   });
 }
 function openViewer(src) { const v = document.createElement('div'); v.className = 'viewer'; v.innerHTML = `<img src="${src}" alt="Foto"><button aria-label="Chiudi"><svg width="16" height="16" viewBox="0 0 16 16" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button>`; v.onclick = () => v.remove(); document.body.appendChild(v); }
-
-// ================= Calendario (.ics) =================
-function icsText(list) {
-  const e = s => String(s).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MeMo//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
-  for (const it of list) {
-    const ty = T(it.type), d = it.due.replace(/-/g, '');
-    L.push('BEGIN:VEVENT', `UID:${it.id}@memo`, `DTSTAMP:${stamp}`);
-    if (it.time) L.push(`DTSTART:${d}T${it.time.replace(':', '')}00`, 'DURATION:PT30M');
-    else L.push(`DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${P.addDays(it.due, 1).replace(/-/g, '')}`);
-    L.push(`SUMMARY:${e(it.title)}`, `DESCRIPTION:${e(ty.todo || 'Un MeMo per te')}`);
-    const start = it.time ? P.dueAt(it) : P.parseISO(it.due);
-    for (const r of P.remindersOf(it)) {
-      const m = Math.round((r - start) / 60000);
-      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e(it.title)}`, `TRIGGER:${m < 0 ? '-' : ''}PT${Math.abs(m)}M`, 'END:VALARM');
-    }
-    L.push('END:VEVENT');
-  }
-  L.push('END:VCALENDAR'); return L.join('\r\n');
-}
-function addToCalendar(list) {
-  if (!list.length) { toast("Non c'è ancora niente da aggiungere."); return; }
-  const url = URL.createObjectURL(new Blob([icsText(list)], { type: 'text/calendar' }));
-  const a = document.createElement('a'); a.href = url; a.rel = 'noopener'; if (!isIOS) a.download = 'memo.ics';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-}
 
 // ================= Anticipi degli avvisi (modificabili) =================
 const LEAD_DEFAULTS = {}; P.TYPES.forEach(t => LEAD_DEFAULTS[t.id] = { lead: t.lead, leadMin: t.leadMin });
@@ -1573,9 +1595,9 @@ function saveLeadPref(id, key, val) {
 applyLeadPrefs();
 const LEAD_GROUPS = [
   ['Documenti', ['cie', 'passaporto', 'patente', 'tessera']],
-  ['Auto', ['bollo', 'revisione', 'assicurazione']],
-  ['Casa e conti', ['bolletta', 'abbonamento', 'caldaia', 'garanzia']],
-  ['Agenda', ['appuntamento', 'chiamata', 'salute', 'viaggio', 'compleanno', 'altro']]
+  ['Auto', ['bollo', 'revisione', 'assicurazione', 'gomme']],
+  ['Casa e conti', ['bolletta', 'tasse', 'abbonamento', 'caldaia', 'garanzia']],
+  ['Agenda', ['appuntamento', 'chiamata', 'salute', 'viaggio', 'compleanno', 'commissione', 'altro']]
 ];
 const DAY_OPTS = [[0, 'La mattina stessa'], [1, 'Il giorno prima'], [3, '3 giorni prima'], [7, 'Una settimana prima'], [15, '15 giorni prima'], [30, 'Un mese prima'], [60, '2 mesi prima'], [90, '3 mesi prima'], [120, '4 mesi prima'], [180, '6 mesi prima']];
 const MIN_OPTS = [[5, '5 min prima'], [10, '10 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [180, '3 ore prima'], [1440, 'Il giorno prima']];
@@ -1590,7 +1612,7 @@ function openLeads() {
       <div class="lrow${open === id ? ' open' : ''}"><button class="lhead" data-id="${id}"><span class="le" aria-hidden="true">${t.emoji}</span><span class="ln">${esc(t.label)}</span><span class="lv">${cap(leadShort(t))}</span></button>
       ${open === id ? `<div class="chips lopts">${(t.leadMin != null ? MIN_OPTS : DAY_OPTS).map(([v, l]) => `<button class="chip" data-v="${v}" aria-pressed="${v === (t.leadMin != null ? t.leadMin : t.lead)}">${l}</button>`).join('')}</div>` : ''}</div>`; }).join('')}</div>`).join('');
   };
-  openSheet(`<h2>Quando ti avviso</h2><p class="lead">MeMo sceglie da solo il momento giusto. Se preferisci, cambialo qui: vale per tutti i MeMo di quel tipo.</p>
+  openSheet(`<h2>Quando ti avviso</h2><p class="lead">Tocca un tipo per cambiarlo. Vale per tutti i MeMo di quel tipo.</p>
     <div id="lList"></div><button class="btn btn-ghost" id="lReset" style="margin-top:16px">Torna alle scelte di MeMo</button>`, body => {
     draw(body);
     body.querySelector('#lList').addEventListener('click', e => {
@@ -1602,18 +1624,42 @@ function openLeads() {
   });
 }
 
+// ================= Scadenze di tutti: un tocco e ci sono =================
+const nextDate = (mo, d) => { const t = P.todayISO(), y = +t.slice(0, 4); let c = `${y}-${pad(mo)}-${pad(d)}`; if (c < t) c = `${y + 1}-${pad(mo)}-${pad(d)}`; return c; };
+const PRESETS = [
+  { id: 'gomme', label: '🛞 Cambio gomme', short: '🛞 Gomme', make: () => [
+      { type: 'gomme', title: 'Montare le gomme invernali', due: nextDate(11, 15), leadMin: 14 * 1440 },
+      { type: 'gomme', title: 'Rimettere le gomme estive', due: nextDate(5, 15), leadMin: 30 * 1440 }],
+    done: 'Invernali entro il 15 novembre, estive entro il 15 maggio.' },
+  { id: 'imu', label: '🏛️ IMU', make: () => [
+      { type: 'tasse', title: "Pagare l'IMU (acconto)", due: nextDate(6, 16), todo: "Si paga con l'F24, anche dall'home banking. Sulla prima casa di solito non si paga." },
+      { type: 'tasse', title: "Pagare l'IMU (saldo)", due: nextDate(12, 16), todo: "Si paga con l'F24, anche dall'home banking. Sulla prima casa di solito non si paga." }],
+    done: 'Acconto il 16 giugno, saldo il 16 dicembre.' },
+  { id: '730', label: '🧾 730', make: () => [
+      { type: 'tasse', title: 'Inviare il 730', due: nextDate(9, 30), leadMin: 139 * 1440, todo: "Il precompilato si vede dal 30 aprile e si invia da metà maggio, dal sito dell'Agenzia delle Entrate. Ultimo giorno: 30 settembre.", link: { label: '730 precompilato', url: 'https://infoprecompilata.agenziaentrate.gov.it/' } }],
+    done: 'Te lo ricordo da metà maggio. Ultimo giorno: 30 settembre.' }
+];
+const hasPreset = id => items.some(i => i.preset === id);
+const preLabel = (p, short) => short && p.short ? p.short : p.label;
+async function addPreset(id) {
+  const p = PRESETS.find(x => x.id === id); if (!p) return;
+  if (hasPreset(id)) { toast('Ce l\'hai già.', 'Lo trovi tra i tuoi MeMo.'); return; }
+  for (const d of p.make()) { const it = { id: uid(), createdAt: new Date().toISOString(), time: null, purchase: null, preset: id, ...d }; await DB.put(it); items.push(it); }
+  haptic(); render(); toast(`${p.label.replace(/^\S+\s/, '')}: fatto.`, p.done);
+}
+function bindPresets(box) {
+  box.querySelectorAll('[data-pre]').forEach(b => b.onclick = async () => { await addPreset(b.dataset.pre); b.setAttribute('aria-pressed', 'true'); b.textContent = '✓ ' + preLabel(PRESETS.find(x => x.id === b.dataset.pre), !!b.dataset.short).replace(/^\S+\s/, ''); });
+}
+
 // ================= Impostazioni =================
 function renderSettings() {
-  const nPhotos = items.filter(i => i.photoId).length;
   const body = $('#setBody');
   body.innerHTML = `
     ${notifBlock()}
-    <div class="s-block"><h3>Avvisi</h3><p>MeMo sceglie da solo il momento giusto: mesi prima per i documenti, un quarto d'ora per un appuntamento, 5 minuti per una chiamata. E se non lo segni come fatto, te lo ricorda ancora.</p>
-      <button class="btn btn-ghost" id="sLeads" style="margin-bottom:10px">Cambia quando ti avviso</button>
-      <button class="btn btn-ghost" id="sTest">Prova una notifica</button></div>
-    <div class="s-block"><h3>Le tue foto</h3><p>Ogni foto resta solo su questo telefono, insieme al suo MeMo, così puoi riguardare il documento quando serve.${nPhotos ? ` Ora ne hai ${nPhotos}.` : ''}</p></div>
-    <div class="s-block"><h3>Backup</h3><p>Salva una copia ogni tanto, foto comprese, e tienila su iCloud Drive.</p>
+    <div class="s-block"><h3>Backup</h3><p>Le foto e i documenti restano solo su questo iPhone: non li salvo da nessun'altra parte. Ogni tanto salva una copia su iCloud Drive.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
+    <div class="s-block"><h3>Quando ti avviso</h3><p>Lo scelgo io per ogni tipo di MeMo. Se preferisci, cambialo.</p>
+      <button class="btn btn-ghost" id="sLeads">Cambia gli anticipi</button></div>
     <button class="btn btn-ghost" id="sIntro" style="background:rgba(255,255,255,.5)">Rivedi come funziona</button><p class="fine">MeMo · versione ${VERSION}</p>`;
   const nb = body.querySelector('#sNotif');
   if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st;
@@ -1622,54 +1668,26 @@ function renderSettings() {
     if (st === 'on') toast('Notifiche attive.', 'Da ora ti avviso anche ad app chiusa.');
     else if (st === 'error') toast('Non sono riuscito ad attivarle.', 'Controlla la connessione e riprova.');
   };
-  const sg = body.querySelector('#sSiriGuide'); if (sg) { sg.onclick = openSiriGuide; body.querySelector('#sSiriCopy').onclick = e => copySiri(e.currentTarget); if (store.get('reg') !== '1') Push.register(); }
+  const wk = body.querySelector('#sWeek');
+  if (wk) wk.onclick = () => { const on = !weeklyOn(); store.set('weekly', on ? '1' : '0'); wk.setAttribute('aria-checked', on); haptic(); Push.sync();
+    toast(on ? 'Riepilogo attivo.' : 'Riepilogo spento.', on ? 'Domenica sera ti racconto la settimana.' : 'Niente più riepilogo della domenica.'); };
   body.querySelector('#sLeads').onclick = () => openLeads();
-  body.querySelector('#sTest').onclick = () => testNotification();
   body.querySelector('#sExp').onclick = exportBackup;
   body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
   body.querySelector('#sIntro').onclick = () => { goPage('home'); setTimeout(showIntro, 450); };
-}
-function siriBlock() {
-  if (!MEMO_SERVER || true) return ''; // in pausa: da rivedere più semplice
-  return `<div class="s-block"><h3>Siri e Comandi Rapidi</h3><p>Aggiungi un MeMo senza aprire l'app, anche a telefono bloccato: «Ehi Siri, MeMo», un tasto sulla schermata di blocco o un doppio tocco sul retro del telefono.</p>
-    <button class="btn btn-main" id="sSiriGuide" style="margin-bottom:10px">Come si crea il comando</button>
-    <button class="btn btn-ghost" id="sSiriCopy">Copia il tuo indirizzo</button></div>`;
-}
-function copySiri(btn) {
-  const u = Push.siriUrl(), done = () => { if (btn) { btn.textContent = 'Copiato ✓'; setTimeout(() => btn.textContent = 'Copia il tuo indirizzo', 1800); } toast('Indirizzo copiato.', 'Incollalo nel comando, nel campo URL. È solo tuo: non condividerlo.'); };
-  try { navigator.clipboard.writeText(u).then(done, () => showCopyBox(u)); } catch (e) { showCopyBox(u); }
-}
-function showCopyBox(u) { openSheet(`<h2>Il tuo indirizzo</h2><p class="lead">Tieni premuto e copia. È solo tuo: non condividerlo.</p><div class="field"><textarea class="input" id="cBoxU" rows="4" readonly>${esc(u)}</textarea></div>`, b => { const t = b.querySelector('#cBoxU'); t.focus(); t.select(); }); }
-const SIRI_STEPS = [
-  ['Apri l\'app Comandi', 'È già sull\'iPhone (icona viola e blu). Tocca <b>+</b> in alto a destra e chiama il comando <b>MeMo</b>: sarà anche la parola per Siri.'],
-  ['Detta testo', 'Tocca <b>Aggiungi azione</b>, cerca <b>Detta testo</b> e aggiungila. Lingua: Italiano. «Interrompi l\'ascolto»: <b>Dopo una pausa</b>.'],
-  ['Mandalo a MeMo', 'Aggiungi <b>Ottieni contenuti dell\'URL</b>. Nel campo URL incolla il tuo indirizzo (il tasto blu qui sopra). Apri le opzioni: Metodo <b>POST</b>, Corpo richiesta <b>JSON</b>, aggiungi un campo Testo con chiave <code>text</code> e come valore la variabile <b>Testo dettato</b>.'],
-  ['Leggi la domanda', 'Aggiungi <b>Ottieni valore del dizionario</b>: chiave <code>ask</code>, da <b>Contenuti dell\'URL</b>.'],
-  ['Se c\'è una domanda', 'Aggiungi <b>Se</b>: «Valore del dizionario» <b>ha un valore</b>. Dentro il Se metti, in ordine: <b>Chiedi input</b> (testo della domanda: Valore del dizionario); <b>Ottieni contenuti dell\'URL</b> come al passo 3 ma con un secondo campo, chiave <code>answer</code> e valore <b>Input fornito</b>; <b>Ottieni valore del dizionario</b> chiave <code>say</code>; <b>Mostra risultato</b>.'],
-  ['Altrimenti', 'Nella parte <b>Altrimenti</b>: <b>Ottieni valore del dizionario</b> chiave <code>say</code> dai primi <b>Contenuti dell\'URL</b>, poi <b>Mostra risultato</b>. Fatto: prova con «Ehi Siri, MeMo».']
-];
-function openSiriGuide() {
-  openSheet(`<h2>«Ehi Siri, MeMo»</h2><p class="lead">Lo crei una volta sola, in due minuti. Poi detti un MeMo da dove vuoi: MeMo lo capisce, programma l'avviso e te lo ritrovi nell'app.</p>
-    <button class="btn btn-main" id="gCopy" style="margin-bottom:18px">Copia il tuo indirizzo</button>
-    <ol class="g-steps">${SIRI_STEPS.map(([h, t]) => `<li><b>${h}</b><p>${t}</p></li>`).join('')}</ol>
-    <h3 class="g-h">Mettilo a portata di mano</h3>
-    <ol class="g-steps g-alt">
-      <li><b>Schermata di blocco</b><p>Tieni premuta la schermata di blocco › <b>Personalizza</b> › tocca la torcia o la fotocamera in basso › <b>−</b> per toglierla › <b>+</b> › <b>Comandi Rapidi</b> › scegli <b>MeMo</b>.</p></li>
-      <li><b>Doppio tocco sul retro</b><p>Impostazioni › Accessibilità › Tocco › <b>Tocca il retro</b> › Doppio tocco › <b>MeMo</b>.</p></li>
-      <li><b>Siri a telefono bloccato</b><p>Impostazioni › Siri › attiva <b>Consenti Siri quando è bloccato</b>.</p></li>
-    </ol>`, b => { b.querySelector('#gCopy').onclick = e => copySiri(e.currentTarget); });
 }
 function notifBlock() {
   const st = Push.state();
   if (st === 'noserver') return '';
   const txt = {
-    on: 'Ti avviso anche quando MeMo è chiusa, sulla schermata di blocco.',
+    on: 'Ti avviso anche quando MeMo è chiusa.',
     off: 'Attivale per ricevere gli avvisi anche ad app chiusa, sulla schermata di blocco.',
     install: 'Per riceverle, aggiungi MeMo alla schermata Home (Condividi › «Aggiungi alla schermata Home») e aprila da lì.',
     denied: "Sono bloccate. Riattivale da Impostazioni dell'iPhone › Notifiche › MeMo.",
     nosupport: 'Questo telefono non le supporta. Serve iOS 16.4 o più recente.'
   }[st];
-  return `<div class="s-block"><h3>Notifiche${st === 'on' ? ' <span class="ok-pill">attive</span>' : ''}</h3><p>${txt}</p>${st === 'off' ? '<button class="btn btn-main" id="sNotif">Attiva le notifiche</button>' : ''}</div>`;
+  const week = st === 'on' ? `<div class="s-tgl"><div><b>Riepilogo della domenica</b><span>Alle 19 ti dico cosa c'è in settimana. Anche quando non c'è niente.</span></div><button class="tgl" id="sWeek" role="switch" aria-checked="${weeklyOn()}" aria-label="Riepilogo della domenica"><i></i></button></div>` : '';
+  return `<div class="s-block"><h3>Notifiche${st === 'on' ? ' <span class="ok-pill">attive</span>' : ''}</h3><p>${txt}</p>${st === 'off' ? '<button class="btn btn-main" id="sNotif">Attiva le notifiche</button>' : ''}${week}</div>`;
 }
 function openSettings() { renderSettings(); goPage('set'); }
 async function exportBackup() {
@@ -1698,7 +1716,7 @@ function showIntro() {
     { art: `<div class="get-art"><div class="g-card"><span class="g-ic">🍷</span><div><b>Vino per Mattia</b><small>domani alle 18:00</small><em>🔔 ti avviso il giorno prima</em></div></div><div class="g-card"><span class="g-ic">🥖</span><div><b>Comprare il pane</b><small>domattina · a che ora?</small></div></div></div>`,
       h: 'Capisco al volo.', p: "Tiro fuori l'essenziale. Se manca qualcosa, te lo chiedo." }
   ];
-  const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '🛡️ Assicurazione', '💡 Bollette', '🎂 Compleanni', '🔁 Abbonamenti', '🧾 Garanzie'].map(x => `<span>${x}</span>`).join('')}</div>`,
+  const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<button data-pre="${p.id}" data-short="1" aria-pressed="${hasPreset(p.id)}">${hasPreset(p.id) ? '✓ ' + preLabel(p, true).replace(/^\S+\s/, '') : preLabel(p, true)}</button>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
   const pst = Push.state();
   if (pst !== 'noserver' && pst !== 'nosupport') {
@@ -1723,6 +1741,7 @@ function showIntro() {
   const close = () => { store.set('intro', '1'); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
   next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
+  bindPresets(el);
   const nb = el.querySelector('#iNotif');
   if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st; try { st = await Push.enable(); } catch (e) { st = 'error'; }
     nb.textContent = st === 'on' ? 'Notifiche attive ✓' : st === 'denied' ? 'Bloccate: riattivale dalle Impostazioni' : 'Riprova più tardi dalle impostazioni';
@@ -1751,7 +1770,6 @@ function allRemindText(it) {
 const N = window.MeMoNotify;
 const userName = () => '';
 let nbTimer, nbItem = null;
-function notifyText(it, salt) { return N.make(it, { name: userName(), emoji: emojiOf(it), salt }); }
 function showBanner(n, it) {
   const el = $('#nb'); nbItem = it || null;
   $('#nbIcon').innerHTML = LOGO_SVG;
@@ -1764,21 +1782,30 @@ $('#nb').addEventListener('click', () => { $('#nb').classList.remove('show'); if
   el.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
   el.addEventListener('touchmove', e => { if (y0 != null && e.touches[0].clientY - y0 < -20) { el.classList.remove('show'); y0 = null; } }, { passive: true });
 })();
-function sampleItem() {
-  if (items.length) return items[Math.floor(Math.random() * items.length)];
-  const d = new Date(Date.now() + 15 * 60000);
-  return { id: 'prova', type: 'appuntamento', title: 'Parrucchiere', due: P.toISO(d), time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
-}
-async function testNotification() {
-  const it = sampleItem(); const at = new Date();
-  const n = N.make(it, { name: userName(), emoji: emojiOf(it), salt: String(Date.now()), at: it.id === 'prova' ? at : undefined });
-  if (Push.state() === 'on') {
-    try { const r = await Push.test({ ...n, url: it.id === 'prova' ? './' : n.url }); toast(r.ok ? 'Mandata. Arriva tra un attimo.' : 'Apple non l\'ha accettata.', r.ok ? 'Se l\'app è aperta, la vedi in alto.' : `Codice ${r.status || '?'}${r.reason ? ' · ' + String(r.reason).slice(0, 80) : ''}. Mandami questo messaggio.`); }
-    catch (e) { toast('Non riesco a parlare con il server.', 'Controlla la connessione e riprova.'); }
-    return;
+// ================= Riepilogo della domenica =================
+// ogni domenica sera, una notifica tranquilla con la settimana che arriva (anche quando non c'è niente)
+const weeklyOn = () => store.get('weekly') !== '0';
+function weekItems(monISO) {
+  const sunISO = P.addDays(monISO, 6), out = [];
+  for (const it of items) {
+    const dues = it.rep ? P.occurrences(it, sunISO, 60) : [it.due];
+    for (const d of dues) if (d >= monISO && d <= sunISO) out.push({ ...it, due: d });
   }
-  setTimeout(() => showBanner(n, it.id === 'prova' ? null : it), 150);
+  return out.sort((a, b) => P.dueAt(a) - P.dueAt(b));
 }
+function weeklyPlan(now) {
+  const out = [], d = new Date(now); d.setHours(19, 0, 0, 0);
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); // la prossima domenica (oggi, se è domenica)
+  for (let w = 0; w < 6; w++) {
+    const at = new Date(d); at.setDate(d.getDate() + 7 * w); if (at.getTime() <= now) continue;
+    const mon = P.addDays(P.toISO(at), 1), list = weekItems(mon);
+    const n = N.week(list.map(x => ({ id: x.id, title: x.title, due: x.due, time: x.time, rep: !!x.rep })), { seed: at.getTime(), mon });
+    out.push({ k: `week@${at.getTime()}`, at: at.getTime(), title: n.title, body: n.body, url: './', tag: 'memo-week' });
+  }
+  return out;
+}
+// i MeMo che si ripetono, passata una volta, vanno avanti da soli alla prossima
+async function rollAll() { for (const it of items) if (P.rollRep(it)) { try { await DB.put(it); } catch (e) {} } }
 
 // ================= Notifiche vere (anche ad app chiusa) =================
 // L'indirizzo del tuo server su Cloudflare. Vuoto = notifiche solo ad app aperta.
@@ -1817,11 +1844,19 @@ const Push = (() => {
   // tutti gli avvisi futuri di tutti i MeMo, con i testi già pronti: il server li manda all'ora giusta
   function plan() {
     const now = Date.now(), max = now + 400 * 86400000, out = [];
-    for (const it of items) for (const r of P.remindersOf(it)) {
-      const t = r.getTime(); if (t <= now || t > max) continue;
-      const n = N.make(it, { name: userName(), emoji: emojiOf(it), at: r });
-      out.push({ k: `${it.id}@${t}`, at: t, title: n.title, body: n.body, url: n.url, tag: it.id });
+    const ahead = { d: 21, w: 84, m: 400, y: 400 }; // per chi si ripete: le prossime volte, già pronte sul server
+    for (const it of items) {
+      const dues = it.rep ? P.occurrences(it, P.toISO(new Date(now + ahead[it.rep.u] * 86400000)), 40) : [it.due];
+      for (const due of dues) {
+        const v = due === it.due ? it : { ...it, due };
+        for (const r of P.remindersOf(v)) {
+          const t = r.getTime(); if (t <= now || t > max) continue;
+          const n = N.make(v, { name: userName(), emoji: emojiOf(v), at: r });
+          out.push({ k: `${it.id}@${t}`, at: t, title: n.title, body: n.body, url: n.url, tag: it.id });
+        }
+      }
     }
+    if (weeklyOn()) out.push(...weeklyPlan(now));
     return out;
   }
   let timer = null, last = '';
@@ -1840,15 +1875,6 @@ const Push = (() => {
     await post('/subscribe', { sub: sub.toJSON(), subject: location.origin + location.pathname });
   }
   async function refresh() { if (state() !== 'on') return; try { await subscription(false); } catch (e) {} }
-  // la prova: se Apple dice che l'iscrizione non vale più, se ne crea una nuova e si riprova una volta
-  async function test(n) {
-    let r;
-    try { r = await post('/test', { message: n }); } catch (e) { r = { ok: false, status: /no subscription/.test(e.message) ? 410 : 0, reason: e.message }; }
-    if (!r.ok && (r.status === 404 || r.status === 410 || r.status === 403)) {
-      try { await subscription(true); r = await post('/test', { message: n }); } catch (e) { r = { ok: false, status: r.status, reason: e.message }; }
-    }
-    return r;
-  }
   // l'AI del server capisce la frase; se non risponde in pochi secondi, si va avanti senza
   async function understand(text, ctl) {
     const now = new Date().toLocaleString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -1859,27 +1885,8 @@ const Push = (() => {
       const j = await r.json(); return j && j.ok ? j.result : null;
     } finally { clearTimeout(t); }
   }
-  // Siri: il telefono si presenta al server una volta, poi il Comando Rapido usa il suo indirizzo personale
-  async function register() { if (!MEMO_SERVER) return; try { await post('/register', { tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome' }); store.set('reg', '1'); } catch (e) {} }
-  const siriUrl = () => { const m = me(); return `${MEMO_SERVER}/in/${m.device}.${m.token}`; };
-  async function take() { if (!MEMO_SERVER || store.get('reg') !== '1') return []; try { const j = await post('/inbox/take', {}); return j.items || []; } catch (e) { return []; } }
-  return { state, enable, sync, later, test, understand, register, siriUrl, take, refresh };
+  return { state, enable, sync, later, understand, refresh };
 })();
-function autoListen() {
-  if (store.get('autoListen') === '0' || navigator.webdriver) return;
-  if (document.querySelector('.intro') || !$('#sheetWrap').hidden || page !== 'home' || document.hidden) return;
-  openVoice({ auto: true });
-}
-// i MeMo detti a Siri arrivano dal server: si aggiungono alla lista
-let importing = false;
-async function importInbox() {
-  if (importing) return; importing = true;
-  try {
-    const got = await Push.take(), fresh = got.filter(it => it && it.id && !items.some(x => x.id === it.id));
-    for (const it of fresh) { await DB.put(it); items.push(it); }
-    if (fresh.length) { render(); toast(fresh.length === 1 ? `Da Siri: ${fresh[0].title}` : `Da Siri: ${fresh.length} MeMo nuovi`, fresh.length === 1 ? `${cap(whenText(fresh[0]))}. Ce l'ho io.` : fresh.map(x => x.title).slice(0, 3).join(', ') + '.'); }
-  } finally { importing = false; }
-}
 // aprendo una notifica si apre il MeMo giusto
 function openFromUrl(u) { try { const id = new URL(u, location.href).searchParams.get('memo'); if (id && items.some(i => i.id === id)) { goPage('home', 0, true); openDetail(id); } } catch (e) {} }
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'open') openFromUrl(e.data.url); });
@@ -1887,6 +1894,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('mess
 // ================= Avvisi mentre l'app è aperta =================
 const alerted = new Set();
 function tick() {
+  rollAll();
   const nowD = new Date();
   for (const it of items) {
     for (const r of P.remindersOf(it)) {
@@ -1926,17 +1934,17 @@ function tick() {
 // ================= Avvio =================
 (async function init() {
   try { items = await DB.all(); } catch (e) { items = []; }
+  await rollAll();
   render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if (isIOS && !isStandalone() && store.get('installHint') !== '1') $('#installHint').hidden = false;
   $('#installClose').onclick = () => { $('#installHint').hidden = true; store.set('installHint', '1'); };
   if (store.get('intro') !== '1' && !new URLSearchParams(location.search).has('nointro')) showIntro();
   openFromUrl(location.href);
-  if (MEMO_SERVER && store.get('reg') !== '1') Push.register();
-  Push.refresh().finally(() => importInbox().finally(() => Push.sync()));
+  Push.refresh().finally(() => Push.sync());
   window.addEventListener('online', () => Push.sync()); // tornata la connessione: aggiorno gli avvisi rimasti indietro
 
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) Push.refresh().finally(() => importInbox().finally(() => Push.sync())); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) Push.refresh().finally(() => Push.sync()); });
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(); clearBadge(); } });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});

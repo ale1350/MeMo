@@ -78,11 +78,21 @@
       todo: "Se non lo usi più, disdicilo prima del rinnovo. Se lo usi, non devi fare niente.",
       link: null,
       kw: [[/abboname/, 5], [/rinnovo\s*automatic/, 5], [/netflix|spotify|disney|dazn|icloud|amazon\s*prime|youtube\s*premium/, 5], [/\bdisdett|\bdisdir/, 3]] },
+    { id: 'gomme', label: 'Cambio gomme', emoji: '🛞', lead: 14, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Entro quando?',
+      todo: "Le invernali si possono montare dal 15 ottobre e servono dal 15 novembre al 15 aprile. Le estive vanno rimesse entro il 15 maggio. Qualche comune ha date sue: occhio ai cartelli.",
+      link: null,
+      kw: [[/cambi\w*\s*(le\s*)?gomm/, 8], [/gomm[ae]\s*(invernal|estiv|termic|da\s*neve)/, 8], [/pneumatic/, 6], [/\bgommista\b/, 6], [/\bgomme\b/, 4], [/catene\s*da\s*neve/, 4]] },
+    { id: 'tasse', label: 'Tasse', emoji: '🏛️', lead: 10, recur: 12, dateKind: 'expiry', done: 'reschedule',
+      ask: 'Entro quando?',
+      todo: "Si paga con l'F24, anche dall'home banking o dall'app della banca.",
+      link: { label: 'Agenzia delle Entrate', url: 'https://www.agenziaentrate.gov.it/' },
+      kw: [[/\bimu\b/, 7], [/\b730\b/, 7], [/dichiarazione\s*dei\s*redditi|modello\s*redditi/, 7], [/\btasse\b|\bimposte\b/, 4], [/\bf24\b/, 3]] },
     { id: 'bolletta', label: 'Pagamento', emoji: '💡', lead: 3, recur: null, dateKind: 'expiry', done: 'archive',
       ask: 'Entro quando va pagato?',
       todo: "Pagalo o controlla che l'addebito automatico sia attivo.",
       link: null,
-      kw: [[/bollett/, 6], [/\bluce\b|\bgas\b|\bacqua\b/, 2], [/\benel\b|\ba2a\b|\biren\b|\bhera\b|\bedison\b|\bsorgenia\b/, 3], [/\bpagar[ei]\b|\bpagament/, 2], [/\brata\b/, 3], [/\bf24\b|\btari\b|\bimu\b|\bcanone\b/, 4], [/scadenza\s*(di\s*)?pagament/, 4], [/importo\s*da\s*pagare/, 4]] },
+      kw: [[/bollett/, 6], [/\bluce\b|\bgas\b|\bacqua\b/, 1], [/\benel\b|\ba2a\b|\biren\b|\bhera\b|\bedison\b|\bsorgenia\b/, 3], [/\bpagar[ei]\b|\bpagament/, 2], [/\brata\b/, 3], [/\btari\b|\bcanone\b/, 4], [/\bf24\b/, 2], [/scadenza\s*(di\s*)?pagament/, 4], [/importo\s*da\s*pagare/, 4]] },
     { id: 'garanzia', label: 'Garanzia', emoji: '🧾', lead: 30, recur: null, dateKind: 'purchase', done: 'archive',
       ask: "Quando l'hai comprato?",
       todo: "Se qualcosa non funziona, portalo al negozio con lo scontrino prima che scada la garanzia: hai diritto a riparazione o sostituzione.",
@@ -317,6 +327,7 @@
       if (/\btari\b/.test(n)) title = 'Pagare la TARI'; else if (/\bimu\b/.test(n)) title = "Pagare l'IMU"; else if (/\bf24\b/.test(n)) title = 'Pagare F24';
       else if (/bollett/.test(n) || what) title = 'Bolletta' + (what ? ' ' + what : '') + (who ? ' ' + who.replace(/\s+/g, ' ').replace(/(^|\s)\S/g, c => c.toUpperCase()).replace(/^(A2a|Tim)$/, m => m.toUpperCase()) : '');
     }
+    if (type === 'tasse') { const n = norm(text); title = /\bimu\b/.test(n) ? "Pagare l'IMU" : /\b730\b/.test(n) ? 'Inviare il 730' : /\bf24\b/.test(n) ? "Pagare l'F24" : 'Pagare le tasse'; }
     return { type, title, date, purchase, confident: confident && score > 0, typeScore: score };
   }
 
@@ -475,7 +486,7 @@
       return cand;
     });
 
-    const { type, score } = detectType(src);
+    const det = detectType(src), score = det.score, type = det.score >= 2 ? det.type : 'altro'; // una parola sola ("acqua") non basta
 
     // orario
     if (tm) {
@@ -528,6 +539,7 @@
       if (typeId === 'garanzia' && s && !/garanzi/i.test(s)) s = 'Garanzia ' + s.replace(/^(?:(?:ho|abbiamo)\s+)?(?:comprat[oaie]|acquistat[oaie]|pres[oaie])\s+/i, '').replace(/^(?:(?:il|lo|la|i|gli|le|un|uno|una)\s+|l'|un')/i, '');
       if (!s || s.length < 2) s = typeId === 'altro' ? 'MeMo' : T2.label;
       s = s.charAt(0).toUpperCase() + s.slice(1);
+      s = s.replace(/\b(imu|tari|f24|iva|inps|isee|spid|cie|rc)\b/gi, w => w.toUpperCase());
       if (s.length > 60) s = s.slice(0, 57).trim() + '…';
       const out = { type: typeId, title: s, date, time, purchase, confident: !!date, typeScore: score };
       if (part && date && !time && TYPE_BY_ID[typeId].dateKind !== 'purchase') out.askTime = { part };
@@ -630,6 +642,11 @@
   // "…perché poi stasera vedo Mattia alle 18": la spiegazione non decide quando avvisare
   const REASON_RE = /\s*[,;.]?\s*\b(?:perche|siccome|visto\s+che|dato\s+che|tanto\s+poi|che\s+poi|cosi\s+poi)\b/;
   function parseSpeech(raw, now) {
+    const R = extractRep(String(raw || '').trim().replace(/\s+/g, ' '));
+    if (R) { const out = parseSpeechOnce(R.rest, now); return withRep(out, R, now); }
+    return parseSpeechOnce(raw, now);
+  }
+  function parseSpeechOnce(raw, now) {
     const nowD = now || new Date(), today = todayISO(nowD);
     let src = String(raw || '').trim().replace(/\s+/g, ' ');
     let reason = '';
@@ -660,7 +677,7 @@
       const [h, mi] = time.split(':').map(Number), cand = new Date(nowD); cand.setHours(h, mi, 0, 0);
       date = cand > nowD ? today : addDays(today, 1);
     }
-    let type = a.typeScore ? a.type : 'altro', title = a.title;
+    let type = a.typeScore >= 2 ? a.type : 'altro', title = a.title;
     if ((!title || title === 'MeMo') && c) { title = c.title; if (!a.typeScore) type = c.type; }
     const out = { type, title, date, time, purchase: null, confident: !!date, typeScore: a.typeScore };
     if (a.leadMin != null) leadMin = a.leadMin; else if (leadMin == null && c && c.leadMin != null) leadMin = c.leadMin;
@@ -669,6 +686,129 @@
     if (askTime && date && !time) out.askTime = askTime;
     return out;
   }
+
+  // ---------- MeMo che si ripetono: "ogni lunedì", "il primo di ogni mese", "ogni 3 mesi", "tutti i giorni alle 8" ----------
+  // rep = { u: 'd'|'w'|'m'|'y', n: ogni quanti, wd: [giorni della settimana], dom: giorno del mese o 'last' }
+  const WD_RE = '(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)';
+  const DOM_RE = `(\\d{1,2}|primo|1o)`;
+  function repPatterns() {
+    const N = `(\\d+|${NUMW}|altr[aie])`;
+    return [
+      // più giorni della settimana: "ogni lunedì e giovedì", "il martedì e il venerdì di ogni settimana"
+      [new RegExp(`\\b(?:ogni|tutti\\s+i|tutte\\s+le|il|la)\\s+${WD_RE}((?:\\s*(?:,|e)\\s*(?:il\\s+|la\\s+)?${WD_RE})+)(?:\\s+(?:di\\s+)?ogni\\s+settimana)?\\b`), m => {
+        const wd = [WEEKDAYS[m[1]], ...m[2].match(new RegExp(WD_RE, 'g')).map(x => WEEKDAYS[x])];
+        return { u: 'w', n: 1, wd: [...new Set(wd)].sort() }; }],
+      [new RegExp(`\\b(?:ogni|tutti\\s+i|tutte\\s+le)\\s+(?:(due|2)\\s+)?${WD_RE}\\b`), m => ({ u: 'w', n: m[1] ? 2 : 1, wd: [WEEKDAYS[m[2]]] })],
+      [new RegExp(`\\b(?:il|la)\\s+${WD_RE}\\s+(?:di\\s+)?ogni\\s+settimana\\b`), m => ({ u: 'w', n: 1, wd: [WEEKDAYS[m[1]]] })],
+      // giorno del mese: "il primo di ogni mese", "ogni 5 del mese", "ogni mese il 10", "il 27 di ogni mese"
+      [/\b(?:a\s+)?fine\s+(?:del\s+)?mese\s+(?:di\s+)?ogni\s+mese\b/, () => ({ u: 'm', n: 1, dom: 'last' })],
+      [new RegExp(`\\b(?:ogni\\s+|il\\s+)?${DOM_RE}\\s*(?:°|º)?\\s+(?:di\\s+ogni|di\\s+tutti\\s+i|del|di\\s+ciascun)\\s+mes[ei]\\b`), m => ({ u: 'm', n: 1, dom: /^\d+$/.test(m[1]) ? +m[1] : 1 })],
+      [new RegExp(`\\bogni\\s+${DOM_RE}\\s*(?:°|º)?\\s+(?:del|di)\\s+mese\\b`), m => ({ u: 'm', n: 1, dom: /^\d+$/.test(m[1]) ? +m[1] : 1 })],
+      [new RegExp(`\\b(?:ogni|tutti\\s+i)\\s+mes[ei]\\s+(?:il|al)\\s+${DOM_RE}\\b`), m => ({ u: 'm', n: 1, dom: /^\d+$/.test(m[1]) ? +m[1] : 1 })],
+      [/\b(?:a|ad|ogni)\s+inizio\s+(?:del\s+|di\s+ogni\s+)?mese\b|\bogni\s+inizio\s+mese\b/, () => ({ u: 'm', n: 1, dom: 1 })],
+      [/\b(?:a|ogni)\s+fine\s+(?:del\s+|di\s+ogni\s+)?mese\b(?=.*\bogni\b)|\bogni\s+fine\s+(?:del\s+)?mese\b|\bfine\s+di\s+ogni\s+mese\b/, () => ({ u: 'm', n: 1, dom: 'last' })],
+      // "ogni 3 mesi", "ogni due settimane", "ogni 15 giorni", "ogni altro giorno"
+      [new RegExp(`\\bogni\\s+${N}\\s+(giorn[oi]|settiman[ae]|mes[ei]|ann[oi])\\b`), m => {
+        const k = /^\d+$/.test(m[1]) ? +m[1] : /^altr/.test(m[1]) ? 2 : NUM_WORDS[m[1]] || 1;
+        return { u: m[2][0] === 'g' ? 'd' : m[2][0] === 's' ? 'w' : m[2][0] === 'm' ? 'm' : 'y', n: k }; }],
+      [/\b(?:ogni|tutti\s+i)\s+giorn[oi]\b|\bogni\s+(?:mattina|sera|notte|pomeriggio)\b|\btutte\s+le\s+(?:mattine|sere|notti)\b|\btutti\s+i\s+pomeriggi\b|\bquotidianamente\b|\bogni\s+santo\s+giorno\b/, () => ({ u: 'd', n: 1 })],
+      [/\b(?:ogni|tutte\s+le)\s+settiman[ae]\b|\bsettimanalmente\b|\buna\s+volta\s+(?:a|alla|ogni)\s+settimana\b/, () => ({ u: 'w', n: 1 })],
+      [/\b(?:ogni|tutti\s+i)\s+mes[ei]\b|\bmensilmente\b|\buna\s+volta\s+(?:al|ogni)\s+mese\b/, () => ({ u: 'm', n: 1 })],
+      [/\b(?:ogni|tutti\s+gli)\s+ann[oi]\b|\bannualmente\b|\buna\s+volta\s+(?:l'|all')\s*anno\b/, () => ({ u: 'y', n: 1 })]
+    ];
+  }
+  let REP_PATTERNS = null;
+  const PART_OF = t => /\bogni\s+mattina|\btutte\s+le\s+mattine/.test(t) ? 'mattina' : /\bogni\s+sera|\btutte\s+le\s+sere/.test(t) ? 'sera' : /\bogni\s+pomeriggio|\btutti\s+i\s+pomeriggi/.test(t) ? 'pomeriggio' : /\bogni\s+notte|\btutte\s+le\s+notti/.test(t) ? 'notte' : null;
+  // trova la ripetizione e la toglie dalla frase (così non finisce nel titolo e non confonde le date)
+  function extractRep(src) {
+    REP_PATTERNS = REP_PATTERNS || repPatterns();
+    const text = String(src || ''), t = norm(text);
+    for (const [re, f] of REP_PATTERNS) {
+      const m = re.exec(t); if (!m) continue;
+      const rep = f(m); if (!rep || !(rep.n >= 1) || rep.n > 60) continue;
+      if (rep.dom != null && rep.dom !== 'last' && (rep.dom < 1 || rep.dom > 31)) continue;
+      const same = t.length === text.length, base = same ? text : t;
+      const rest = (base.slice(0, m.index) + ' ' + base.slice(m.index + m[0].length)).replace(/\s{2,}/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
+      return { rep, rest, part: PART_OF(t) };
+    }
+    return null;
+  }
+  const domIn = (y, mo, dom) => dom === 'last' ? lastDay(y, mo) : Math.min(dom, lastDay(y, mo));
+  // la volta successiva a `due`
+  function nextRep(item, fromISO) {
+    const r = item.rep, due = fromISO || item.due;
+    if (!r) return null;
+    if (r.u === 'd') return addDays(due, r.n);
+    if (r.u === 'w') {
+      if (r.wd && r.wd.length > 1) { for (let k = 1; k <= 7; k++) { const c = addDays(due, k); if (r.wd.includes(parseISO(c).getDay())) return c; } }
+      return addDays(due, 7 * r.n);
+    }
+    if (r.u === 'm') { const nx = addMonths(due, r.n); if (r.dom == null) return nx; const y = +nx.slice(0, 4), mo = +nx.slice(5, 7); return iso(y, mo, domIn(y, mo, r.dom)); }
+    return addMonths(due, 12 * r.n);
+  }
+  // la prima volta: oggi se non è già passato, altrimenti la prossima
+  function firstRep(rep, date, time, now) {
+    const nowD = now || new Date(), today = todayISO(nowD);
+    const passed = iso_ => { if (iso_ > today) return false; if (iso_ < today) return true; if (!time) return false; const [h, mi] = time.split(':').map(Number); const c = new Date(nowD); c.setHours(h, mi, 0, 0); return c <= nowD; };
+    let d;
+    if (rep.u === 'w' && rep.wd) { for (let k = 0; k < 14; k++) { const c = addDays(today, k); if (rep.wd.includes(parseISO(c).getDay()) && !passed(c)) { d = c; break; } } }
+    else if (rep.u === 'm' && rep.dom != null) {
+      const y = +today.slice(0, 4), mo = +today.slice(5, 7); d = iso(y, mo, domIn(y, mo, rep.dom));
+      if (passed(d)) { const nx = addMonths(iso(y, mo, 1), 1); const ny = +nx.slice(0, 4), nm = +nx.slice(5, 7); d = iso(ny, nm, domIn(ny, nm, rep.dom)); }
+    } else {
+      d = date && date >= today ? date : today;
+      let k = 0; while (passed(d) && k++ < 400) d = nextRep({ rep, due: d });
+    }
+    return d || today;
+  }
+  // le prossime volte, a partire da quella attuale (per il calendario e per gli avvisi già programmati)
+  function occurrences(item, untilISO, max) {
+    const out = [item.due]; if (!item.rep) return out;
+    let d = item.due, k = 0;
+    while (k++ < (max || 400)) { d = nextRep(item, d); if (!d || d > untilISO) break; out.push(d); }
+    return out;
+  }
+  // un MeMo che si ripete e la cui volta è passata va avanti da solo alla prossima
+  function rollRep(item, now) {
+    if (!item.rep) return false;
+    const nowD = now || new Date(); let moved = false, k = 0;
+    while (k++ < 800) {
+      const due = dueAt(item), grace = item.time ? 60 * 60000 : 0;
+      if (due.getTime() + grace >= nowD.getTime()) break;
+      item.due = nextRep(item); moved = true;
+    }
+    return moved;
+  }
+  const WD_NAME = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+  const WD_PL = ['la domenica', 'il lunedì', 'il martedì', 'il mercoledì', 'il giovedì', 'il venerdì', 'il sabato'];
+  // "ogni lunedì", "il 5 di ogni mese", "ogni 3 mesi", "ogni giorno"
+  function repText(rep) {
+    if (!rep) return '';
+    const n = rep.n || 1;
+    if (rep.u === 'd') return n === 1 ? 'ogni giorno' : n === 2 ? 'un giorno sì e uno no' : `ogni ${n} giorni`;
+    if (rep.u === 'w') {
+      if (rep.wd && rep.wd.length > 1) { const w = rep.wd.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(x => WD_NAME[x]); return 'ogni ' + w.slice(0, -1).join(', ') + ' e ' + w[w.length - 1]; }
+      if (rep.wd) return n === 1 ? `ogni ${WD_NAME[rep.wd[0]]}` : `${WD_PL[rep.wd[0]]}, ogni ${n} settimane`;
+      return n === 1 ? 'ogni settimana' : `ogni ${n} settimane`;
+    }
+    if (rep.u === 'm') {
+      if (rep.dom === 'last') return n === 1 ? 'a fine mese' : `a fine mese, ogni ${n} mesi`;
+      if (rep.dom != null) { const d = rep.dom === 1 ? 'il primo' : `il ${rep.dom}`; return n === 1 ? `${d} di ogni mese` : `${d} del mese, ogni ${n} mesi`; }
+      return n === 1 ? 'ogni mese' : `ogni ${n} mesi`;
+    }
+    return n === 1 ? 'ogni anno' : `ogni ${n} anni`;
+  }
+  // applica la ripetizione detta a voce al risultato del motore (o dell'AI)
+  function withRep(out, R, now) {
+    if (!R || !out) return out;
+    out.rep = R.rep;
+    out.date = firstRep(R.rep, out.date, out.time, now);
+    out.confident = true;
+    if (R.part && !out.time) out.askTime = { part: R.part };
+    if (out.askTime && out.time) delete out.askTime;
+    return out;
+  }
+  const REP_WORDS_RE = /\s*\b(?:ogni|tutti\s+i|tutte\s+le|tutti\s+gli)\s+(?:\d+\s+|due\s+|tre\s+)?(?:giorn[oi]|settiman[ae]|mes[ei]|ann[oi]|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|lunedi|martedi|mercoledi|giovedi|venerdi|mattin[ae]|ser[ae])\b/gi;
 
   // ---------- Dall'AI al MeMo ----------
   // L'AI dice cosa, quando e quanto prima avvisare (a parole); qui si calcolano date e orari con il nostro motore.
@@ -714,11 +854,13 @@
     let title = String(ai.title || '').trim();
     const dt = docTitle(type, said); if (dt) title = dt;
     if (title) title = title.charAt(0).toUpperCase() + title.slice(1);
+    const R = extractRep(said);
+    if (R && title) { title = title.replace(REP_WORDS_RE, ' ').replace(/\s{2,}/g, ' ').replace(/[\s,]+$/, '').trim(); title = title.charAt(0).toUpperCase() + title.slice(1); }
     const out = { type, title: title || 'MeMo', date, time, purchase, confident: !!date, typeScore: 9, ai: true };
     if (leadMin != null && (time || leadMin % 1440 === 0)) out.leadMin = leadMin;
     if (!title || ai.ask === 'title') out.needTitle = true;
     if (askTime && date && !time) out.askTime = askTime;
-    return out;
+    return R ? withRep(out, R, nowD) : out;
   }
 
   // ---------- Come dirlo a parole: "di comprare il pane", "del dentista", "di rinnovare la patente" ----------
@@ -799,6 +941,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    phraseOf, fromAI, leadFrom, docTitle, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
+    phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);
