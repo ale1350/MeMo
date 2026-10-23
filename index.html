@@ -701,7 +701,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.2';
+const VERSION = '2.3';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1648,22 +1648,23 @@ async function aiOf(t) {
 }
 function resOf(text, ai, inherit) {
   const t = P.typed(text);
-  if (ai && ai.action) { const c = cmdFromAI(ai, text); if (c) return { cmd: c, said: String(text || '').trim() }; }
+  if (ai && ai.action) { const c = cmdFromAI(ai, text); if (c && c.chat) return { chat: c.chat, said: String(text || '').trim() }; if (c) return { cmd: c, said: String(text || '').trim() }; }
   let res; try { res = ai ? P.fromAI(ai, t) : P.parseSpeech(t); } catch (e) { res = P.parseSpeech(t); }
   if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(t); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
-  if (inherit && !res.date) { res.date = inherit; delete res.needTitle; } // "…e poi ricordami anche di chiamare Tia": il giorno è quello di prima
+  if (inherit) { res.date = inherit; if (res.title && res.title !== 'MeMo') delete res.needTitle; } // "…e poi ricordami anche di chiamare Tia": il giorno è quello di prima
   if (P.needsTime(res)) res.askTime = { part: null, soon: true }; // a breve e senza ora: l'ora si chiede
   res.said = String(text || '').trim();
   return res;
 }
 async function understandAll(text) {
+  const chat = P.chitchat(text); if (chat) return [{ chat, said: String(text || '').trim() }]; // "ciao", "grazie": niente da ricordare
   const cmd = P.command(text); if (cmd) return [{ cmd, said: String(text || '').trim() }]; // un comando sui MeMo che ci sono: lo capisce il telefono, niente AI
   const many = P.splitMany(text), parts = many || [String(text || '').trim()];
   const online = !aiOff && MEMO_SERVER && navigator.onLine !== false;
   let ais = parts.map(() => null);
   if (online) { thinkCtl = new AbortController(); try { ais = await Promise.all(parts.map(x => aiOf(P.typed(x)))); } finally { thinkCtl = null; } }
   const out = parts.map((x, i) => resOf(x, ais[i], many && many.inherit ? many.inherit[i] : null));
-  const c = out.find(r => r.cmd); return c ? [c] : out;
+  const c = out.find(r => r.cmd || r.chat); return c ? [c] : out;
 }
 async function submitSpeech(text) {
   stopRec();
@@ -1674,6 +1675,7 @@ async function submitSpeech(text) {
   if (h) h.textContent = 'Ci penso un attimo…'; if (go) go.textContent = 'Ci penso… (tocca per fare subito)'; if (mic) mic.classList.add('think');
   let list; try { list = await understandAll(text); }
   finally { thinking = false; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+  if (list[0] && list[0].chat) { showChat(list[0].chat, text, true); return; }
   if (list[0] && list[0].cmd) { await handleCommand(list[0].cmd, text); return; }
   if (list.length > 1) { openReview(list, text, { voice: true }); return; } // più cose insieme: un'occhiata prima di segnarle
   routeOne(list[0], text, { voice: true });
@@ -1742,7 +1744,7 @@ function openWrite(prefill) {
       let list; try { list = await understandAll(v); } finally { busy = false; }
       if ($('#wText') !== ta) return; // nel frattempo hai chiuso
       writeDraft = '';
-      if (list[0] && list[0].cmd) handleCommand(list[0].cmd, v); else if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
+      if (list[0] && list[0].chat) showChat(list[0].chat, v); else if (list[0] && list[0].cmd) handleCommand(list[0].cmd, v); else if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
     };
     ta.addEventListener('input', upd);
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
@@ -1850,7 +1852,16 @@ function findMemos(target, verb) {
   }
   return out.sort((a, b) => b.sc - a.sc || P.dueAt(a.it) - P.dueAt(b.it));
 }
+// "ciao", "grazie", "asdfg": una risposta gentile, nessun MeMo
+const CHAT = { ciao: ['Ciao! Dimmi pure cosa ricordarti.', 'Eccomi! Cosa ti ricordo?', 'Ciao! Cosa non vuoi dimenticare?'], grazie: ['Figurati! Ci penso io.', 'Di niente: è il mio lavoro.', 'Quando vuoi!'],
+  boh: ['Non ho capito bene. Dimmi cosa e quando.', 'Mmh, non ci arrivo. Riprova con cosa e quando.', 'Questa mi sfugge. Cosa ti ricordo, e quando?'], vuoto: ['Dimmi pure cosa ricordarti.'] };
+function showChat(kind, text, voice) {
+  const msg = anyOf(CHAT[kind] || CHAT.boh);
+  if (voice) { closeSheet(); toast(msg); return; }
+  openSheet(`<div class="sheet-in"><h2>${esc(msg)}</h2><button class="btn btn-main" id="cAgain" style="margin-top:8px">Scrivi</button></div>`, b => { b.querySelector('#cAgain').onclick = () => openWrite(kind === 'boh' ? text : ''); }, { fade: true });
+}
 function cmdFromAI(ai, said) {
+  if (ai.action === 'chiacchiera') return { chat: 'ciao' };
   const A = { cerca: 'find', elenca: 'list', sposta: 'move', modifica: 'move', cancella: 'delete', fatto: 'done', aggiungi: 'add', avviso: 'lead' }[ai.action];
   if (!A) return null;
   if (A === 'list') return { action: A, period: ai.when ? P.period(ai.when) : null, said };
@@ -2015,7 +2026,8 @@ function fishLayers(big) {
 <path class="m-smile" d="M76.6 59.2 Q78.9 61.5 81.2 59"/><path class="m-big" d="M76 58.6 Q78.9 64 81.6 58.4 Z" fill="#8E2A3A"/><ellipse class="m-o" cx="79.2" cy="60" rx="1.7" ry="2.2" fill="#1F2552" stroke="none"/>
 <path class="m-flat" d="M76.7 60.3 L81.2 59.7"/><path class="m-side" d="M76.8 60.8 Q79 60.3 81.3 58.7"/><path class="m-wavy" d="M76.2 60.6 q1.2 -1.4 2.4 0 t2.4 0"/></g></g>`;
   const eyeMini = `<circle cx="67.5" cy="48.5" r="7.6" fill="url(#g3Eye)"/><circle cx="69" cy="47.6" r="4" fill="url(#g3Pupil)"/><circle cx="70.5" cy="46" r="1.4" fill="#fff"/>`;
-  const side = back => `<div class="dl dv-face ${back ? 'back' : 'front'}" style="transform:${back ? 'rotateY(180deg) ' : ''}translateZ(var(--zm)) scale(.86)"><svg ${vb}>
+  // il fianco di là è lo specchio di quello di qua: quando il pesce nuota verso sinistra l'occhio resta dalla parte della testa
+  const side = back => `<div class="dl dv-face ${back ? 'back' : 'front'}" style="transform:${back ? 'rotateY(180deg) ' : ''}translateZ(var(--zm)) scale(${back ? '-.86' : '.86'}, .86)"><svg ${vb}>
 <path d="${FISH_BODY}" fill="url(#g3Body)"/>${belly}
 <path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="url(#g3Fin)"/>
 ${big ? `<ellipse class="dv-blush" cx="66.5" cy="59.5" rx="4.3" ry="2.3" fill="#FF4F6E"/>${eyeBig}` : eyeMini}</svg></div>`;

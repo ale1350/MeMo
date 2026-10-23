@@ -532,7 +532,7 @@
       else {
         let h = tm.h;
         const pm = /sera|pomeriggio/.test(tm.qual) || part === 'sera' || part === 'pomeriggio' || /\b(stasera|sera|pomeriggio|stanotte)\b/.test(t);
-        const am = /mattin/.test(tm.qual) || /\b(stamattina|stamani|mattina|mattino)\b/.test(t);
+        const am = /mattin/.test(tm.qual) || /\b(stamattina|stamani|mattina|mattino)\b/.test(t) || ((type === 'viaggio' || /\b(sveglia|svegliarmi|colazione)\b/.test(t)) && h >= 4 && h <= 9);
         if (!tm.fixed && !(tm.zero && tm.hasMin)) { // "alle 07:00" è già chiaro: niente da indovinare
           if (pm && h < 12) h += 12;
           else if (!am && h >= 1 && h <= 7 && !(tm.hasMin && type === 'viaggio')) h += 12;
@@ -713,12 +713,54 @@
     if (best && bd <= lim && Math.abs(best.length - k.length) <= lim && (k.length > 5 || k.slice(-3) === best.slice(-3))) { const out = KEY_ACC[best] || best; return w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase() ? out[0].toUpperCase() + out.slice(1) : out; }
     return w;
   }
+  // le feste, con la data giusta (Pasqua cambia ogni anno)
+  function easter(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return new Date(y, mo - 1, da); }
+  const FESTE = [
+    ["il giorno dopo ferragosto", () => [7, 16]], ["la vigilia di natale|vigilia di natale", () => [11, 24]], ["la vigilia di capodanno|vigilia di capodanno|san silvestro|l'ultimo dell'anno|ultimo dell'anno", () => [11, 31]],
+    ["santo stefano", () => [11, 26]], ["natale", () => [11, 25]], ["capodanno", () => [0, 1]], ["epifania|befana", () => [0, 6]], ["san valentino", () => [1, 14]], ["festa della donna", () => [2, 8]],
+    ["festa della liberazione", () => [3, 25]], ["festa dei lavoratori|festa del lavoro", () => [4, 1]], ["festa della repubblica", () => [5, 2]], ["ferragosto", () => [7, 15]], ["halloween", () => [9, 31]], ["ognissanti|tutti i santi", () => [10, 1]],
+    ["pasquetta", y => { const d = easter(y); d.setDate(d.getDate() + 1); return [d.getMonth(), d.getDate()]; }], ["pasqua", y => { const d = easter(y); return [d.getMonth(), d.getDate()]; }]
+  ];
+  function feste(s, nowD) {
+    const today = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+    for (const [names, f] of FESTE) {
+      // solo quando è un "quando": "a Natale", "per Pasqua", "entro Ferragosto", o a inizio frase (mai "il regalo di Natale")
+      const re = new RegExp(`(^\\s*|[\\s,;(](?:a|ad|per|entro|il\\s+giorno\\s+di|la\\s+mattina\\s+di|la\\s+sera\\s+di|il|dopo|prima\\s+di|a\\s+ridosso\\s+di|il\\s+giorno\\s+della)\\s+)(?:${names})\\b`, 'gi');
+      s = s.replace(re, (m, pre) => { let y = nowD.getFullYear(), [mo, d] = f(y); if (new Date(y, mo, d) < today) { y++; [mo, d] = f(y); } const lead = pre.match(/^\s*[\s,;(]?/)[0], bare = !/[a-z]/i.test(pre) && !/\s/.test(m.trim()); return bare ? `${lead}${m.trim()} il ${d} ${MONTH_FULL[mo]} ${y}` : `${lead}il ${d} ${MONTH_FULL[mo]} ${y}`; });
+    }
+    return s;
+  }
   function typed(raw, now) {
     let s = ' ' + String(raw || '').replace(/\s*[\r\n]+\s*/g, '. ').replace(/([.!?;])\.\s/g, '$1 ').replace(/\s+/g, ' ').trim() + ' ';
     const nowD = now || new Date();
     const R = (re, to) => { s = s.replace(re, to); };
     s = s.replace(/[A-Za-zÀ-ÿ]{5,}/g, fixWord);
     R(/\bnnon\b/gi, 'non'); R(/\boil\b/gi, 'il'); R(/\bsiga\b/gi, 'sigarette'); R(/\bpigliare\b/gi, 'prendere');
+    R(/\bun'?\s*oretta\b/gi, "un'ora"); R(/\bmezz'?\s*oretta\b/gi, "mezz'ora"); R(/\bun\s+paio\s+d'?\s*ore\b/gi, '2 ore'); R(/\boretta\b/gi, 'ora'); R(/\bprox\b\.?/gi, 'prossimo');
+    // "alle 5, no anzi alle 6": vale la correzione
+    R(/\balle\s+(\d{1,2}(?:[:.]\d{2})?)\s*,?\s*(?:no\s+anzi|no|anzi|cio[eè]|o\s+meglio|scusa)\s*,?\s*(?:alle\s+)?(\d{1,2}(?:[:.]\d{2})?)\b\s*,?/gi, 'alle $2 ');
+    // "non domani, dopodomani": vale il secondo
+    { const D = "oggi|domani|dopodomani|stasera|domattina|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica";
+      R(new RegExp(`\\bnon\\s+(?:${D})\\s*[,:;]?\\s*(?:ma\\s+)?(${D})\\b\\s*[:,]?`, 'gi'), '$1 '); }
+    // "ieri dovevo…": un promemoria non può stare nel passato, si fa oggi
+    R(/\bieri\b/gi, 'oggi'); R(/\b(?:dovevo|avrei\s+dovuto|dovrei)\s+/gi, 'devo ');
+    // le feste: "a Natale", "il giorno dopo Ferragosto", "a Pasqua"
+    s = feste(s, nowD);
+    // "il primo lunedì di dicembre", "l'ultimo venerdì di novembre"
+    s = s.replace(/\b(?:il\s+|l')?(primo|1°|secondo|terzo|quarto|ultimo)\s+(luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\s+(?:di|del\s+mese\s+di)\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\b/gi, (m, ord, w, mon) => {
+      const wd = WD_FULL.findIndex(x => stripAccents(x) === stripAccents(w.toLowerCase())), mo = MONTH_FULL.indexOf(mon.toLowerCase());
+      const k = { primo: 1, '1°': 1, secondo: 2, terzo: 3, quarto: 4 }[ord.toLowerCase()] || -1;
+      const pick = y => { if (k > 0) { const d = new Date(y, mo, 1); while (d.getDay() !== wd) d.setDate(d.getDate() + 1); d.setDate(d.getDate() + 7 * (k - 1)); return d; } const d = new Date(y, mo + 1, 0); while (d.getDay() !== wd) d.setDate(d.getDate() - 1); return d; };
+      let d = pick(nowD.getFullYear()); if (d < new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate())) d = pick(nowD.getFullYear() + 1);
+      return `il ${d.getDate()} ${MONTH_FULL[d.getMonth()]} ${d.getFullYear()}`;
+    });
+    // "il mese prossimo" senza giorno: il mese dopo
+    R(/\b(?:il|nel|dal|per\s+il|entro\s+il)\s+mese\s+prossimo\b|\bprossimo\s+mese\b/gi, () => 'a ' + MONTH_FULL[(nowD.getMonth() + 1) % 12]);
+    // date che non esistono ("31 novembre"): meglio chiedere che indovinare
+    R(/\b(?:il\s+)?(?:31\s+(?:aprile|giugno|settembre|novembre)|3[01]\s+febbraio)\b/gi, ' ');
+    // "questo weekend", "in settimana": periodi vaghi, si sistemano dopo
+    R(/\b(?:questo|sto|nel|il|per\s+il|entro\s+il)\s+(?:weekend|week-end|week\s+end|fine\s+settimana)\b|\bweekend\b/gi, ' nel weekend ');
+    R(/\b(?:in\s+settimana|entro\s+(?:la|questa)\s+settimana|entro\s+fine\s+settimana)\b/gi, ' in settimana ');
     R(/^\s*(?:(?:allora|quindi|dunque|ok|okay|ehi|ehm|senti|oh|bro|zio|tipo)[\s,!]+)+/i, ' ');
     R(/\b(?:mi\s+servirebbe|mi\s+serve|ho\s+bisogno\s*di|avrei\s+bisogno\s*di|vorrei|puoi\s+mettermi|mettimi|fammi|segnami)\s+(?:un|uno|una)\s+(?:reminder|promemoria|memo|notifica|avviso)\s+(?:per|di|che)?\s*/gi, 'ricordami ');
     // "sabato prossimo, non questo, quello dopo": il sabato della settimana dopo
@@ -855,29 +897,41 @@
 
   // ---------- più cose in una frase: "vino per Mattia domani alle 18. E domattina il pane!" → due MeMo ----------
   // si divide solo dove è chiaro (punto, "e poi", "e domani"...) e solo se ogni pezzo sta in piedi da solo (cosa + quando)
-  const MANY_NEXT = "(?:oggi|domani|dopodomani|stasera|stamattina|stamani|domattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|il\\s+\\d|l'\\d|entro\\b|tra\\s|fra\\s|ogni\\b|ricordami\\b|ricordati\\b|devo\\b|mi\\s+scade|scade\\b|ho\\s)";
+  const MANY_NEXT = "(?:(?:la|alla)\\s+(?:sera|mattina)|il\\s+pomeriggio|nel\\s+pomeriggio|oggi|domani|dopodomani|stasera|stamattina|stamani|domattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|il\\s+\\d|l'\\d|entro\\b|tra\\s|fra\\s|ogni\\b|ricordami\\b|ricordati\\b|devo\\b|mi\\s+scade|scade\\b|ho\\s)";
   function splitMany(raw, now) {
     const s = typed(raw, now);
-    const cut = new RegExp(`(?<=[.!?;])\\s+|,?\\s+(?:e\\s+poi|e\\s+anche|poi|inoltre|ed?|anche)\\s+(?=${MANY_NEXT})|,\\s+(?:e\\s+)?poi\\s+`, 'gi');
-    const pieces = s.split(cut).map(x => String(x || '').trim()).filter(x => x.length > 2);
-    const parts = pieces.map(x => x.replace(/^(?:e|ed|poi|e\s+poi|anche|inoltre)\s+/i, '').replace(/[\s.!?;,]+$/, '').trim()).filter(x => x.length > 2);
+    const P_ = x => { try { return parseSpeech(x.replace(/^(ricordami|ricordati|ricordarmi)\s+anche\s+/i, '$1 '), now); } catch (e) { return null; } };
+    const DAYW = /\b(?:oggi|domani|dopodomani|stasera|stamattina|domattina|stanotte|luned|marted|mercoled|gioved|venerd|sabato|domenica|(?:tra|fra)\s+(?:\d|un|una|mezz|due|tre|quattro|cinque|qualche|poco|pochi)|ogni|entro|weekend|settimana|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|\d{1,2}\s*\/)/i;
+    // "domani devo: comprare il pane, ritirare il pacco e chiamare il commercialista": una lista di cose da fare nello stesso giorno
+    { const m = /^(.*?)\b(?:devo|ho\s+da|da\s+fare|mi\s+serve|ricordami\s+di)\s*:?\s+(.+)$/i.exec(s);
+      if (m && DAYW.test(stripAccents(m[1]))) {
+        const items = m[2].split(/\s*[,;]\s*(?:e\s+)?|\s+e\s+(?=\S+(?:are|ere|ire)\b)/i).map(x => x.replace(/[.!?]+$/, '').trim()).filter(Boolean);
+        if (items.length >= 2 && items.every(x => /^\S+(?:are|ere|ire)\b/i.test(x))) {
+          const lead = P_(m[1] + ' ricordami di ' + items[0]);
+          if (lead && lead.date) { const out = items.slice(0, 6).map(x => x.charAt(0).toUpperCase() + x.slice(1)); out.inherit = out.map(() => lead.date); return out; }
+        }
+      } }
+    // i punti dove la frase si può dividere, con il loro tipo: "A" = "e poi", "anche", "poi" (una cosa in più), "S" = fine frase
+    const cut = new RegExp(`(?<=[.!?;])\\s+|(?<!\\b(?:perch[eé]|che|quando|cos[iì]|dato|visto))(?:,?\\s+)(?:e\\s+poi|e\\s+anche|poi|inoltre|ed?|anche)\\s+(?=${MANY_NEXT})|,\\s+(?:e\\s+)?poi\\s+`, 'gi');
+    const pieces = [], seps = ['']; let last = 0, mm; cut.lastIndex = 0;
+    while ((mm = cut.exec(s))) { if (!mm[0]) { cut.lastIndex++; continue; } pieces.push(s.slice(last, mm.index)); seps.push(/poi|anche|inoltre|(?:^|[\s,])ed?\s/i.test(mm[0]) ? 'A' : 'S'); last = mm.index + mm[0].length; }
+    pieces.push(s.slice(last));
+    const parts = [], sepOf = [];
+    pieces.forEach((x, k) => { const c = String(x || '').replace(/^(?:e|ed|poi|e\s+poi|anche|inoltre)\s+/i, '').replace(/[\s.!?;,]+$/, '').trim(); if (c.length > 2) { parts.push(c); sepOf.push(/^(?:e\s+poi|poi|anche|inoltre|e\s+anche)\b/i.test(String(x).trim()) ? 'A' : seps[k]); } });
     if (parts.length < 2) return null;
-    const P_ = x => { try { return parseSpeech(x, now); } catch (e) { return null; } };
-    const P0 = P_; // (i pezzi con "ricordami anche" si leggono senza "anche")
-    const ok = x => { const r = P0(x.replace(/^(ricordami|ricordati|ricordarmi)\s+anche\s+/i, '$1 ')); return !!(r && r.date && !r.needTitle && r.title && r.title !== 'MeMo'); };
-    const hasWhat = x => { const r = P0(x.replace(/^(ricordami|ricordati|ricordarmi)\s+anche\s+/i, '$1 ')); return !!(r && !r.date && !r.needTitle && r.title && r.title !== 'MeMo'); };
-    // "…e poi ricordami anche di chiamare Tia": una cosa nuova, che prende il giorno da quella prima
-    const another = (rw, x) => /^(?:e\s+poi|poi|anche|inoltre|e\s+anche)\b/i.test(rw) || /^(?:ricordami|ricordati|ricordarmi)\s+anche\b/i.test(x);
+    const ok = x => { const r = P_(x); return !!(r && r.date && !r.needTitle && r.title && r.title !== 'MeMo'); };
+    const hasWhat = x => { const r = P_(x); return !!(r && !r.needTitle && r.title && r.title !== 'MeMo'); };
+    const GENERIC = /^(?:l'?appuntamento|appuntamento|impegno|l'?impegno|visita|la visita|orario|ora|alle)$/i;
     const chunks = [], inherit = [];
-    // "Ho l'appuntamento alle 18": senza un giorno suo, e con quella prima senza ora, è l'orario di quella prima
-    const DAYW = /\b(?:oggi|domani|dopodomani|stasera|stamattina|domattina|stanotte|luned|marted|mercoled|gioved|venerd|sabato|domenica|tra|fra|ogni|entro|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|\d{1,2}\s*\/)/i;
-    const completes = x => { if (!chunks.length || DAYW.test(stripAccents(x))) return false; const me = P_(x), last = P_(chunks[chunks.length - 1]); return !!(me && me.time && last && last.date && !last.time); };
+    const lastDate = () => { for (let k = chunks.length - 1; k >= 0; k--) { if (inherit[k]) return inherit[k]; const r = P_(chunks[k]); if (r && r.date) return r.date; } return null; };
     parts.forEach((x, k) => {
-      if (completes(x)) { chunks[chunks.length - 1] += '. ' + x; return; }
-      if (chunks.length && !ok(x)) {
-        if (hasWhat(x) && another(pieces[k] || '', x) && P_(chunks[0]) && P_(chunks[chunks.length - 1]).date) { chunks.push(x); inherit.push(P_(chunks[chunks.length - 2]).date || inherit[inherit.length - 1]); }
-        else chunks[chunks.length - 1] += '. ' + x; // il seguito di quella prima ("Ricordami di portare le lastre")
-      } else { chunks.push(x); inherit.push(null); }
+      const noDay = !DAYW.test(stripAccents(x)), r = P_(x), prev = chunks.length ? P_(chunks[chunks.length - 1]) : null;
+      // "Ho l'appuntamento alle 18": senza un giorno e senza una cosa sua, è l'orario di quella prima
+      if (chunks.length && noDay && r && r.time && (!r.title || GENERIC.test(r.title) || r.needTitle) && prev && prev.date && !prev.time) { chunks[chunks.length - 1] += '. ' + x; return; }
+      const another = sepOf[k] === 'A' || /^(?:ricordami|ricordati|ricordarmi)\s+anche\b/i.test(x);
+      if (chunks.length && noDay && hasWhat(x) && (another || ok(x)) && lastDate()) { const d = lastDate(); chunks.push(x); inherit.push(d); return; } // una cosa in più, nello stesso giorno di prima
+      if (chunks.length && !ok(x)) { chunks[chunks.length - 1] += '. ' + x; return; } // il seguito di quella prima ("Ricordami di portare le lastre")
+      chunks.push(x); inherit.push(null);
     });
     if (chunks.length > 1 && !ok(chunks[0])) { chunks[1] = chunks[0] + '. ' + chunks[1]; chunks.shift(); inherit.shift(); }
     for (let k = 0; k < chunks.length; k++) chunks[k] = chunks[k].replace(/^(ricordami|ricordati|ricordarmi)\s+anche\s+/i, '$1 ');
@@ -891,13 +945,49 @@
   // per le scadenze (documenti, bollo, compleanni…) o le cose più lontane basta il giorno, con l'avviso a mezzogiorno
   const ASK_SOON = ['appuntamento', 'salute', 'chiamata', 'commissione', 'altro', 'bolletta', 'tasse', 'viaggio', 'gomme'];
   const ASK_EVENT = ['appuntamento', 'salute', 'gomme', 'viaggio', 'commissione', 'altro'];
+  // "ciao", "grazie", "asdfg prova": non c'è niente da ricordare
+  function chitchat(raw) {
+    const t = norm(raw).replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim(); if (!t) return 'vuoto';
+    if (/\b(?:oggi|domani|dopodomani|stasera|domattina|luned|marted|mercoled|gioved|venerd|sabato|domenica|alle|ore|tra|fra|ogni|scade|ricordami|ricordati|avvisami|devo|comprare|pagare|chiamare)\b|\d/.test(t)) return null;
+    const w = t.split(' ');
+    if (/^(?:grazie|grazie mille|ti ringrazio|thanks|thank you)\b/.test(t) && w.length <= 5) return 'grazie';
+    if (/^(?:ciao|ehi|hey|ehila|buongiorno|buonasera|buonanotte|salve|come va|come stai|tutto bene|ok|okay|va bene|perfetto|ottimo|bravo|brava|grande|top)\b/.test(t) && w.length <= 6) return 'ciao';
+    const junk = x => /^(?:prova|test|testing|bla|blabla|boh|mah|eh|ah|uff|ciao|memo|asd|lol)$/.test(x) || /[bcdfghjklmnpqrstvwxz]{4,}/.test(x) || !/[aeiou]/.test(x);
+    if (w.every(junk)) return 'boh';
+    return null;
+  }
   function needsTime(res, now) {
     if (!res || !res.date || res.time || res.askTime || res.remindAsk || res.remindOn || res.rep || res.purchase || res.needTitle) return false;
     const d = diffDays(todayISO(now || new Date()), res.date);
-    if (d >= 0 && d < 7 && ASK_SOON.includes(res.type)) return true;
+    if (d >= 0 && d <= 7 && ASK_SOON.includes(res.type)) return true;
     return res.leadMin != null && res.leadMin >= 1440 && ASK_EVENT.includes(res.type);
   }
-  function parseSpeech(raw, now) { const out = parseSpeech0(raw, now); if (out && out.title) out.title = out.title.replace(TAIL_RE, '').trim() || out.title; return out; }
+  function parseSpeech(raw, now) {
+    const nowD = now || new Date(), T0 = typed(raw, nowD), tn = norm(T0);
+    const wk = /\bnel weekend\b/.test(tn), ws = /\bin settimana\b/.test(tn);
+    const out = parseSpeech0(wk || ws ? T0.replace(/\b(?:nel weekend|in settimana)\b/gi, ' ') : raw, nowD);
+    return applyRules(out, raw, nowD);
+  }
+  // le regole di Ale, uguali per il motore e per l'AI
+  function applyRules(out, raw, nowD) {
+    if (!out) return out;
+    const tn = norm(typed(raw, nowD)), wk = /\bnel weekend\b/.test(tn), ws = /\bin settimana\b/.test(tn);
+    if (out.title) out.title = out.title.replace(TAIL_RE, '').trim() || out.title;
+    if (/^(?:cosa|una cosa|qualcosa|una roba|roba|mattina|mattino|sera|pomeriggio|notte|la mattina|la sera)$/i.test(out.title || '')) { out.title = ''; out.needTitle = true; }
+    const today = todayISO(nowD), d0 = parseISO(today), dow = d0.getDay();
+    // periodi vaghi: "nel weekend" (scade domenica, avviso sabato a mezzogiorno e poi domenica), "in settimana" (entro venerdì)
+    if (wk && !out.time) { const sat = addDays(today, (6 - dow + 7) % 7), sun = dow === 0 ? today : addDays(sat, 1); out.date = sun; if (dow !== 0) out.remindOn = `${sat}T12:00`; out.confident = true; delete out.askTime; if (out.title) delete out.needTitle; }
+    if (ws && !out.time) { const fri = addDays(today, ((5 - dow + 7) % 7) || (dow === 5 ? 7 : 0) || 7); out.date = dow === 6 || dow === 0 ? addDays(today, (5 - dow + 7) % 7) : fri; const next = dow >= 5 || dow === 0 ? addDays(today, dow === 0 ? 1 : 8 - dow) : addDays(today, 1); if (next < out.date) out.remindOn = `${next}T12:00`; out.confident = true; delete out.askTime; }
+    // avvisi puntuali: i timer ("tra 20 minuti"), le cose di tutti i giorni (la pastiglia alle 22), la sveglia
+    if (out.time && out.leadMin == null && /\b(?:tra|fra)\s+(?:\d+|un'?|una|mezz'?|due|tre|quattro|cinque|dieci|venti|trenta|un\s+quarto)\s*(?:minut|or[ae]\b|'?\s*ora\b|d'?\s*ora)/.test(tn)) out.leadMin = 0;
+    if (out.time && out.leadMin == null && out.rep && out.rep.u === 'd') out.leadMin = 0;
+    if (/\bsveglia\b/.test(tn)) { out.title = 'Sveglia'; delete out.needTitle; if (out.time) out.leadMin = 0; }
+    // "pranzo" senza ora: è a mezzogiorno
+    if (!out.time && out.date && /\bpranzo\b/.test(tn) && !/\b(?:mattina|sera|pomeriggio)\b/.test(tn) && !(out.askTime && (out.askTime.part || out.askTime.ctxTime))) { out.time = '12:00'; delete out.askTime; }
+    // si ripete "il martedì sera": l'ora si chiede
+    if (out.rep && !out.time && !out.askTime) { const pm = /\b(mattina|pomeriggio|sera|notte)\b/.exec(tn); if (pm) out.askTime = { part: pm[1] }; }
+    return out;
+  }
   function parseSpeech0(raw, now) {
     raw = typed(raw, now);
     const A = anchorOf(raw, now);
@@ -1159,7 +1249,8 @@
     }
     return null;
   }
-  function fromAI(ai, said, now) {
+  function fromAI(ai, said, now) { return applyRules(fromAI0(ai, said, now), said, now || new Date()); }
+  function fromAI0(ai, said, now) {
     const nowD = now || new Date(), today = todayISO(nowD);
     let type = TYPE_BY_ID[ai.type] ? ai.type : 'altro';
     if (type === 'altro') { const d = detectType(said + ' ' + (ai.title || '')); if (d.score >= 3) type = d.type; }
@@ -1297,7 +1388,7 @@
     return { key: 'calm', ...base };
   }
 
-  const API = { TYPES, TYPE_BY_ID, typed, splitMany, needsTime, command, period, whenOf, leadText, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
+  const API = { TYPES, TYPE_BY_ID, typed, splitMany, needsTime, chitchat, command, period, whenOf, leadText, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
     phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, anchorOf, plausible, MAX_YEARS, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);
