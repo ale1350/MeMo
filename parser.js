@@ -291,6 +291,12 @@
 
     let title = DOC_TITLE[type] || T.label;
     if (type === 'garanzia') { const s = guessStore(text); title = s ? `Garanzia ${s}` : 'Garanzia acquisto'; }
+    if (type === 'bolletta') { // "Bolletta luce Enel", "Bolletta gas", "Rata", "TARI"
+      const n = norm(text), what = /\bluce\b|energia\s+elettrica/.test(n) ? 'luce' : /\bgas\b/.test(n) ? 'gas' : /\bacqua\b|idric/.test(n) ? 'acqua' : /telefon|internet|fibra|mobile/.test(n) ? 'telefono' : '';
+      const who = (n.match(/\b(enel|a2a|iren|hera|edison|sorgenia|eni\s*plenitude|acea|tim|vodafone|windtre|fastweb|iliad|illumia|engie)\b/) || [])[1];
+      if (/\btari\b/.test(n)) title = 'Pagare la TARI'; else if (/\bimu\b/.test(n)) title = "Pagare l'IMU"; else if (/\bf24\b/.test(n)) title = 'Pagare F24';
+      else if (/bollett/.test(n) || what) title = 'Bolletta' + (what ? ' ' + what : '') + (who ? ' ' + who.replace(/\s+/g, ' ').replace(/(^|\s)\S/g, c => c.toUpperCase()).replace(/^(A2a|Tim)$/, m => m.toUpperCase()) : '');
+    }
     return { type, title, date, purchase, confident: confident && score > 0, typeScore: score };
   }
 

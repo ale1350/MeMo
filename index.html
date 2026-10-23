@@ -498,6 +498,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 
 <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
 <input type="file" id="fileLibrary" accept="image/*" hidden>
+<input type="file" id="fileAny" accept="image/*,application/pdf,.pdf" hidden>
 <input type="file" id="fileBackup" accept="application/json,.json" hidden>
 
 <div class="sheet-wrap" id="sheetWrap" hidden>
@@ -529,7 +530,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.29';
+const VERSION = '1.30';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
@@ -982,7 +983,7 @@ async function getOcr() {
   return ocrWorker;
 }
 function fileToImage(file) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = URL.createObjectURL(file); }); }
-function drawScaled(img, max) { const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)); const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c; }
+function drawScaled(img, max) { const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height; const s = Math.min(1, max / Math.max(iw, ih)); const c = document.createElement('canvas'); c.width = Math.round(iw * s); c.height = Math.round(ih * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c; }
 function prepForOcr(img) {
   const c = drawScaled(img, 2000); const g = c.getContext('2d'); const d = g.getImageData(0, 0, c.width, c.height), a = d.data;
   let min = 255, max = 0; const lum = new Uint8ClampedArray(a.length / 4);
@@ -994,10 +995,40 @@ function prepForOcr(img) {
 const savedPhoto = img => drawScaled(img, 1600).toDataURL('image/jpeg', 0.8);
 async function readPhoto(img) { const w = await getOcr(); const { data } = await w.recognize(prepForOcr(img)); return P.parseOcr(data.text || ''); }
 const onFile = e => { const f = e.target.files[0]; e.target.value = ''; const r = photoRoute; photoRoute = null; if (f && r) r(f); };
-$('#fileCamera').addEventListener('change', onFile); $('#fileLibrary').addEventListener('change', onFile);
-function pickPhoto(camera, route) { photoRoute = route; (camera ? $('#fileCamera') : $('#fileLibrary')).click(); }
+$('#fileCamera').addEventListener('change', onFile); $('#fileLibrary').addEventListener('change', onFile); $('#fileAny').addEventListener('change', onFile);
+// senza "capture" l'iPhone mostra la scelta: Scatta foto, Libreria foto, Scegli file (anche PDF)
+function pickPhoto(camera, route) { photoRoute = route; (camera === 'any' ? $('#fileAny') : camera ? $('#fileCamera') : $('#fileLibrary')).click(); }
+
+// ---------- documenti PDF: si leggono sul telefono, niente va su un server ----------
+const isPdf = f => f && (f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
+async function getPdf() {
+  if (!window.pdfjsLib) await loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  return window.pdfjsLib;
+}
+// testo delle prime pagine, riga per riga (le etichette tipo "Scadenza" restano vicine alle loro date)
+async function pdfText(doc, pages) {
+  const out = [];
+  for (let n = 1; n <= Math.min(pages, doc.numPages); n++) {
+    const tc = await (await doc.getPage(n)).getTextContent(), rows = [];
+    for (const it of tc.items) { if (!it.str || !it.str.trim()) continue; const y = Math.round(it.transform[5] / 3), x = it.transform[4];
+      let r = rows.find(r => Math.abs(r.y - y) <= 1); if (!r) rows.push(r = { y, parts: [] }); r.parts.push({ x, s: it.str }); }
+    rows.sort((a, b) => b.y - a.y).forEach(r => out.push(r.parts.sort((a, b) => a.x - b.x).map(p => p.s).join('   ')));
+  }
+  return out.join('\n');
+}
+async function pdfPage(doc, scale) { const pg = await doc.getPage(1), vp = pg.getViewport({ scale }); const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height); await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise; return c; }
+async function readPdf(file, onPreview) {
+  const lib = await getPdf(), doc = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const first = await pdfPage(doc, 1.6); onPreview(first);
+  const text = await pdfText(doc, 3);
+  if (text.replace(/\s/g, '').length > 40) return P.parseOcr(text); // PDF con testo vero: lettura precisa
+  const w = await getOcr(); const { data } = await w.recognize(prepForOcr(await pdfPage(doc, 2.6))); // PDF scansionato: come una foto
+  return P.parseOcr(data.text || '');
+}
 
 async function scanFlow(file) {
+  if (isPdf(file)) return pdfFlow(file);
   let img; try { img = await fileToImage(file); } catch (e) { toast('Non riesco ad aprire questa foto.', "Prova a scattarne un'altra."); return; }
   const photo = savedPhoto(img);
   openSheet(`<h2>Sto leggendo la foto</h2>
@@ -1016,7 +1047,25 @@ async function scanFlow(file) {
   try { const res = await readPhoto(img); if (cancelled) return; onSheetClose = null; go(res); }
   catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Per leggere le foto serve la connessione.', 'Intanto puoi inserire i dati a mano.'); }
 }
-$('#btnPhoto').addEventListener('click', () => pickPhoto(true, scanFlow));
+async function pdfFlow(file) {
+  let photo = null;
+  openSheet(`<h2>Sto leggendo il documento</h2>
+    <div class="scan"><img id="pdfThumb" alt="" style="visibility:hidden"><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar" style="width:30%"></i></div></div></div>
+    <button class="btn btn-ghost" id="ocrSkip">Lo scrivo io</button>`);
+  let cancelled = false; onSheetClose = () => { cancelled = true; };
+  const go = res => {
+    const draft = { type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null, photo };
+    openEditor(draft, res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
+      : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade. Il documento lo tengo comunque.", markMissing: true });
+  };
+  $('#ocrSkip').onclick = () => { cancelled = true; onSheetClose = null; go(null); };
+  ocrProgress = m => { const bar = $('#ocrBar'); if (bar && m.status === 'recognizing text') bar.style.width = Math.round(40 + m.progress * 60) + '%'; };
+  try {
+    const res = await readPdf(file, c => { photo = drawScaled(c, 1600).toDataURL('image/jpeg', 0.8); const t = $('#pdfThumb'); if (t) { t.src = photo; t.style.visibility = 'visible'; } const b = $('#ocrBar'); if (b) b.style.width = '60%'; });
+    if (cancelled) return; onSheetClose = null; go(res);
+  } catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Non riesco ad aprire questo documento.', 'Inserisci i dati a mano: al resto penso io.'); }
+}
+$('#btnPhoto').addEventListener('click', () => pickPhoto('any', scanFlow));
 
 // ================= Editor: nuova memo, conferma, modifica =================
 const LEADS_TIMED = [[0, 'Puntuale'], [5, '5 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [1440, 'Il giorno prima']];
@@ -1045,9 +1094,7 @@ function openEditor(draft, opts = {}) {
       <div class="pair"><div style="flex:1.45"><input class="input" type="date" id="eDate" aria-label="Giorno"></div>
       <div style="flex:1" id="eTimeBox"><input class="input" type="time" id="eTime" aria-label="Ora, se c'è"></div></div>
       <div class="chips" id="eQuick" style="margin-top:10px"></div></div>
-    <div class="field"><span class="lbl">Che tipo è?</span>
-      <div class="chips scroll" id="eTypes">${P.TYPES.map(t => `<button class="chip" data-type="${t.id}"><span aria-hidden="true">${t.emoji}</span>${esc(t.label)}</button>`).join('')}</div></div>
-    <div class="field"><span class="lbl">Foto <span style="font-weight:600;color:var(--ink-3)">(facoltativa)</span></span><div id="ePhoto"></div></div>
+    <div class="field"><span class="lbl">Foto o documento <span style="font-weight:600;color:var(--ink-3)">(facoltativo)</span></span><div id="ePhoto"></div></div>
     <div class="summary" id="eSum" hidden><div class="row1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2.2 2.2 0 0 0 4 0"/></svg><p id="eSumTxt"></p><button class="chg" id="eChg">Cambia</button></div><div class="chips" id="eLeads" hidden></div></div>
     <button class="btn btn-main" id="eSave">Ricordamelo</button>
     ${opts.renew ? '<button class="btn btn-ghost" id="eDrop" style="margin-top:10px">Non serve più, toglilo</button>' : ''}`, body => {
@@ -1058,19 +1105,22 @@ function openEditor(draft, opts = {}) {
       const box = body.querySelector('#ePhoto');
       if (state.photo) {
         box.innerHTML = `<div class="photo-slot"><img class="photo-thumb" src="${state.photo}" alt="Foto allegata"><div class="photo-actions"><button id="pChange">${reading ? 'Sto leggendo la foto…' : 'Cambia foto'}</button><button class="rm" id="pRemove">Togli la foto</button></div></div>`;
-        box.querySelector('#pChange').onclick = () => !reading && pickPhoto(false, onPhoto);
+        box.querySelector('#pChange').onclick = () => !reading && pickPhoto('any', onPhoto);
         box.querySelector('#pRemove').onclick = () => { state.photo = null; state.photoRemoved = true; renderPhoto(); };
       } else {
-        box.innerHTML = `<button class="photo-add" id="pAdd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>Aggiungi una foto</button>`;
-        box.querySelector('#pAdd').onclick = () => pickPhoto(false, onPhoto);
+        box.innerHTML = `<button class="photo-add" id="pAdd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>Aggiungi foto o PDF</button>`;
+        box.querySelector('#pAdd').onclick = () => pickPhoto('any', onPhoto);
       }
     };
     const onPhoto = async file => {
-      let img; try { img = await fileToImage(file); } catch (e) { return; }
-      state.photo = savedPhoto(img); state.photoRemoved = false;
-      if (T(state.type).dateKind === 'purchase' ? state.purchase : state.date) { renderPhoto(); return; }
+      let img = null;
+      if (isPdf(file)) { reading = true; renderPhoto(); }
+      else { try { img = await fileToImage(file); } catch (e) { return; } state.photo = savedPhoto(img); state.photoRemoved = false; }
+      const known = T(state.type).dateKind === 'purchase' ? state.purchase : state.date;
+      if (img && known) { renderPhoto(); return; }
       reading = true; renderPhoto();
-      try { const res = await readPhoto(img);
+      try { const res = img ? await readPhoto(img) : await readPdf(file, c => { state.photo = drawScaled(c, 1600).toDataURL('image/jpeg', 0.8); state.photoRemoved = false; renderPhoto(); });
+        if (known) { reading = false; renderPhoto(); return; }
         if (!(T(state.type).dateKind === 'purchase' ? state.purchase : state.date) && res.date) {
           if (!state.typeManual && res.typeScore) state.type = res.type;
           if (state.autoTitle && res.typeScore) titleEl.value = res.title;
@@ -1080,7 +1130,6 @@ function openEditor(draft, opts = {}) {
     };
     const sync = () => {
       const ty = T(state.type), today = P.todayISO();
-      body.querySelectorAll('#eTypes .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.type === state.type));
       body.querySelector('#eDateLbl').textContent = ty.dateKind === 'purchase' ? ty.ask : `${ty.ask} L'ora è facoltativa.`;
       body.querySelector('#eTimeBox').hidden = ty.dateKind === 'purchase';
       const val = ty.dateKind === 'purchase' ? (state.purchase || '') : (state.date || '');
@@ -1108,10 +1157,10 @@ function openEditor(draft, opts = {}) {
       const prevKind = T(state.type).dateKind; state.type = id; const kind = T(id).dateKind; state.leadMin = null;
       if (prevKind !== kind) { if (kind === 'purchase') { state.purchase = state.date && state.date <= P.todayISO() ? state.date : null; state.date = null; } else { state.date = state.purchase ? P.addMonths(state.purchase, 24) : state.date; state.purchase = null; } }
     };
-    body.querySelector('#eTypes').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.typeManual = true; setType(c.dataset.type); if (state.autoTitle && state.type !== 'altro') titleEl.value = T(state.type).label; sync(); });
     titleEl.addEventListener('input', () => {
       state.autoTitle = false;
-      if (!state.typeManual) { const d = P.detectType(titleEl.value); const id = d.score ? d.type : 'altro'; if (id !== state.type) { setType(id); const sel = body.querySelector(`#eTypes .chip[data-type="${id}"]`); if (sel) sel.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } }
+      // il tipo lo capisco da quello che scrivi (in modifica cambio solo se è chiaro)
+      { const d = P.detectType(titleEl.value); const id = d.score ? d.type : 'altro'; if (id !== state.type && (!state.typeManual || d.score >= 4)) setType(id); }
       sync();
     });
     titleEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); } });
@@ -1134,7 +1183,6 @@ function openEditor(draft, opts = {}) {
       haptic(); closeSheet(); render(); savedToast(it);
     };
     renderPhoto(); sync();
-    const sel = body.querySelector('#eTypes .chip[aria-pressed="true"]'); if (sel) body.querySelector('#eTypes').scrollLeft = sel.offsetLeft - 20;
     if (opts.focus) setTimeout(() => body.querySelector(opts.focus).focus(), 440);
   });
 }
