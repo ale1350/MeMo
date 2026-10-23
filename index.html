@@ -251,6 +251,14 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 /* ---------- il pesciolino che arriva dal profondo e ti ascolta ---------- */
 #heroKnot{transition:opacity .18s}
 body.listening #heroKnot{opacity:0;transition:none}
+/* il pesciolino in 3D vero: è uno solo e va dove serve (cerchio, sfondo, tutorial, quando ascolta) */
+.fish3d-c{position:absolute;display:block;pointer-events:none}
+.knot3{position:absolute;pointer-events:none;animation:swim 5s ease-in-out infinite;filter:drop-shadow(0 10px 18px rgba(242,87,58,.22))}
+body.listening .knot3{opacity:0}
+body.fish3d #heroKnot,body.fish3d #diver .dv-3d,body.fish3d #swimmer .f3,body.fish3d .i-fish>svg{visibility:hidden}
+.i-fish{position:relative}
+.i-fish .fish3d-c{filter:drop-shadow(0 16px 20px rgba(255,110,60,.25))}
+@media (prefers-reduced-motion: reduce){.knot3{animation:none}}
 .deep{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;transition:opacity .6s ease;overflow:hidden;
   background:radial-gradient(120% 75% at 50% 64%, rgba(255,255,255,0) 0%, rgba(44,86,170,.18) 50%, rgba(20,46,110,.38) 100%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .deep.on{opacity:1}
@@ -312,7 +320,7 @@ body.listening #heroKnot{opacity:0;transition:none}
 .w-lead .brandw{font-weight:750}
 .w-box{position:relative}
 textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:76px;padding:13px 60px 13px 15px;margin:0;font-size:17px;line-height:1.4;border-radius:22px;text-align:left;text-indent:0;vertical-align:top;white-space:pre-wrap;transition:opacity .2s}
-.w-send{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--brand-grad);box-shadow:0 6px 16px rgba(47,107,242,.32);transition:transform .15s,opacity .2s}
+.w-send{position:absolute;right:9px;top:50%;margin-top:-22px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--brand-grad);box-shadow:0 6px 16px rgba(47,107,242,.32);transition:transform .15s,opacity .2s}
 .w-send:active{transform:scale(.92)}
 .w-send:disabled{opacity:.32;box-shadow:none}
 .w-send .dots{margin:0}
@@ -701,7 +709,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.3';
+const VERSION = '2.5';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -746,7 +754,19 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const T = id => P.TYPE_BY_ID[id] || P.TYPE_BY_ID.altro;
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+// il box "Cosa fare" solo dove serve davvero: documenti, auto, casa, tasse (non per un giro in moto o una cena)
+const TODO_TYPES = ['passaporto', 'cie', 'patente', 'tessera', 'revisione', 'bollo', 'assicurazione', 'caldaia', 'gomme', 'tasse', 'garanzia'];
+// l'icona giusta per quello che stai facendo, prima ancora del tipo
+const EMOJI_KW = [[/\bmoto\b|motorino|scooter/, '🏍️'], [/\bbici|bicicletta|ciclismo/, '🚲'], [/palestra|allenament|pesi\b/, '🏋️'], [/calcetto|calcio|partita/, '⚽'], [/\bcorsa\b|correre|running|jogging/, '🏃'],
+  [/piscina|nuoto|nuotare/, '🏊'], [/tennis|padel/, '🎾'], [/yoga|pilates/, '🧘'], [/aperitiv|spritz/, '🍹'], [/cena|pranzo|colazione|ristorante|pizza/, '🍽️'], [/\bvino\b/, '🍷'], [/birra/, '🍺'], [/\btorta\b|dolce\b/, '🎂'],
+  [/fiori/, '💐'], [/regalo|regali/, '🎁'], [/\bcane\b|veterinari/, '🐶'], [/\bgatto\b/, '🐱'], [/pastiglia|pillola|medicin|farmac/, '💊'], [/dentist/, '🦷'], [/spesa|supermercato/, '🛒'], [/\bpane\b/, '🥖'],
+  [/\blatte\b/, '🥛'], [/pacco|poste\b|spedi/, '📦'], [/banca|bancomat/, '🏦'], [/lavatrice|bucato|stendere/, '🧺'], [/pulizi|pulire/, '🧹'], [/\bscuola\b|bambini/, '🎒'], [/treno/, '🚆'], [/\bvolo\b|aereo|aeroporto/, '✈️'],
+  [/traghetto|\bnave\b/, '⛴️'], [/\bbus\b|autobus|pullman/, '🚌'], [/macchina|\bauto\b|meccanico|tagliando|benzina/, '🚗'], [/parrucch|barbier/, '💇'], [/estetist|manicure|massagg/, '💅'],
+  [/riunion|meeting|\bcall\b|colloquio|lavoro|cliente|ufficio/, '💼'], [/sveglia/, '⏰'], [/forno/, '🔥'], [/compleanno/, '🎂'], [/film|cinema/, '🎬'], [/concerto/, '🎵']];
 function emojiOf(it) {
+  if (!['passaporto', 'cie', 'patente', 'tessera', 'bollo', 'assicurazione', 'revisione', 'caldaia', 'garanzia', 'tasse', 'gomme', 'abbonamento'].includes(it.type)) {
+    const t0 = String(it.title || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); for (const [re, e] of EMOJI_KW) if (re.test(t0)) return e;
+  }
   const t = (it.title || '').toLowerCase();
   if (it.type === 'appuntamento') {
     if (/parrucch|barbier/.test(t)) return '💇';
@@ -2101,7 +2121,7 @@ const Fish = (() => {
   const MOUTH = { curious: 'o', listen: 'smile', mm: 'smile', o: 'o', got: 'big', wait: 'flat', think: 'side', happy: 'big', worry: 'wavy', puzzled: 'flat' };
   const setFace = f => { face = f; el.dataset.f = f; el.dataset.m = MOUTH[f] || 'smile'; };
   const look = (x, y) => { el.style.setProperty('--lx', x.toFixed(2) + 'px'); el.style.setProperty('--ly', y.toFixed(2) + 'px'); };
-  const gesture = g => { head.classList.remove('g-nod', 'g-hop', 'g-shake'); void head.offsetWidth; head.classList.add('g-' + g); };
+  const gesture = g => { head.classList.remove('g-nod', 'g-hop', 'g-shake'); void head.offsetWidth; head.classList.add('g-' + g); if (window.memoFish3D) memoFish3D.gesture(g); };
   const stopAnims = () => { anims.forEach(a => a.cancel()); anims = []; };
   function play(fr, dur, done) {
     stopAnims();
@@ -2136,7 +2156,7 @@ const Fish = (() => {
     return { x: rc.left + rc.width * .55, y: rc.top + rc.height * .54 - (2.5 / 62) * (w * 62 / 88) * s, s };
   }
   function come() {
-    clearTimeout(exitT); if (on) return;
+    clearTimeout(exitT); if (on) return; if (window.memoFish3D) memoFish3D.wake();
     on = true; mode = 'listen'; lastHear = Date.now(); stopAll();
     const W = innerWidth, H = innerHeight, w = Math.round(Math.min(270, Math.max(170, W * .62))), h = Math.round(w * 62 / 88);
     el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.margin = `${-h / 2}px 0 0 ${-w / 2}px`; el.style.setProperty('--zm', (w * .12).toFixed(1) + 'px');
@@ -2344,7 +2364,7 @@ const PTT = (() => {
   const stop = () => { anims.forEach(a => a.cancel()); anims = []; cur = null; };
   function swim(force) {
     if (!force && !free()) { later(15000); return; }
-    stop();
+    stop(); if (window.memoFish3D) memoFish3D.wake();
     const W = innerWidth, H = innerHeight, size = .95 + r() * .3;
     const x0 = dir > 0 ? -70 : W + 70, x1 = dir > 0 ? W + 70 : -70, way = r();
     const y0 = H * (.38 + r() * .32), y1 = H * (.26 + r() * .42);
@@ -2441,7 +2461,7 @@ async function openDetail(id) {
   const doneSub = it.rep ? `Poi te lo ricordo ${P.repText(it.rep)}.` : ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
     ${photo ? `<img class="thumb" id="dPhoto" src="${photo}" alt="Foto salvata, tocca per ingrandire">` : ''}
-    ${(it.todo || ty.todo) ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(it.todo || ty.todo)}</p>${(it.link || ty.link) ? `<a class="link" href="${(it.link || ty.link).url}" target="_blank" rel="noopener">${esc((it.link || ty.link).label)}</a>` : ''}</div>` : ''}
+    ${(it.todo || (TODO_TYPES.includes(it.type) && ty.todo)) ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(it.todo || ty.todo)}</p>${(it.link || ty.link) ? `<a class="link" href="${(it.link || ty.link).url}" target="_blank" rel="noopener">${esc((it.link || ty.link).label)}</a>` : ''}</div>` : ''}
     ${nextList ? `<div class="d-card"><span class="lbl">I prossimi avvisi</span><p class="todo" style="margin:0">${esc(nextList)}</p></div>` : ''}
     ${it.said ? `<div class="d-card"><span class="lbl">Mi avevi detto</span><p class="todo" style="margin:0">«${esc(it.said)}»</p></div>` : ''}
     <button class="btn btn-main" id="dDone">${doneLabel}</button>${doneSub ? `<p class="fine">${doneSub}</p>` : ''}
@@ -2588,7 +2608,7 @@ function showIntro() {
         <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
       h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Una foto, due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
   ];
-  const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<button data-pre="${p.id}" data-short="1" aria-pressed="${hasPreset(p.id)}">${hasPreset(p.id) ? '✓ ' + preLabel(p, true).replace(/^\S+\s/, '') : preLabel(p, true)}</button>`).join('')}</div>`,
+  const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<span>${preLabel(p, true)}</span>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
   const pst = Push.state();
   if (pst !== 'noserver' && pst !== 'nosupport') {
@@ -2613,7 +2633,6 @@ function showIntro() {
   const close = () => { store.set('intro', '1'); window.dispatchEvent(new Event('memo:introdone')); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
   next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
-  bindPresets(el);
   const nb = el.querySelector('#iNotif');
   if (nb) nb.onclick = async () => { nb.disabled = true; nb.textContent = 'Un attimo…'; let st; try { st = await Push.enable(); } catch (e) { st = 'error'; }
     nb.textContent = st === 'on' ? 'Notifiche attive ✓' : st === 'denied' ? 'Bloccate: riattivale dalle Impostazioni' : 'Riprova più tardi dalle impostazioni';
@@ -2814,6 +2833,8 @@ function tick() {
 // ================= Avvio =================
 (async function init() {
   try { items = await DB.all(); } catch (e) { items = []; }
+  // i "viaggi" che non sono viaggi (un giro in moto): tornano attività normali, senza l'avviso della sera prima
+  for (const it of items) if (it.type === 'viaggio' && !/\b(?:vol[oi]|aere|treno|partenz|partir|parto|viaggi|vacanz|aeroporto|nave|traghett|crociera|valigi)/i.test((it.title || '') + ' ' + (it.said || ''))) { it.type = 'altro'; try { await DB.put(it); } catch (e) {} }
   await rollAll();
   // l'iPhone, per le webapp, chiede il permesso del microfono una volta per ogni apertura: lo chiedo subito,
   // così quando tieni premuto il tasto parti a parlare senza interruzioni
@@ -2844,6 +2865,8 @@ function tick() {
   setInterval(tick, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(); clearBadge(); } });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  // il pesciolino in 3D: si carica subito dopo; se il telefono non ce la fa resta quello di prima
+  if (window.WebGLRenderingContext) setTimeout(() => { import('./memo-fish.js').catch(() => {}); }, 120);
 })();
 </script>
 </body>

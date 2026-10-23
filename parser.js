@@ -1253,6 +1253,8 @@
   function fromAI0(ai, said, now) {
     const nowD = now || new Date(), today = todayISO(nowD);
     let type = TYPE_BY_ID[ai.type] ? ai.type : 'altro';
+    // "viaggio" solo se si parte davvero (volo, treno, nave, vacanza): un giro in moto o in bici non è un viaggio
+    if (type === 'viaggio' && !/\b(?:vol[oi]|aere|treno|partenz|partir|parto|partiamo|viaggi|vacanz|aeroporto|nave|traghett|crociera|valigi|check-?in)/.test(norm(said + ' ' + (ai.title || '')))) { const d = detectType(said); type = d.score >= 2 && d.type !== 'viaggio' ? d.type : 'altro'; }
     if (type === 'altro') { const d = detectType(said + ' ' + (ai.title || '')); if (d.score >= 3) type = d.type; }
     const w = ai.when ? parseSpeech(ai.when, nowD) : null;
     let date = w && w.date || null, time = w && w.time || null, purchase = null, askTime = null, leadMin = null;
