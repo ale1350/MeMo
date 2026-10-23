@@ -331,6 +331,10 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 /* ---------- toast col nodo ---------- */
 .toast{position:fixed;left:14px;right:14px;bottom:calc(124px + env(safe-area-inset-bottom));z-index:30;max-width:520px;margin:0 auto;background:rgba(232,236,243,.94);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);color:var(--ink);border:1px solid rgba(18,24,38,.06);border-radius:16px;padding:8px 8px 8px 10px;display:flex;align-items:center;gap:10px;font-size:14.5px;line-height:1.3;transform:translateY(16px) scale(.98);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1.15),opacity .22s;pointer-events:none;box-shadow:0 8px 24px rgba(43,72,140,.14)}
 .toast.show{transform:none;opacity:1;pointer-events:auto}
+.rep-row{display:flex;align-items:center;gap:10px;margin:-4px 0 18px;min-height:40px}
+.rep-row > span{flex:1;font-weight:700;font-size:15px;color:var(--ink-2)}
+.rep-sel{font:inherit;font-size:15px;font-weight:650;color:var(--brand-ink);background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%232F6FE0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;border:0;border-radius:12px;padding:8px 30px 8px 12px;max-width:62%;-webkit-appearance:none;appearance:none}
+.rep-row[hidden]{display:none}
 .s-tgl{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--stroke)}
 .s-tgl div{flex:1;display:flex;flex-direction:column;gap:2px}
 .s-tgl b{font-size:15.5px;font-weight:750}
@@ -549,7 +553,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.34';
+const VERSION = '1.35';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 function clearBadge() { try { if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {}); } catch (e) {} }
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -1160,7 +1164,7 @@ function openEditor(draft, opts = {}) {
       <div class="pair"><div style="flex:1.45"><input class="input" type="date" id="eDate" aria-label="Giorno"></div>
       <div style="flex:1" id="eTimeBox"><input class="input" type="time" id="eTime" aria-label="Ora, se c'è"></div></div>
       <div class="chips" id="eQuick" style="margin-top:10px"></div></div>
-    <div class="field" id="eRepBox"><label for="eRep">Si ripete?</label><select class="input" id="eRep"></select></div>
+    <div class="rep-row" id="eRepBox"><span>Si ripete</span><select class="rep-sel" id="eRep" aria-label="Ogni quanto" hidden></select><button class="tgl" id="eRepT" role="switch" aria-checked="false" aria-label="Si ripete"><i></i></button></div>
     <div class="field"><span class="lbl">Foto o documento <span style="font-weight:600;color:var(--ink-3)">(facoltativo)</span></span><div id="ePhoto"></div></div>
     <div class="summary" id="eSum" hidden><div class="row1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2.2 2.2 0 0 0 4 0"/></svg><p id="eSumTxt"></p><button class="chg" id="eChg">Cambia</button></div><div class="chips" id="eLeads" hidden></div></div>
     <button class="btn btn-main" id="eSave">Ricordamelo</button>
@@ -1224,10 +1228,11 @@ function openEditor(draft, opts = {}) {
       if (!repBox.hidden) {
         const d = state.date ? P.parseISO(state.date) : null, wd = d ? d.getDay() : null, dom = d ? d.getDate() : null;
         if (state.rep && d) { if (state.rep.u === 'w' && state.rep.wd && state.rep.wd.length === 1) state.rep.wd = [wd]; if (state.rep.u === 'm' && state.rep.dom != null && state.rep.dom !== 'last') state.rep.dom = dom; }
-        const opts = [['no', 'No'], ['d', 'Ogni giorno'], ['w', d ? `Ogni ${['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'][wd]}` : 'Ogni settimana'], ['m', d ? (dom === 1 ? 'Il primo di ogni mese' : `Il ${dom} di ogni mese`) : 'Ogni mese'], ['y', 'Ogni anno']];
-        const cur = !state.rep ? 'no' : (state.rep.n === 1 && !(state.rep.wd && state.rep.wd.length > 1) && state.rep.dom !== 'last') ? state.rep.u : 'custom';
+        const opts = [['d', 'Ogni giorno'], ['w', d ? `Ogni ${['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'][wd]}` : 'Ogni settimana'], ['m', d ? (dom === 1 ? 'Il primo di ogni mese' : `Il ${dom} di ogni mese`) : 'Ogni mese'], ['y', 'Ogni anno']];
+        const cur = !state.rep ? '' : (state.rep.n === 1 && !(state.rep.wd && state.rep.wd.length > 1) && state.rep.dom !== 'last') ? state.rep.u : 'custom';
         if (cur === 'custom') opts.splice(1, 0, ['custom', cap(P.repText(state.rep))]);
         repEl.innerHTML = opts.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`).join('');
+        repEl.hidden = !state.rep; body.querySelector('#eRepT').setAttribute('aria-checked', String(!!state.rep));
       }
       body.querySelector('#eSave').disabled = !state.due || !titleEl.value.trim();
     };
@@ -1246,13 +1251,11 @@ function openEditor(draft, opts = {}) {
     timeEl.addEventListener('change', () => { state.time = timeEl.value || null; state.leadMin = null; if (state.time && !state.date) state.date = P.todayISO(); sync(); });
     body.querySelector('#eQuick').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; if (T(state.type).dateKind === 'purchase') state.purchase = c.dataset.d; else state.date = c.dataset.d; sync(); });
     body.querySelector('#eChg').onclick = () => { showLeads = !showLeads; sync(); };
-    body.querySelector('#eRep').addEventListener('change', e => {
-      const v = e.target.value; if (v === 'custom') return;
-      if (!state.date) state.date = P.todayISO();
-      const d = P.parseISO(state.date);
-      state.rep = v === 'no' ? null : v === 'w' ? { u: 'w', n: 1, wd: [d.getDay()] } : v === 'm' ? { u: 'm', n: 1, dom: d.getDate() } : { u: v, n: 1 };
-      haptic(); sync();
-    });
+    const repFor = v => { if (!state.date) state.date = P.todayISO(); const d = P.parseISO(state.date);
+      return v === 'w' ? { u: 'w', n: 1, wd: [d.getDay()] } : v === 'm' ? { u: 'm', n: 1, dom: d.getDate() } : { u: v, n: 1 }; };
+    body.querySelector('#eRep').addEventListener('change', e => { const v = e.target.value; if (v === 'custom') return; state.rep = repFor(v); haptic(); sync(); });
+    // un interruttore: acceso = ogni settimana (o ogni mese per i pagamenti), poi si cambia dal menu accanto
+    body.querySelector('#eRepT').onclick = () => { state.rep = state.rep ? null : repFor(state.type === 'bolletta' || state.type === 'tasse' ? 'm' : 'w'); haptic(); sync(); };
     body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; sync(); });
     const drop = body.querySelector('#eDrop');
     if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); if (calOpen) renderCal(); toast(say('drop')); };
