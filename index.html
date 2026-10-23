@@ -271,13 +271,29 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .photo-actions button.rm{color:var(--ink-3)}
 .thumb{width:100%;max-height:240px;object-fit:cover;border-radius:20px;display:block;margin:0 0 18px}
 .scan{display:flex;gap:14px;align-items:center;margin:4px 0 22px}
+/* ---------- tieni premuto e parla ---------- */
+#btnVoice{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none}
+#btnVoice .c{transition:transform .18s cubic-bezier(.3,.8,.3,1.3),box-shadow .2s}
+#btnVoice.holding .c{transform:scale(1.12);box-shadow:0 0 0 10px rgba(76,141,246,.18),0 0 0 22px rgba(76,141,246,.08),var(--cam-glow)}
+#btnVoice.away .c{transform:scale(.92);opacity:.6}
+.ptt{position:fixed;left:14px;right:14px;bottom:calc(158px + env(safe-area-inset-bottom));z-index:40;display:flex;justify-content:center;pointer-events:none;opacity:0;transform:translateY(12px);transition:opacity .2s,transform .25s cubic-bezier(.3,.8,.3,1.2)}
+.ptt.show{opacity:1;transform:none}
+.ptt[hidden]{display:none}
+.ptt-card{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--stroke);border-radius:999px;padding:9px 16px 9px 14px;box-shadow:0 10px 28px rgba(43,72,140,.16);pointer-events:auto}
+.ptt-wave{display:flex;align-items:center;gap:3px;height:18px}
+.ptt-wave i{width:3px;height:100%;border-radius:2px;background:var(--brand-grad);animation:pttWave 1s ease-in-out infinite;transform:scaleY(.3)}
+.ptt-wave i:nth-child(2){animation-delay:.12s}.ptt-wave i:nth-child(3){animation-delay:.24s}.ptt-wave i:nth-child(4){animation-delay:.36s}.ptt-wave i:nth-child(5){animation-delay:.48s}.ptt-wave i:nth-child(6){animation-delay:.6s}.ptt-wave i:nth-child(7){animation-delay:.72s}
+.ptt.idle .ptt-wave i{animation:none;transform:scaleY(.25);opacity:.5}
+.ptt.cancel .ptt-card{background:rgba(255,236,228,.96)}
+@keyframes pttWave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.ptt-hint{margin:0;font-weight:750;font-size:14.5px;color:var(--ink);white-space:nowrap}
 /* ---------- fotocamera di MeMo: legge mentre inquadri ---------- */
 .scanner{position:fixed;inset:0;z-index:60;background:#05070d;color:#fff;overflow:hidden;touch-action:none}
 .scanner[hidden]{display:none}
 .scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.sc-shade{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-.sc-guide{position:relative;width:min(88vw,520px);aspect-ratio:1.586;border-radius:22px;box-shadow:0 0 0 200vmax rgba(5,7,13,.52);transition:box-shadow .3s}
-.sc-guide i{position:absolute;width:34px;height:34px;border:4px solid rgba(255,255,255,.9);transition:border-color .3s}
+.sc-shade{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:13vh;pointer-events:none}
+.sc-guide{position:relative;width:86vw;height:62vh;border-radius:22px;box-shadow:0 0 0 200vmax rgba(5,7,13,.45);transition:width .45s cubic-bezier(.3,.8,.3,1),height .45s cubic-bezier(.3,.8,.3,1),box-shadow .3s}
+.sc-guide i{position:absolute;width:30px;height:30px;border:4px solid rgba(255,255,255,.9);transition:border-color .3s}
 .sc-guide i:nth-child(1){left:-2px;top:-2px;border-right:0;border-bottom:0;border-radius:22px 0 0 0}
 .sc-guide i:nth-child(2){right:-2px;top:-2px;border-left:0;border-bottom:0;border-radius:0 22px 0 0}
 .sc-guide i:nth-child(3){left:-2px;bottom:-2px;border-right:0;border-top:0;border-radius:0 0 0 22px}
@@ -286,8 +302,9 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .sc-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 12px);display:flex;justify-content:space-between;align-items:center;padding:0 16px}
 .sc-x{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .sc-pick{color:#fff;font-weight:700;font-size:15px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.sc-hint{position:absolute;left:16px;right:16px;top:calc(50% - min(88vw,520px) / 3.172 - 56px);margin:0;text-align:center;font-size:18px;font-weight:750;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-.sc-status{position:absolute;left:16px;right:16px;top:calc(50% + min(88vw,520px) / 3.172 + 20px);display:flex;flex-direction:column;align-items:center;gap:8px}
+.sc-hint{position:absolute;left:16px;right:16px;top:calc(env(safe-area-inset-top) + 66px);margin:0;text-align:center;font-size:17px;font-weight:750;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.sc-status{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 124px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.sc-chip.other{background:rgba(255,255,255,.88);color:#121826}
 .sc-chip{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-size:15px;font-weight:650;transition:background .3s}
 .sc-chip.found{background:rgba(60,219,152,.92);color:#05230f}
 .sc-shot{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 28px);width:78px;height:78px;margin-left:-39px;border-radius:50%;border:4px solid rgba(255,255,255,.9);background:transparent;display:grid;place-items:center}
@@ -550,7 +567,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </section>
 <nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
-  <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span>Dimmi</button>
+  <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span><span class="rb-l">Tieni premuto</span></button>
   <button class="rb add" id="btnAdd"><span class="c"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
 </nav>
 
@@ -565,12 +582,14 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </div>
 
 <button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
+<div class="ptt" id="ptt" hidden aria-live="polite"><div class="ptt-card"><div class="ptt-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <p class="ptt-hint" id="pttHint">Ti ascolto…</p></div></div>
 <div class="scanner" id="scanner" hidden role="dialog" aria-label="Inquadra il documento">
   <video id="scVideo" playsinline muted autoplay></video>
   <div class="sc-shade"><div class="sc-guide" id="scGuide"><i></i><i></i><i></i><i></i></div></div>
   <div class="sc-top"><button class="sc-x" id="scClose" aria-label="Chiudi"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
     <button class="sc-pick" id="scPick">Galleria o PDF</button></div>
-  <p class="sc-hint" id="scHint">Inquadra il documento</p>
+  <p class="sc-hint" id="scHint">Inquadra il documento, in verticale o in orizzontale</p>
   <div class="sc-status"><span class="sc-chip" id="scType"><b>📄</b><span>Cerco cos'è…</span></span><span class="sc-chip" id="scDate"><b>📅</b><span>Cerco la scadenza…</span></span></div>
   <button class="sc-shot" id="scShot" aria-label="Scatta"><i></i></button>
 </div>
@@ -597,7 +616,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.38';
+const VERSION = '1.41';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1210,7 +1229,8 @@ async function scanImage(img, known, liveText) {
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
     const draft = { type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null, photo };
-    openEditor(draft, res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
+    openEditor(draft, res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
+      : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
       : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerla bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nella foto: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade. La foto la tengo comunque.", markMissing: true });
   };
   $('#ocrSkip').onclick = () => { cancelled = true; onSheetClose = null; go(null); };
@@ -1229,7 +1249,8 @@ async function pdfFlow(file) {
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
     const draft = { type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null, photo };
-    openEditor(draft, res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
+    openEditor(draft, res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
+      : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
       : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade. Il documento lo tengo comunque.", markMissing: true });
   };
   $('#ocrSkip').onclick = () => { cancelled = true; onSheetClose = null; go(null); };
@@ -1241,12 +1262,23 @@ async function pdfFlow(file) {
 }
 // ---------- la fotocamera di MeMo: mentre inquadri, ti dice cosa sta leggendo ----------
 const Scanner = (() => {
-  let stream = null, open = false, live = [], last = null, stable = 0, busy = false;
+  let stream = null, open = false, live = [], last = null, stable = 0, busy = false, tries = 0, other = false, shape = '', cur = ['any', false];
+  window.addEventListener('resize', () => { if (open) { shape = ''; setGuide(cur[0], cur[1]); } }); // telefono girato: il riquadro si rifà
   const el = $('#scanner'), video = $('#scVideo');
-  const cut = (pad) => { // la parte del video dentro il riquadro (più un margine)
+  // il riquadro parte generico e prende la forma del documento che riconosce: tessera, passaporto, foglio, scontrino
+  const SHAPE = { card: 1.586, passport: 1.42, page: 0.707, receipt: 0.42, any: 0.8 };
+  const shapeOf = type => ['patente', 'cie', 'tessera'].includes(type) ? 'card' : type === 'passaporto' ? 'passport' : type === 'garanzia' ? 'receipt' : 'page';
+  function setGuide(name, sideways) {
+    const key = name + (sideways ? '|s' : ''); if (key === shape) return; shape = key; cur = [name, sideways];
+    let a = SHAPE[name] || SHAPE.any; if (sideways) a = 1 / a;
+    const maxW = el.clientWidth * 0.92, maxH = el.clientHeight * 0.52;
+    const W = maxW / a <= maxH ? maxW : maxH * a, H = W / a, g = $('#scGuide');
+    g.style.width = Math.round(W) + 'px'; g.style.height = Math.round(H) + 'px';
+  }
+  const cut = (pad, all) => { // la parte del video dentro il riquadro (più un margine), oppure tutto quello che si vede
     const vw = video.videoWidth, vh = video.videoHeight; if (!vw) return null;
     const cw = el.clientWidth, ch = el.clientHeight, s = Math.max(cw / vw, ch / vh), ox = (cw - vw * s) / 2, oy = (ch - vh * s) / 2;
-    const r = $('#scGuide').getBoundingClientRect(), er = el.getBoundingClientRect();
+    const r = all ? { left: 0, top: 0, width: cw, height: ch } : $('#scGuide').getBoundingClientRect(), er = all ? { left: 0, top: 0 } : el.getBoundingClientRect();
     let x = (r.left - er.left - ox) / s, y = (r.top - er.top - oy) / s, w = r.width / s, h = r.height / s;
     x -= w * pad; y -= h * pad; w *= 1 + 2 * pad; h *= 1 + 2 * pad;
     x = Math.max(0, x); y = Math.max(0, y); w = Math.min(vw - x, w); h = Math.min(vh - y, h);
@@ -1254,26 +1286,34 @@ const Scanner = (() => {
   };
   const chip = (id, found, txt) => { const c = $(id); c.classList.toggle('found', !!found); c.querySelector('b').textContent = found ? '✓' : id === '#scType' ? '📄' : '📅'; c.querySelector('span').textContent = txt; };
   const hint = t => { $('#scHint').textContent = t; };
-  function show(res, chars) {
+  function show(res, chars, ang) {
     const okType = res && res.typeScore >= 3, okDate = res && !!res.date;
-    chip('#scType', okType, okType ? P.TYPE_BY_ID[res.type].label : "Cerco cos'è…");
-    chip('#scDate', okDate, okDate ? (T(res.type).dateKind === 'purchase' ? 'Acquisto ' : 'Scade ') + dayRef(res.date).replace(/^il /, '') : T(res && res.type || 'altro').dateKind === 'purchase' ? 'Cerco la data…' : 'Cerco la scadenza…');
+    if (!okType && chars >= 25) tries++;
+    if (okType) { other = false; setGuide(shapeOf(res.type), Math.abs(ang) > 45); }
+    else if (tries >= 20 && !other) { other = true; setGuide('page', false); } // dopo una ventina di letture: è un documento qualsiasi
+    chip('#scType', okType, okType ? (['bolletta', 'tasse', 'garanzia'].includes(res.type) && res.title ? res.title : P.TYPE_BY_ID[res.type].label) : other ? 'Altro documento' : "Cerco cos'è…");
+    $('#scType').classList.toggle('other', !okType && other);
+    const kind = T(res && res.type || 'altro'), day = okDate ? dayRef(res.date).replace(/^il /, '') : '';
+    chip('#scDate', okDate, okDate ? (kind.dateKind === 'purchase' ? 'Acquisto ' + day : DEADLINE.has(res.type) ? 'Scade ' + day : cap(day)) : kind.dateKind === 'purchase' ? 'Cerco la data…' : okType && !DEADLINE.has(res.type) || other ? 'Cerco la data…' : 'Cerco la scadenza…');
     const key = okType && okDate ? res.type + res.date : null; stable = key && last === key ? stable + 1 : key ? 1 : 0; last = key;
-    if (okType && okDate) { if (stable === 1) haptic(); el.classList.add('ok'); hint(stable >= 2 ? 'Perfetto, scatta!' : 'Ci sono quasi, tienilo fermo'); }
-    else { el.classList.remove('ok'); hint(chars < 25 ? 'Avvicinati un po\' e metti il documento nel riquadro' : okType ? 'Tienilo fermo, cerco la data' : 'Inquadra il documento'); }
+    const ready = okDate && (okType || other);
+    if (ready) { if (stable === 1 || other && stable === 0) haptic(); el.classList.add('ok'); hint(stable >= 2 || other ? 'Perfetto, scatta!' : 'Ci sono quasi, tienilo fermo'); }
+    else { el.classList.remove('ok'); hint(chars < 25 ? 'Avvicinati un po\' e metti il documento nel riquadro' : okType || other ? 'Tienilo fermo, cerco la data' : 'Inquadra il documento, in verticale o in orizzontale'); }
   }
   async function loop() {
     let w; try { hint('Preparo la lettura…'); w = await getOcr(); } catch (e) { hint('Per leggere dal vivo serve la connessione: scatta pure'); return; }
-    if (open) hint('Inquadra il documento');
-    let k = 0;
+    if (open) hint('Inquadra il documento, in verticale o in orizzontale');
+    let k = 0, flip = 0, poor = 0;
     while (open) {
-      const f = video.readyState >= 2 ? cut(0.1) : null;
+      const f = video.readyState >= 2 ? cut(0, true) : null;
       if (!f || busy) { await new Promise(r => setTimeout(r, 250)); continue; }
       try {
-        const ang = textAngle(f), up = ang ? rotated(f, ang) : f;
-        const t = (await w.recognize(k++ % 2 ? prepFlat(up) : prepForOcr(up))).data.text || ''; if (!open) break; // una lettura normale e una senza riflessi, a turno
+        const ang = textAngle(f) + flip, up = ang ? rotated(f, ang) : f;
+        const d = (await w.recognize(k++ % 2 ? prepFlat(up) : prepForOcr(up))).data, t = d.text || ''; if (!open) break; // una lettura normale e una senza riflessi, a turno
+        const q = (d.confidence || 0) * Math.min(1, (t.match(/[A-Za-z0-9]/g) || []).length / 80);
+        if (q < 55 && ++poor >= 2) { flip = flip ? 0 : 180; poor = 0; } else if (q >= 55) poor = 0; // forse è sottosopra
         live.push(t); if (live.length > 3) live.shift();
-        show(P.parseOcr(live.join('\n')), t.replace(/\s/g, '').length);
+        show(P.parseOcr(live.join('\n')), t.replace(/\s/g, '').length, ang);
       } catch (e) { await new Promise(r => setTimeout(r, 500)); }
     }
   }
@@ -1281,7 +1321,8 @@ const Scanner = (() => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); }
     catch (e) { return false; }
-    video.srcObject = stream; el.hidden = false; open = true; live = []; last = null; stable = 0; el.classList.remove('ok');
+    video.srcObject = stream; el.hidden = false; open = true; live = []; last = null; stable = 0; tries = 0; other = false; shape = ''; el.classList.remove('ok');
+    setGuide('any', false);
     chip('#scType', false, "Cerco cos'è…"); chip('#scDate', false, 'Cerco la scadenza…');
     document.documentElement.classList.add('locked');
     try { await video.play(); } catch (e) {}
@@ -1482,10 +1523,12 @@ const Ear = (() => {
     catch (e) { try { reset(); r = make(); h = handlers; r.start(); busy = true; return true; } catch (e2) { return false; } }
   }
   function stop() { h = null; queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } }
+  // chiude ma aspetta le ultime parole: il risultato finale arriva prima della fine
+  function finish() { queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } else if (h && h.end) h.end(); }
   // se qualcosa si è inceppato, la prossima volta si riparte con un orecchio nuovo
   function reset() { const old = r; r = null; busy = false; h = null; queued = null;
     if (old) { old.onresult = old.onend = old.onerror = old.onstart = null; try { old.abort(); } catch (e) {} } }
-  return { start, stop, reset };
+  return { start, stop, finish, reset };
 })();
 // iPhone a volte ripete nei risultati tutto quello che hai già detto: qui si tiene una copia sola
 function joinResults(results) {
@@ -1569,13 +1612,13 @@ function micSteps() {
   if (DEV === 'ios') return inApp + `
       <li><b>Microfono per i siti</b><p>Impostazioni › App › <b>Safari</b> › scorri fino a «Impostazioni per i siti web» › <b>Microfono</b> › scegli <b>Chiedi</b> o <b>Consenti</b> (non «Rifiuta»).</p></li>
       <li><b>Dettatura accesa</b><p>Impostazioni › Generali › Tastiera › attiva <b>Abilita dettatura</b>. MeMo usa la dettatura dell'${PHONE} per capirti.</p></li>
-      <li><b>Riapri MeMo</b><p>Chiudila del tutto (scorri verso l'alto dall'elenco delle app aperte) e riaprila: alla prima volta che tocchi Dimmi, l'${PHONE} ti chiede il permesso.</p></li>
+      <li><b>Riapri MeMo</b><p>Chiudila del tutto (scorri verso l'alto dall'elenco delle app aperte) e riaprila: alla prima volta che tieni premuto il microfono, l'${PHONE} ti chiede il permesso.</p></li>
       <li><b>Tempo di utilizzo</b><p>Se hai limiti attivi: Impostazioni › Tempo di utilizzo › Restrizioni contenuti e privacy › <b>Microfono</b> › Consenti.</p></li>`;
   if (DEV === 'android') return inApp + `
       <li><b>Permesso del sito</b><p>${isStandalone() ? 'Impostazioni del telefono › App › <b>MeMo</b> › Autorizzazioni › <b>Microfono</b> › Consenti.' : "Tocca il <b>lucchetto</b> accanto all'indirizzo › Autorizzazioni › <b>Microfono</b> › Consenti."}</p></li>
       <li><b>Permesso di Chrome</b><p>Impostazioni del telefono › App › <b>Chrome</b> › Autorizzazioni › <b>Microfono</b> › Consenti.</p></li>
       <li><b>App Google aggiornata</b><p>Su Android a capirti è il riconoscimento vocale di Google: controlla che l'app <b>Google</b> sia installata e aggiornata dal Play Store.</p></li>
-      <li><b>Riapri MeMo</b><p>Chiudila e riaprila: alla prima volta che tocchi Dimmi, il telefono ti chiede il permesso.</p></li>`;
+      <li><b>Riapri MeMo</b><p>Chiudila e riaprila: alla prima volta che tieni premuto il microfono, il telefono ti chiede il permesso.</p></li>`;
   return inApp + `
       <li><b>Permesso del sito</b><p>Clicca il <b>lucchetto</b> accanto all'indirizzo › <b>Microfono</b> › Consenti, poi ricarica la pagina.</p></li>
       <li><b>Il microfono c'è?</b><p>Controlla che il computer abbia un microfono acceso e scelto nelle impostazioni audio.</p></li>
@@ -1686,7 +1729,80 @@ function askRemind(res, text) {
     go.onclick = () => t.value && done(t.value);
   });
 }
-$('#btnVoice').addEventListener('click', openVoice);
+// ---------- tieni premuto e parla: finché tieni premuto ascolto, quando lasci segno il MeMo ----------
+const PTT = (() => {
+  const btn = $('#btnVoice'), el = $('#ptt'), hintEl = $('#pttHint'), textEl = { textContent: '' }; // le parole non si mostrano qui: restano nel MeMo («Mi avevi detto»)
+  let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0;
+  const hint = h => { hintEl.textContent = h; };
+  const show = h => { el.hidden = false; el.classList.remove('idle', 'cancel'); requestAnimationFrame(() => el.classList.add('show')); hint(h); };
+  const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
+  const clear = () => { clearTimeout(endT); clearTimeout(quiet); };
+  function listen() {
+    return Ear.start({
+      start: () => {},
+      result: t => { if (mode === 'off') return; text = joinText(base, t); textEl.textContent = text;
+        if (mode === 'hold') hint(away ? 'Lascia per annullare' : 'Ti ascolto…');
+        else if (mode === 'free') { hint('Ti ascolto… fai una pausa per finire'); clearTimeout(quiet); quiet = setTimeout(finish, 1800); } },
+      error: code => { if (code === 'aborted' || code === 'no-speech' || mode === 'off') return;
+        clear(); Ear.reset(); mode = 'off'; btn.classList.remove('holding', 'away'); el.classList.add('idle');
+        if (code === 'not-allowed' || code === 'service-not-allowed') { hint('Il microfono è bloccato.'); hide(400); setTimeout(() => { openVoice(); }, 650); }
+        else if (code === 'network') { hint('Per capire la voce serve internet.'); hide(2200); }
+        else { hint('Qualcosa non è andato: riprova.'); hide(1800); } },
+      end: () => {
+        if (mode === 'finishing') return finalize();
+        if (mode === 'hold' && down) { base = text; listen(); return; } // il telefono ha chiuso da solo mentre tieni premuto: si riparte senza perdere niente
+        if (mode === 'free') { if (text.trim()) finish(); else { mode = 'off'; el.classList.add('idle'); hint('Non ti ho sentito'); hide(1800); } }
+      }
+    });
+  }
+  function press(x, y) {
+    if (!SR) { openVoice(); return; }
+    if (mode !== 'off') { if (mode === 'free') finish(); return; }
+    down = true; away = false; done = false; t0 = Date.now(); text = ''; base = ''; textEl.textContent = ''; x0 = x; y0 = y;
+    mode = 'hold'; btn.classList.add('holding'); haptic(); show('Ti ascolto…');
+    if (!listen()) { mode = 'off'; btn.classList.remove('holding'); hint('Non riesco ad aprire il microfono.'); hide(1600); }
+  }
+  function move(x, y) {
+    if (!down || mode !== 'hold') return;
+    const far = Math.hypot(x - x0, y - y0) > 110; if (far === away) return;
+    away = far; btn.classList.toggle('away', far); el.classList.toggle('cancel', far); hint(far ? 'Lascia per annullare' : 'Ti ascolto…');
+  }
+  function release() {
+    if (!down) return; down = false; btn.classList.remove('holding', 'away'); haptic();
+    if (mode !== 'hold') return;
+    if (away) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Annullato.'); hide(900); return; }
+    if (Date.now() - t0 < 350 && !text) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Tienilo premuto mentre parli'); hide(1700); return; }
+    finish();
+  }
+  // il tocco è stato interrotto (per esempio dalla richiesta del permesso): si continua ad ascoltare e ci si ferma da soli dopo una pausa
+  function interrupted() {
+    if (!down) return; down = false; btn.classList.remove('holding', 'away');
+    if (mode !== 'hold') return; mode = 'free'; hint('Ti ascolto… fai una pausa per finire');
+    clearTimeout(quiet); quiet = setTimeout(() => { if (mode === 'free') finish(); }, text ? 1800 : 8000);
+  }
+  function finish() {
+    if (mode === 'off' || mode === 'finishing') return; clear(); mode = 'finishing'; el.classList.add('idle');
+    hint(text ? 'Ho capito' : 'Un attimo…'); Ear.finish(); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
+  }
+  async function finalize() {
+    if (done) return; done = true; clear(); const said = text.trim();
+    if (!said) { mode = 'off'; hint('Non ti ho sentito'); hide(1700); return; }
+    hint('Ci penso…');
+    try { await submitSpeech(said); } finally { mode = 'off'; hide(0); }
+  }
+  btn.addEventListener('touchstart', e => { e.preventDefault(); lastTouch = Date.now(); const t = e.changedTouches[0]; press(t.clientX, t.clientY); }, { passive: false });
+  btn.addEventListener('touchmove', e => { const t = e.changedTouches[0]; move(t.clientX, t.clientY); }, { passive: true });
+  btn.addEventListener('touchend', e => { e.preventDefault(); release(); }, { passive: false });
+  btn.addEventListener('touchcancel', interrupted);
+  btn.addEventListener('mousedown', e => { if (Date.now() - lastTouch < 800) return; press(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e => { if (down && Date.now() - lastTouch > 800) move(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', () => { if (Date.now() - lastTouch > 800) release(); });
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+  btn.addEventListener('click', e => { if (e.detail === 0) openVoice(); }); // da tastiera: la scheda classica, dove si può anche scrivere
+  el.addEventListener('click', () => { if (mode === 'free') finish(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && mode !== 'off') { down = false; btn.classList.remove('holding', 'away'); if (text.trim()) finish(); else { mode = 'off'; Ear.stop(); hide(0); } } });
+  return { busy: () => mode !== 'off' };
+})();
 
 // ================= Il pesciolino di passaggio =================
 // ogni tanto sfreccia sullo sfondo: da sinistra verso destra, salendo un po', mai in linea retta e mai due volte uguale.
@@ -1930,7 +2046,7 @@ function showIntro() {
     { art: `<div class="photo-art"><div class="pdfdoc"><b>PDF</b><i></i><i></i><i style="width:60%"></i></div><div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div></div>`,
       h: 'Fai una foto.', p: `Scatta o scegli una foto o un PDF. Leggo io cos'è e quando scade, e resta tutto sul tuo ${PHONE}.` },
     { art: `<span class="bubble wide">Vino per Mattia domani alle 18, avvisami il giorno prima. E domattina il pane!</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`,
-      h: 'Oppure dillo.', p: "Parla come con un amico, anche più cose insieme." },
+      h: 'Oppure dillo.', p: "Tieni premuto il microfono e parla come con un amico, anche più cose insieme." },
     { art: `<div class="get-art"><div class="g-card"><span class="g-ic">🍷</span><div><b>Vino per Mattia</b><small>domani alle 18:00</small><em>🔔 ti avviso il giorno prima</em></div></div><div class="g-card"><span class="g-ic">🥖</span><div><b>Comprare il pane</b><small>domattina · a che ora?</small></div></div></div>`,
       h: 'Capisco al volo.', p: "Tiro fuori l'essenziale. Se manca qualcosa, te lo chiedo." }
   ];

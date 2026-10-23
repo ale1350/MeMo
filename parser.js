@@ -277,6 +277,16 @@
     }
     return map;
   }
+  // un documento qualsiasi: il titolo è la prima riga "vera" (corta, fatta di parole): "Concerto di Natale"
+  function headline(text) {
+    for (const raw of String(text || '').split('\n').slice(0, 8)) {
+      const l = raw.replace(/[|_~*•]+/g, ' ').replace(/\s+/g, ' ').trim(), letters = (l.match(/[A-Za-zÀ-ÿ]/g) || []).length;
+      if (l.length < 4 || l.length > 42 || letters / l.length < 0.8 || !/[aeiouàèéìòù]/i.test(l) || (l.match(/\b[A-Za-zÀ-ÿ]{3,}\b/g) || []).length < 1) continue;
+      const t = l === l.toUpperCase() ? l.charAt(0) + l.slice(1).toLowerCase() : l;
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+    return '';
+  }
   function guessStore(text) {
     const lines = String(text).split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4);
     for (const l of lines) {
@@ -333,7 +343,7 @@
       }
     }
 
-    let title = DOC_TITLE[type] || (type === 'altro' ? '' : T.label);
+    let title = DOC_TITLE[type] || (type === 'altro' ? headline(text) : T.label);
     if (type === 'garanzia') { const s = guessStore(text); title = s ? `Garanzia ${s}` : 'Garanzia acquisto'; }
     if (type === 'bolletta') { // "Bolletta luce Enel", "Bolletta gas", "Rata", "TARI"
       const n = norm(text), what = /\bluce\b|energia\s+elettrica/.test(n) ? 'luce' : /\bgas\b/.test(n) ? 'gas' : /\bacqua\b|idric/.test(n) ? 'acqua' : /telefon|internet|fibra|mobile/.test(n) ? 'telefono' : '';
