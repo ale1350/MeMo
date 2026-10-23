@@ -22,7 +22,7 @@
       ask: 'Quando scade?',
       todo: "Prenota la visita medica per il rinnovo: in autoscuola, in un'agenzia di pratiche auto o all'ASL. Dopo la visita la nuova patente arriva a casa per posta.",
       link: { label: 'Portale dell\'automobilista', url: 'https://www.ilportaledellautomobilista.it/' },
-      kw: [[/\bpatent[ei]\b/, 6], [/driving\s*licen/, 5], [/permis\s*de\s*conduire/, 5], [/\b4b\b/, 1]] },
+      kw: [[/\bpatent[ei]\b/, 6], [/driving\s*licen/, 5], [/permis\s*de\s*conduire/, 5], [/f.hrerschein/, 5], [/\b4a\b/, 2], [/\b4b\b/, 2], [/\b4c\b/, 2], [/\bmit-?uco\b|\bmc-[a-z]{2}\b|motorizzazione/, 4]] },
     { id: 'tessera', label: 'Tessera sanitaria', emoji: '💳', lead: 60, recur: null, dateKind: 'expiry', done: 'renew',
       ask: 'Quando scade?',
       todo: "Di solito la nuova tessera arriva a casa da sola. Se manca un mese alla scadenza e non è arrivata, richiedila all'Agenzia delle Entrate o alla tua ASL.",
@@ -130,7 +130,15 @@
     return iso(ny, nm, Math.min(d, lastDay(ny, nm)));
   }
   function diffDays(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 86400000); } // b - a
-  function fullYear(y) { y = Number(y); if (y < 100) y += 2000; return y; }
+  // anni a due cifre: "27" è il 2027, ma "85" o "99" (le date di nascita sulla patente) sono del Novecento
+  function fullYear(y) { y = Number(y); if (y < 100) { const cur = new Date().getFullYear(); y = 2000 + y > cur + 30 ? 1900 + y : 2000 + y; } return y; }
+  // quanto può essere lontana, al massimo, una scadenza vera (in anni da oggi): oltre, è un errore di lettura
+  const MAX_YEARS = { patente: 11, cie: 11, passaporto: 10.5, tessera: 6.5, bollo: 1.5, assicurazione: 1.5, revisione: 4.5, caldaia: 4.5, abbonamento: 1.5,
+    bolletta: 1, tasse: 1.5, gomme: 1.1, viaggio: 1.5, compleanno: 1.1, garanzia: 5, altro: 20 };
+  function plausible(type, isoDate, now) {
+    const today = todayISO(now), max = MAX_YEARS[type] != null ? MAX_YEARS[type] : 20;
+    return isoDate <= addMonths(today, Math.round(max * 12));
+  }
 
   const MONTHS = {
     gen: 1, genn: 1, gennaio: 1, jan: 1, january: 1, janvier: 1,
@@ -198,8 +206,9 @@
       .replace(/\b(\d{2})(\d{2})(20\d{2})\b/g, (x, d, m, y) => okDM(d, m) ? `${d}/${m}/${y}` : x);
   }
   function fixOcrDigits(text) {
-    return fixLostSlash(text).replace(/[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{2,4}/g, m =>
-      m.replace(/[Oo]/g, '0').replace(/[Il|]/g, '1').replace(/S/g, '5').replace(/B/g, '8'));
+    // dentro una riga sola, e solo se ogni pezzo ha già almeno una cifra vera ("MI" + "." a capo non è una data)
+    return fixLostSlash(text).replace(/(?<![A-Za-z0-9])[0-9OoIl|SB]{1,2}[ \t]?[\/.\-][ \t]?[0-9OoIl|SB]{1,2}[ \t]?[\/.\-][ \t]?[0-9OoIl|SB]{2,4}(?![A-Za-z0-9])/g, m =>
+      m.split(/[\/.\-]/).every(x => /\d/.test(x)) ? m.replace(/[Oo]/g, '0').replace(/[Il|]/g, '1').replace(/S/g, '5').replace(/B/g, '8') : m);
   }
 
   function findDates(text) {
@@ -207,7 +216,7 @@
     const t = fixOcrDigits(text);
     const low = norm(t);
     let m;
-    const reNum = /(?<!\d)(\d{1,2})\s?[\/.\-]\s?(\d{1,2})\s?[\/.\-]\s?(\d{4}|\d{2})(?!\d)/g;
+    const reNum = /(?<!\d)(\d{1,2})[ \t]?[\/.\-][ \t]?(\d{1,2})[ \t]?[\/.\-][ \t]?(\d{4}|\d{2})(?!\d)/g;
     while ((m = reNum.exec(t))) {
       const d = +m[1], mo = +m[2], y = fullYear(m[3]);
       if (valid(y, mo, d)) out.push({ date: iso(y, mo, d), index: m.index, len: m[0].length });
@@ -289,23 +298,28 @@
     const mrz = findMrzExpiry(text);
     let date = null, purchase = null, confident = false;
 
+    // niente date assurde: una bolletta non scade tra dieci anni
+    for (let i = dates.length - 1; i >= 0; i--) if (dates[i].date > today && !plausible(type, dates[i].date, now)) dates.splice(i, 1);
     if (T.dateKind === 'purchase') {
       // Scontrino: la data è l'acquisto. Prendo la più recente non nel futuro.
       const past = dates.map(d => d.date).filter(d => d <= addDays(today, 1)).sort();
       purchase = past.length ? past[past.length - 1] : null;
       if (purchase) { date = addMonths(purchase, 24); confident = true; }
     } else if (ID_DOCS.has(type)) {
-      // documenti d'identità: nascita < emissione < scadenza, quindi la scadenza è sempre la data più lontana.
-      // Le etichette qui ingannano (sulla CIE "emissione" e "scadenza" stanno sulla stessa riga, con le date sotto).
-      // una data già passata qui è la nascita o l'emissione, non la scadenza: meglio chiederla che sbagliarla
-      const all = dates.map(d => d.date).filter(d => d >= today);
-      if (mrz) all.push(mrz);
-      if (all.length) {
-        date = all.sort().pop();
-        // la riga in fondo alle carte (MRZ) è la fonte più affidabile, se non è più vicina della data stampata
-        if (mrz && mrz >= today) date = mrz > date ? mrz : (date === mrz ? mrz : date);
-        confident = date > today || all.length === 1;
-      }
+      // documenti d'identità: nascita < emissione < scadenza. Una data passata è la nascita o l'emissione, non la scadenza;
+      // una data troppo lontana (oltre la durata massima del documento) è un errore di lettura: meglio chiederla che sbagliarla.
+      const fut = dates.filter(d => d.date >= today && plausible(type, d.date, now));
+      const mrzOk = mrz && mrz >= today && plausible(type, mrz, now) ? mrz : null;
+      const latest = list => list.map(d => d.date).sort().pop();
+      // 1) l'etichetta della scadenza (4b sulla patente, "data di scadenza" sulla tessera). Sulla CIE le etichette ingannano: lì no.
+      const lab = type === 'cie' ? [] : fut.filter(d => { const l = labelBefore(text, d.index); return l.expiry && !l.issue; });
+      // 2) patente e carta d'identità scadono il giorno del compleanno: se c'è la data di nascita, la scadenza ha lo stesso giorno e mese
+      const births = dates.filter(d => d.date < addMonths(today, -14 * 12)).map(d => d.date.slice(5));
+      const bday = (type === 'patente' || type === 'cie') && births.length ? fut.filter(d => births.includes(d.date.slice(5))) : [];
+      if (lab.length) { date = latest(lab); confident = true; }
+      else if (bday.length) { date = latest(bday); confident = true; }
+      else if (mrzOk) { date = mrzOk; confident = true; }
+      else if (fut.length) { date = latest(fut); confident = fut.length === 1; }
     } else {
       // intestazioni in colonna ("Data emissione   Scadenza") con le date sotto: si abbinano nell'ordine
       const cols = columnLabels(text, dates);
@@ -1048,6 +1062,6 @@
   }
 
   const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
-    phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, anchorOf, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
+    phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, anchorOf, plausible, MAX_YEARS, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);

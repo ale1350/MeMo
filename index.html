@@ -271,6 +271,30 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .photo-actions button.rm{color:var(--ink-3)}
 .thumb{width:100%;max-height:240px;object-fit:cover;border-radius:20px;display:block;margin:0 0 18px}
 .scan{display:flex;gap:14px;align-items:center;margin:4px 0 22px}
+/* ---------- fotocamera di MeMo: legge mentre inquadri ---------- */
+.scanner{position:fixed;inset:0;z-index:60;background:#05070d;color:#fff;overflow:hidden;touch-action:none}
+.scanner[hidden]{display:none}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sc-shade{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.sc-guide{position:relative;width:min(88vw,520px);aspect-ratio:1.586;border-radius:22px;box-shadow:0 0 0 200vmax rgba(5,7,13,.52);transition:box-shadow .3s}
+.sc-guide i{position:absolute;width:34px;height:34px;border:4px solid rgba(255,255,255,.9);transition:border-color .3s}
+.sc-guide i:nth-child(1){left:-2px;top:-2px;border-right:0;border-bottom:0;border-radius:22px 0 0 0}
+.sc-guide i:nth-child(2){right:-2px;top:-2px;border-left:0;border-bottom:0;border-radius:0 22px 0 0}
+.sc-guide i:nth-child(3){left:-2px;bottom:-2px;border-right:0;border-top:0;border-radius:0 0 0 22px}
+.sc-guide i:nth-child(4){right:-2px;bottom:-2px;border-left:0;border-top:0;border-radius:0 0 22px 0}
+.scanner.ok .sc-guide i{border-color:#3CDB98}
+.sc-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 12px);display:flex;justify-content:space-between;align-items:center;padding:0 16px}
+.sc-x{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.sc-pick{color:#fff;font-weight:700;font-size:15px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.sc-hint{position:absolute;left:16px;right:16px;top:calc(50% - min(88vw,520px) / 3.172 - 56px);margin:0;text-align:center;font-size:18px;font-weight:750;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.sc-status{position:absolute;left:16px;right:16px;top:calc(50% + min(88vw,520px) / 3.172 + 20px);display:flex;flex-direction:column;align-items:center;gap:8px}
+.sc-chip{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-size:15px;font-weight:650;transition:background .3s}
+.sc-chip.found{background:rgba(60,219,152,.92);color:#05230f}
+.sc-shot{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 28px);width:78px;height:78px;margin-left:-39px;border-radius:50%;border:4px solid rgba(255,255,255,.9);background:transparent;display:grid;place-items:center}
+.sc-shot i{width:62px;height:62px;border-radius:50%;background:#fff;transition:transform .15s}
+.sc-shot:active i{transform:scale(.9)}
+.scanner.ok .sc-shot{border-color:#3CDB98;animation:shotGlow 1.4s ease-in-out infinite}
+@keyframes shotGlow{0%,100%{box-shadow:0 0 0 0 rgba(60,219,152,.5)}50%{box-shadow:0 0 0 12px rgba(60,219,152,0)}}
 .scan img{width:84px;height:84px;object-fit:cover;border-radius:18px}
 .bar-p{height:6px;border-radius:3px;background:var(--field);overflow:hidden;margin-top:10px}
 .bar-p i{display:block;height:100%;width:0;background:var(--brand-grad);transition:width .3s}
@@ -340,6 +364,8 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .g-steps li p{grid-column:2;margin:2px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.45}
 .g-steps li p b{color:var(--ink);font-weight:750}
 .g-steps code{font:600 13px ui-monospace,Menlo,monospace;background:var(--field);padding:1px 5px;border-radius:6px}
+.e-warn{margin:8px 2px 0;font-size:14px;font-weight:650;color:#B5562B;line-height:1.35}
+.input.warn{box-shadow:0 0 0 2px rgba(232,140,80,.55) inset}
 .rep-row{display:flex;align-items:center;gap:10px;margin:-4px 0 18px;min-height:40px}
 .rep-row > span{flex:1;font-weight:700;font-size:15px;color:var(--ink-2)}
 .rep-sel{font:inherit;font-size:15px;font-weight:650;color:var(--brand-ink);background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%232F6FE0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;border:0;border-radius:12px;padding:8px 30px 8px 12px;max-width:62%;-webkit-appearance:none;appearance:none}
@@ -539,6 +565,15 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 </div>
 
 <button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
+<div class="scanner" id="scanner" hidden role="dialog" aria-label="Inquadra il documento">
+  <video id="scVideo" playsinline muted autoplay></video>
+  <div class="sc-shade"><div class="sc-guide" id="scGuide"><i></i><i></i><i></i><i></i></div></div>
+  <div class="sc-top"><button class="sc-x" id="scClose" aria-label="Chiudi"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+    <button class="sc-pick" id="scPick">Galleria o PDF</button></div>
+  <p class="sc-hint" id="scHint">Inquadra il documento</p>
+  <div class="sc-status"><span class="sc-chip" id="scType"><b>📄</b><span>Cerco cos'è…</span></span><span class="sc-chip" id="scDate"><b>📅</b><span>Cerco la scadenza…</span></span></div>
+  <button class="sc-shot" id="scShot" aria-label="Scatta"><i></i></button>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite">
   <span class="tie"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F6BF2"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(51 53) scale(0.9726847805739988) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
 <g class="fishbody" transform="rotate(-16 54 54)">
@@ -562,7 +597,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.37';
+const VERSION = '1.38';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1079,12 +1114,54 @@ function prepFlat(img) {
       const v = Math.max(0, Math.min(255, (l[y * W + x] / (m + 1) * 235 - 120) * 2.2)), k = (y * W + x) * 4; a[k] = a[k + 1] = a[k + 2] = v; } }
   g.putImageData(d, 0, 0); return c;
 }
-async function readPhoto(img) {
-  const w = await getOcr(); const first = (await w.recognize(prepForOcr(img))).data.text || '';
-  const res = P.parseOcr(first); if (res.typeScore && res.date) return res;
-  const msg = $('#ocrMsg'); if (msg) msg.textContent = 'Guardo meglio, un attimo.';
-  const second = (await w.recognize(prepFlat(img))).data.text || '';
-  return P.parseOcr(first + '\n' + second); // le due letture si completano: il tipo da una, la data dall'altra
+// ---------- foto storte o girate: si raddrizzano prima di leggerle ----------
+// Le righe di testo, viste di lato, fanno "a righe": si prova a girare la foto finché le righe sono più nette possibile.
+function textAngle(img) {
+  const c = drawScaled(img, 640), g = c.getContext('2d'), W = c.width, H = c.height, a = g.getImageData(0, 0, W, H).data;
+  const l = new Float32Array(W * H); for (let i = 0, j = 0; j < l.length; i += 4, j++) l[j] = a[i] * .299 + a[i + 1] * .587 + a[i + 2] * .114;
+  const I = new Float64Array((W + 1) * (H + 1));
+  for (let y = 1; y <= H; y++) { let row = 0; for (let x = 1; x <= W; x++) { row += l[(y - 1) * W + x - 1]; I[y * (W + 1) + x] = I[(y - 1) * (W + 1) + x] + row; } }
+  const r = 12, xs = [], ys = [];
+  for (let y = 0; y < H; y++) { const y0 = Math.max(0, y - r), y1 = Math.min(H, y + r + 1);
+    for (let x = 0; x < W; x++) { const x0 = Math.max(0, x - r), x1 = Math.min(W, x + r + 1);
+      const m = (I[y1 * (W + 1) + x1] - I[y0 * (W + 1) + x1] - I[y1 * (W + 1) + x0] + I[y0 * (W + 1) + x0]) / ((y1 - y0) * (x1 - x0));
+      if (l[y * W + x] < m * 0.82) { xs.push(x - W / 2); ys.push(y - H / 2); } } }
+  if (xs.length < 300) return 0;
+  const D = Math.ceil(Math.hypot(W, H)) + 2, bins = new Float64Array(D);
+  const score = deg => { const t = deg * Math.PI / 180, sn = Math.sin(t), cs = Math.cos(t); bins.fill(0);
+    for (let k = 0; k < xs.length; k++) bins[Math.round(-xs[k] * sn + ys[k] * cs + D / 2)]++;
+    let v = 0; for (let k = 0; k < D; k++) v += bins[k] * bins[k]; return v; };
+  let best = 0, bestV = -1;
+  for (let d = -30; d <= 30; d += 2) { const v = score(d); if (v > bestV) { bestV = v; best = d; } }
+  for (let d = 60; d <= 120; d += 2) { const v = score(d); if (v > bestV * 1.08) { bestV = v; best = d; } } // girata di lato: deve vincere bene
+  for (let d = best - 1.5; d <= best + 1.5; d += 0.5) { const v = score(d); if (v > bestV) { bestV = v; best = d; } }
+  return Math.abs(best) < 1 ? 0 : best;
+}
+function rotated(img, deg) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height, s = Math.min(1, 2400 / Math.max(iw, ih));
+  const w = iw * s, h = ih * s, t = deg * Math.PI / 180, W = Math.round(Math.abs(w * Math.cos(t)) + Math.abs(h * Math.sin(t))), H = Math.round(Math.abs(w * Math.sin(t)) + Math.abs(h * Math.cos(t)));
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.translate(W / 2, H / 2); g.rotate(-t); g.drawImage(img, -w / 2, -h / 2, w, h); return c;
+}
+async function readPhoto(img, onStep, extra) {
+  const w = await getOcr(), step = m => { const el = $('#ocrMsg'); if (el) el.textContent = m; if (onStep) onStep(m); };
+  const texts = extra ? [extra] : [];
+  // quanto è "vera" una lettura: sicurezza dell'OCR, ma solo se ha letto abbastanza testo (due parole sicure non bastano)
+  const ocr = async src => { const d = (await w.recognize(src)).data, t = d.text || ''; texts.push(t); return (d.confidence || 0) * Math.min(1, (t.match(/[A-Za-z0-9]/g) || []).length / 80); };
+  const done = () => { const r = P.parseOcr(texts.join('\n')); return r.typeScore && r.date ? r : null; };
+  // 1) raddrizzata secondo le righe di testo, poi 2) la lettura che toglie riflessi e ombre
+  const ang = textAngle(img), up = ang ? rotated(img, ang) : img;
+  let best = await ocr(prepForOcr(up)), r;
+  if ((r = done())) return r;
+  step('Guardo meglio, un attimo.');
+  best = Math.max(best, await ocr(prepFlat(up)));
+  if ((r = done())) return r;
+  // 3) letture povere: forse è sottosopra o di lato
+  if (best < 72) {
+    step('Provo a girarla.');
+    for (const extraAng of [180, 90, -90]) { await ocr(prepFlat(rotated(img, ang + extraAng))); if ((r = done())) return r; }
+  }
+  return P.parseOcr(texts.join('\n')); // le letture si completano: il tipo da una, la data dall'altra
 }
 const onFile = e => { const f = e.target.files[0]; e.target.value = ''; const r = photoRoute; photoRoute = null; if (f && r) r(f); };
 $('#fileCamera').addEventListener('change', onFile); $('#fileLibrary').addEventListener('change', onFile); $('#fileAny').addEventListener('change', onFile);
@@ -1122,6 +1199,10 @@ async function readPdf(file, onPreview) {
 async function scanFlow(file) {
   if (isPdf(file)) return pdfFlow(file);
   let img; try { img = await fileToImage(file); } catch (e) { toast('Non riesco ad aprire questa foto.', "Prova a scattarne un'altra."); return; }
+  scanImage(img);
+}
+// legge una foto. Se la fotocamera di MeMo l'aveva già capita mentre inquadravi (known), non serve rileggerla.
+async function scanImage(img, known, liveText) {
   const photo = savedPhoto(img);
   openSheet(`<h2>Sto leggendo la foto</h2>
     <div class="scan"><img src="${photo}" alt=""><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar"></i></div></div></div>
@@ -1136,7 +1217,8 @@ async function scanFlow(file) {
   ocrProgress = m => { const bar = $('#ocrBar'), msg = $('#ocrMsg'); if (!bar) return;
     if (m.status === 'recognizing text') { bar.style.width = Math.round(12 + m.progress * 88) + '%'; if (!/meglio/.test(msg.textContent)) msg.textContent = "Cerco cos'è e quando scade."; }
     else if (/load|initializ/.test(m.status)) { bar.style.width = '8%'; msg.textContent = 'Preparo la lettura. La prima volta ci vuole qualche secondo in più.'; } };
-  try { const res = await readPhoto(img); if (cancelled) return; onSheetClose = null; go(res); }
+  if (known) { onSheetClose = null; go(known); return; }
+  try { const res = await readPhoto(img, null, liveText); if (cancelled) return; onSheetClose = null; go(res); }
   catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Per leggere le foto serve la connessione.', 'Intanto puoi inserire i dati a mano.'); }
 }
 async function pdfFlow(file) {
@@ -1157,7 +1239,73 @@ async function pdfFlow(file) {
     if (cancelled) return; onSheetClose = null; go(res);
   } catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Non riesco ad aprire questo documento.', 'Inserisci i dati a mano: al resto penso io.'); }
 }
-$('#btnPhoto').addEventListener('click', () => pickPhoto('any', scanFlow));
+// ---------- la fotocamera di MeMo: mentre inquadri, ti dice cosa sta leggendo ----------
+const Scanner = (() => {
+  let stream = null, open = false, live = [], last = null, stable = 0, busy = false;
+  const el = $('#scanner'), video = $('#scVideo');
+  const cut = (pad) => { // la parte del video dentro il riquadro (più un margine)
+    const vw = video.videoWidth, vh = video.videoHeight; if (!vw) return null;
+    const cw = el.clientWidth, ch = el.clientHeight, s = Math.max(cw / vw, ch / vh), ox = (cw - vw * s) / 2, oy = (ch - vh * s) / 2;
+    const r = $('#scGuide').getBoundingClientRect(), er = el.getBoundingClientRect();
+    let x = (r.left - er.left - ox) / s, y = (r.top - er.top - oy) / s, w = r.width / s, h = r.height / s;
+    x -= w * pad; y -= h * pad; w *= 1 + 2 * pad; h *= 1 + 2 * pad;
+    x = Math.max(0, x); y = Math.max(0, y); w = Math.min(vw - x, w); h = Math.min(vh - y, h);
+    const c = document.createElement('canvas'); c.width = Math.round(w); c.height = Math.round(h); c.getContext('2d').drawImage(video, x, y, w, h, 0, 0, c.width, c.height); return c;
+  };
+  const chip = (id, found, txt) => { const c = $(id); c.classList.toggle('found', !!found); c.querySelector('b').textContent = found ? '✓' : id === '#scType' ? '📄' : '📅'; c.querySelector('span').textContent = txt; };
+  const hint = t => { $('#scHint').textContent = t; };
+  function show(res, chars) {
+    const okType = res && res.typeScore >= 3, okDate = res && !!res.date;
+    chip('#scType', okType, okType ? P.TYPE_BY_ID[res.type].label : "Cerco cos'è…");
+    chip('#scDate', okDate, okDate ? (T(res.type).dateKind === 'purchase' ? 'Acquisto ' : 'Scade ') + dayRef(res.date).replace(/^il /, '') : T(res && res.type || 'altro').dateKind === 'purchase' ? 'Cerco la data…' : 'Cerco la scadenza…');
+    const key = okType && okDate ? res.type + res.date : null; stable = key && last === key ? stable + 1 : key ? 1 : 0; last = key;
+    if (okType && okDate) { if (stable === 1) haptic(); el.classList.add('ok'); hint(stable >= 2 ? 'Perfetto, scatta!' : 'Ci sono quasi, tienilo fermo'); }
+    else { el.classList.remove('ok'); hint(chars < 25 ? 'Avvicinati un po\' e metti il documento nel riquadro' : okType ? 'Tienilo fermo, cerco la data' : 'Inquadra il documento'); }
+  }
+  async function loop() {
+    let w; try { hint('Preparo la lettura…'); w = await getOcr(); } catch (e) { hint('Per leggere dal vivo serve la connessione: scatta pure'); return; }
+    if (open) hint('Inquadra il documento');
+    let k = 0;
+    while (open) {
+      const f = video.readyState >= 2 ? cut(0.1) : null;
+      if (!f || busy) { await new Promise(r => setTimeout(r, 250)); continue; }
+      try {
+        const ang = textAngle(f), up = ang ? rotated(f, ang) : f;
+        const t = (await w.recognize(k++ % 2 ? prepFlat(up) : prepForOcr(up))).data.text || ''; if (!open) break; // una lettura normale e una senza riflessi, a turno
+        live.push(t); if (live.length > 3) live.shift();
+        show(P.parseOcr(live.join('\n')), t.replace(/\s/g, '').length);
+      } catch (e) { await new Promise(r => setTimeout(r, 500)); }
+    }
+  }
+  async function start() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); }
+    catch (e) { return false; }
+    video.srcObject = stream; el.hidden = false; open = true; live = []; last = null; stable = 0; el.classList.remove('ok');
+    chip('#scType', false, "Cerco cos'è…"); chip('#scDate', false, 'Cerco la scadenza…');
+    document.documentElement.classList.add('locked');
+    try { await video.play(); } catch (e) {}
+    loop(); return true;
+  }
+  function stop() { open = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; el.hidden = true; document.documentElement.classList.remove('locked'); }
+  async function shoot() {
+    if (!open || !video.videoWidth) return;
+    busy = true; haptic();
+    const shot = cut(0.12), liveText = live.join('\n'), liveRes = P.parseOcr(liveText);
+    stop(); busy = false;
+    scanImage(shot, liveRes.typeScore >= 3 && liveRes.date && stable >= 1 ? liveRes : null, liveText);
+  }
+  $('#scClose').onclick = stop;
+  $('#scShot').onclick = shoot;
+  $('#scPick').onclick = () => { stop(); pickPhoto('any', scanFlow); };
+  return { start, stop };
+})();
+// la fotocamera di MeMo se c'è; altrimenti (o se il permesso è negato) la scelta classica del telefono.
+// Su iPhone la scelta file va aperta dentro il tocco: per questo, dopo un rifiuto, si passa da un tasto.
+$('#btnPhoto').addEventListener('click', async () => {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { pickPhoto('any', scanFlow); return; }
+  if (!(await Scanner.start())) toast('Non posso usare la fotocamera.', 'Puoi scegliere una foto o un PDF.', [{ label: 'Scegli', fn: () => pickPhoto('any', scanFlow) }]);
+});
 
 // ================= Editor: nuova memo, conferma, modifica =================
 const LEADS_TIMED = [[0, 'Puntuale'], [5, '5 min prima'], [15, '15 min prima'], [30, "Mezz'ora prima"], [60, "Un'ora prima"], [120, '2 ore prima'], [1440, 'Il giorno prima']];
@@ -1173,6 +1321,8 @@ function leadLabel(min, timed) {
   if (d % 30 === 0) return d === 30 ? 'un mese prima' : `${d / 30} mesi prima`;
   return `${d} giorni prima`;
 }
+const ART_OF = { patente: 'la patente', cie: "la carta d'identità", passaporto: 'il passaporto', tessera: 'la tessera sanitaria', bollo: 'il bollo', assicurazione: "l'assicurazione",
+  revisione: 'la revisione', caldaia: 'il controllo della caldaia', abbonamento: "l'abbonamento", bolletta: 'un pagamento', tasse: 'le tasse', gomme: 'il cambio gomme', viaggio: 'un viaggio', compleanno: 'un compleanno' };
 function openEditor(draft, opts = {}) {
   const state = { photo: null, time: null, leadMin: null, ...draft };
   { const ex = draft.id ? items.find(x => x.id === draft.id) : null; state.rep = 'rep' in draft ? draft.rep || null : ex ? ex.rep || null : null;
@@ -1187,6 +1337,7 @@ function openEditor(draft, opts = {}) {
     <div class="field"><span class="lbl" id="eDateLbl"></span>
       <div class="pair"><div style="flex:1.45"><input class="input" type="date" id="eDate" aria-label="Giorno"></div>
       <div style="flex:1" id="eTimeBox"><input class="input" type="time" id="eTime" aria-label="Ora, se c'è"></div></div>
+      <p class="e-warn" id="eWarn" hidden></p>
       <div class="chips" id="eQuick" style="margin-top:10px"></div></div>
     <div class="rep-row" id="eRepBox"><span>Si ripete</span><select class="rep-sel" id="eRep" aria-label="Ogni quanto" hidden></select><button class="tgl" id="eRepT" role="switch" aria-checked="false" aria-label="Si ripete"><i></i></button></div>
     <div class="field"><span class="lbl">Foto o documento <span style="font-weight:600;color:var(--ink-3)">(facoltativo)</span></span><div id="ePhoto"></div></div>
@@ -1230,6 +1381,10 @@ function openEditor(draft, opts = {}) {
       const val = ty.dateKind === 'purchase' ? (state.purchase || '') : (state.date || '');
       if (dateEl.value !== val) dateEl.value = val;
       dateEl.classList.toggle('missing', !val && !!opts.markMissing);
+      // una data impossibile per quel documento: lo dico subito, con calma
+      const warn = body.querySelector('#eWarn'), far = val && ty.dateKind !== 'purchase' && !P.plausible(ty.id, val);
+      warn.hidden = !far; if (far) warn.textContent = `Controlla l'anno: per ${ART_OF[ty.id] || 'questo MeMo'} il ${val.slice(0, 4)} mi sembra troppo in là.`;
+      dateEl.classList.toggle('warn', !!far);
       const quick = ty.dateKind === 'purchase' ? [['Oggi', today], ['Ieri', P.addDays(today, -1)]]
         : ['cie', 'passaporto', 'patente', 'tessera'].includes(ty.id) ? []
         : [['Oggi', today], ['Domani', P.addDays(today, 1)], ['Tra una settimana', P.addDays(today, 7)], ['Tra un mese', P.addMonths(today, 1)]];
