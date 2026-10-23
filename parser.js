@@ -27,7 +27,7 @@
       ask: 'Quando scade?',
       todo: "Di solito la nuova tessera arriva a casa da sola. Se manca un mese alla scadenza e non è arrivata, richiedila all'Agenzia delle Entrate o alla tua ASL.",
       link: { label: 'Agenzia delle Entrate', url: 'https://www.agenziaentrate.gov.it/' },
-      kw: [[/tessera\s*sanitaria/, 6], [/\bteam\b/, 2], [/carta\s*nazionale\s*dei\s*servizi/, 5], [/codice\s*fiscale/, 2]] },
+      kw: [[/tes+e?ra\s*sa\s*nit/, 8], [/tessera\s*europea/, 9], [/assicurazione\s*malattia/, 9], [/\bteam\b/, 3], [/carta\s*(nazionale|regionale)\s*dei\s*servizi/, 6], [/\b(cns|crs)\b/, 3], [/servizio\s*sanitario/, 5], [/\bssn\b/, 3], [/sanitari[ao]/, 3], [/codice\s*fiscale/, 3], [/ministero\s*dell.?\s*economia/, 3], [/european\s*health|health\s*insurance\s*card/, 8], [/numero\s*di\s*identificazione\s*della\s*tessera/, 6]] },
     { id: 'revisione', label: 'Revisione auto', emoji: '🔧', lead: 30, recur: 24, dateKind: 'expiry', done: 'reschedule',
       ask: 'Entro quando va fatta?',
       todo: "Prenota in un centro revisioni: va fatta entro la fine del mese di scadenza. Dopo la prima, si rifà ogni 2 anni.",
@@ -42,7 +42,7 @@
       ask: 'Quando scade?',
       todo: "Prima del rinnovo confronta qualche preventivo: spesso si risparmia. Per l'RC auto hai 15 giorni di tolleranza dopo la scadenza, ma non contarci.",
       link: null,
-      kw: [[/assicura/, 5], [/\bpolizz/, 5], [/\brc\s*auto\b/, 6], [/\brca\b/, 4]] },
+      kw: [[/assicura(?!zione\s*malattia)/, 5], [/\bpolizz/, 5], [/\brc\s*auto\b/, 6], [/\brca\b/, 4]] },
     { id: 'caldaia', label: 'Controllo caldaia', emoji: '🔥', lead: 30, recur: 12, dateKind: 'expiry', done: 'reschedule',
       ask: 'Entro quando va fatto?',
       todo: "Chiama il tecnico per il controllo e fatti aggiornare il libretto d'impianto.",
@@ -155,11 +155,22 @@
   }
 
   // ---------- Riconoscimento del tipo ----------
-  function detectType(text) {
-    const t = norm(text);
+  // Codice fiscale (RSSMRA85B01F205X), tollerando gli errori tipici dell'OCR: è il segno più sicuro della tessera
+  // sanitaria, anche quando l'intestazione sulla foto non si legge. La carta d'identità lo ha solo sul retro, con la MRZ.
+  const CF_RE = /[A-Z0]{6}[0-9OILSZB]{2}[ABCDEHLMPRST][0-9OILSZB]{2}[A-Z][0-9OILSZB]{3}[A-Z0-9]/;
+  function hasCodiceFiscale(text) {
+    if (/<<|[ci1]<ita/i.test(text)) return false;
+    return String(text || '').toUpperCase().split(/\n/).some(line => {
+      const l = line.replace(/[^A-Z0-9]/g, ''); const m = CF_RE.exec(l);
+      if (!m) return false; const c = m[0], digits = (c[6] + c[7] + c[9] + c[10] + c[12] + c[13] + c[14]).match(/[0-9]/g) || [];
+      return (c.slice(0, 6).match(/[A-Z]/g) || []).length >= 5 && digits.length >= 5;
+    });
+  }
+  function detectType(text, fromPhoto) {
+    const t = norm(text), cf = fromPhoto && hasCodiceFiscale(text);
     let best = null, bestScore = 0;
     for (const ty of TYPES) {
-      let s = 0;
+      let s = ty.id === 'tessera' && cf ? 7 : 0;
       for (const [re, w] of ty.kw) if (re.test(t)) s += w;
       if (s > bestScore) { best = ty; bestScore = s; }
     }
@@ -168,8 +179,16 @@
 
   // ---------- Date nel testo di una foto (OCR) ----------
   // Corregge errori tipici dell'OCR dentro gruppi che sembrano date: O→0, I/l/|→1, S→5, B→8.
+  // l'OCR a volte perde una barra: "3112/2029", "31/122029", "31122029" → 31/12/2029 (solo se è una data vera)
+  const okDM = (d, m) => +d >= 1 && +d <= 31 && +m >= 1 && +m <= 12;
+  function fixLostSlash(text) {
+    return String(text || "")
+      .replace(/\b(\d{2})(\d{2})[\/.\-](20\d{2})\b/g, (x, d, m, y) => okDM(d, m) ? `${d}/${m}/${y}` : x)
+      .replace(/\b(\d{2})[\/.\-](\d{2})(20\d{2})\b/g, (x, d, m, y) => okDM(d, m) ? `${d}/${m}/${y}` : x)
+      .replace(/\b(\d{2})(\d{2})(20\d{2})\b/g, (x, d, m, y) => okDM(d, m) ? `${d}/${m}/${y}` : x);
+  }
   function fixOcrDigits(text) {
-    return text.replace(/[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{2,4}/g, m =>
+    return fixLostSlash(text).replace(/[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{1,2}\s?[\/.\-]\s?[0-9OoIl|SB]{2,4}/g, m =>
       m.replace(/[Oo]/g, '0').replace(/[Il|]/g, '1').replace(/S/g, '5').replace(/B/g, '8'));
   }
 
@@ -254,7 +273,7 @@
   const ID_DOCS = new Set(['cie', 'passaporto', 'patente', 'tessera']);
   function parseOcr(text, now) {
     const today = todayISO(now);
-    const { type, score } = detectType(text);
+    const { type, score } = detectType(text, true);
     const T = TYPE_BY_ID[type];
     const dates = findDates(text);
     const mrz = findMrzExpiry(text);
@@ -268,7 +287,8 @@
     } else if (ID_DOCS.has(type)) {
       // documenti d'identità: nascita < emissione < scadenza, quindi la scadenza è sempre la data più lontana.
       // Le etichette qui ingannano (sulla CIE "emissione" e "scadenza" stanno sulla stessa riga, con le date sotto).
-      const all = dates.map(d => d.date).filter(d => d > '1990-01-01');
+      // una data già passata qui è la nascita o l'emissione, non la scadenza: meglio chiederla che sbagliarla
+      const all = dates.map(d => d.date).filter(d => d >= today);
       if (mrz) all.push(mrz);
       if (all.length) {
         date = all.sort().pop();
@@ -289,7 +309,7 @@
       }
     }
 
-    let title = DOC_TITLE[type] || T.label;
+    let title = DOC_TITLE[type] || (type === 'altro' ? '' : T.label);
     if (type === 'garanzia') { const s = guessStore(text); title = s ? `Garanzia ${s}` : 'Garanzia acquisto'; }
     if (type === 'bolletta') { // "Bolletta luce Enel", "Bolletta gas", "Rata", "TARI"
       const n = norm(text), what = /\bluce\b|energia\s+elettrica/.test(n) ? 'luce' : /\bgas\b/.test(n) ? 'gas' : /\bacqua\b|idric/.test(n) ? 'acqua' : /telefon|internet|fibra|mobile/.test(n) ? 'telefono' : '';
