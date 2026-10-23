@@ -1,7 +1,7 @@
 {
   "name": "MeMo",
   "short_name": "MeMo",
-  "description": "Fai una foto, detta una scadenza e dimenticatela: ti avvisa MeMo quando è il momento.",
+  "description": "Scansiona un documento, detta o scrivi una scadenza e dimenticatela: ti avvisa MeMo quando è il momento.",
   "lang": "it",
   "start_url": "./",
   "scope": "./",

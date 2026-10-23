@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MeMo</title>
-<meta name="description" content="Fai una foto, detta una scadenza e dimenticatela: ti avvisa MeMo quando è il momento.">
+<meta name="description" content="Scansiona un documento, detta o scrivi una scadenza e dimenticatela: ti avvisa MeMo quando è il momento.">
 <meta name="theme-color" content="#F3F6FA">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -223,13 +223,6 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .btn-danger{color:var(--now-ink)}
 .btn-row{display:flex;gap:10px;margin-top:10px}
 .btn-row .btn{flex:1}
-.photo-slot{display:flex;gap:12px;align-items:center}
-.photo-add{width:100%;height:76px;border-radius:20px;border:1.5px dashed color-mix(in srgb, var(--ink) 22%, transparent);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--ink-2);font-weight:700;font-size:15.5px}
-.photo-thumb{width:80px;height:80px;border-radius:18px;object-fit:cover;flex:0 0 80px}
-.photo-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.photo-actions button{font-weight:750;font-size:15.5px;padding:4px 0;color:var(--brand-ink)}
-.photo-actions button.rm{color:var(--ink-3)}
-.thumb{width:100%;max-height:240px;object-fit:cover;border-radius:20px;display:block;margin:0 0 18px}
 .scan{display:flex;gap:14px;align-items:center;margin:4px 0 22px}
 /* ---------- tieni premuto e parla ---------- */
 #btnVoice{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none}
@@ -388,7 +381,11 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 .sc-shot:active i{transform:scale(.9)}
 .scanner.ok .sc-shot{border-color:#3CDB98;animation:shotGlow 1.4s ease-in-out infinite}
 @keyframes shotGlow{0%,100%{box-shadow:0 0 0 0 rgba(60,219,152,.5)}50%{box-shadow:0 0 0 12px rgba(60,219,152,0)}}
-.scan img{width:84px;height:84px;object-fit:cover;border-radius:18px}
+.scan-ic{flex:0 0 84px;width:84px;height:84px;border-radius:22px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#4C8DF6,#2FCDBE);box-shadow:0 10px 24px rgba(47,205,190,.3);position:relative;overflow:hidden}
+.scan-ic svg{width:40px;height:40px}
+.scan-ic::after{content:'';position:absolute;left:14px;right:14px;height:2.5px;border-radius:2px;background:#fff;box-shadow:0 0 10px #fff;top:22px;animation:scanLine 1.4s ease-in-out infinite alternate}
+@keyframes scanLine{to{top:60px}}
+@media (prefers-reduced-motion: reduce){.scan-ic::after{animation:none;top:41px}}
 .bar-p{height:6px;border-radius:3px;background:var(--field);overflow:hidden;margin-top:10px}
 .bar-p i{display:block;height:100%;width:0;background:var(--brand-grad);transition:width .3s}
 .todo{font-size:16px;line-height:1.5;margin:0 0 12px}
@@ -431,15 +428,13 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 .themes button[aria-pressed="true"] .sw{border-color:var(--ink)}
 .themes button[aria-pressed="true"]{color:var(--ink)}
 .fine{font-size:13px;color:var(--ink-3);text-align:center;margin-top:10px}
-.viewer{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.94);display:grid;place-items:center}
-.viewer img{max-width:100%;max-height:100%;object-fit:contain}
-.viewer button{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;border-radius:22px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+.s-block p.s-note{margin:12px 0 0;font-size:13px;color:var(--ink-3)}
 
 /* ---------- banner notifica, stile iPhone ---------- */
 .nb{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);z-index:60;max-width:520px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:24px;background:rgba(246,246,248,.82);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);box-shadow:none;transform:translateY(-160%);visibility:hidden;transition:transform .5s cubic-bezier(.2,.9,.25,1.15),box-shadow .3s,visibility 0s .5s;text-align:left;color:#111}
 .nb.show{transform:none;visibility:visible;box-shadow:0 12px 40px rgba(18,24,38,.22);transition:transform .5s cubic-bezier(.2,.9,.25,1.15),box-shadow .3s,visibility 0s}
 .nb .ni{flex:0 0 40px;height:40px;border-radius:10px;overflow:hidden}
-.nb .ni svg{width:40px;height:40px;display:block}
+.nb .ni svg,.nb .ni img{width:40px;height:40px;display:block}
 .nb .nt{flex:1;min-width:0;display:block}
 .nb .nh{display:flex;justify-content:space-between;font-size:13px;color:rgba(0,0,0,.5);font-weight:600;margin-bottom:1px}
 .nb .nh b{color:rgba(0,0,0,.8);font-weight:700}
@@ -500,11 +495,6 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 .bubble{position:absolute;top:4px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--toast-bg);color:var(--toast-ink);font-weight:750;font-size:15px;padding:10px 14px;border-radius:18px 18px 18px 6px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .art .mic-big{margin:60px 0 0}
 .lead-list{display:flex;flex-direction:column;gap:8px;width:250px}
-.photo-art{position:relative;width:260px;height:200px;display:grid;place-items:center}
-.photo-art .doc{position:relative;z-index:1;margin:30px 24px 0 0}
-.pdfdoc{position:absolute;right:14px;top:6px;width:96px;height:124px;border-radius:12px;background:var(--card);border:1px solid color-mix(in srgb, var(--ink) 14%, transparent);transform:rotate(9deg);padding:12px 12px 0;box-shadow:0 14px 30px rgba(0,0,0,.12)}
-.pdfdoc b{display:inline-block;font-size:11px;font-weight:850;letter-spacing:.04em;color:#fff;background:var(--brand-grad);padding:3px 7px;border-radius:6px;margin-bottom:10px}
-.pdfdoc i{display:block;height:6px;border-radius:3px;background:color-mix(in srgb, var(--ink) 14%, transparent);margin-bottom:7px}
 .bubble.wide{white-space:normal;width:250px;text-align:left;line-height:1.35;top:-6px}
 .bubble.wide + .mic-big{margin-top:100px}
 .get-art{display:flex;flex-direction:column;gap:9px;width:270px}
@@ -522,7 +512,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 .lock-art b{font-size:50px;font-weight:700;letter-spacing:-.02em;line-height:1}
 .lock-art .lk-date{font-size:12.5px;font-weight:650;opacity:.85;margin-top:4px}
 .lk-note{margin-top:auto;width:100%;display:flex;gap:9px;align-items:flex-start;padding:10px;border-radius:18px;background:rgba(255,255,255,.24);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);text-align:left;animation:lkIn 2.8s cubic-bezier(.2,.9,.25,1.1) infinite}
-.lk-ic svg{width:30px;height:30px;display:block}
+.lk-ic svg,.lk-ic img{width:30px!important;height:30px!important;display:block;border-radius:8px}
 .lk-note div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .lk-t{font-size:12.5px;font-weight:800}
 .lk-b{font-size:12px;opacity:.92}
@@ -659,13 +649,11 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
   <div class="wrap" id="setBody"></div>
 </section>
 <nav class="dock" aria-label="Aggiungi un MeMo">
-  <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
+  <button class="rb photo" id="btnPhoto" aria-label="Scansiona un documento"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M7.5 12h9"/></svg></span>Scansiona</button>
   <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span><span class="rb-l">Tieni premuto</span></button>
   <button class="rb add" id="btnAdd" aria-label="Scrivi a MeMo"><span class="c"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(0 -1.5)"><path d="M5 18.5c-1.2-1.4-2-3.2-2-5.1C3 8.8 7 5 12 5s9 3.8 9 8.4-4 8.4-9 8.4c-1.4 0-2.7-.3-3.9-.8L4 22l1-3.5z"/><path d="M8.5 12h7M8.5 15.2h4.5"/></g></svg></span>Scrivi</button>
 </nav>
 
-<input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
-<input type="file" id="fileLibrary" accept="image/*" hidden>
 <input type="file" id="fileAny" accept="image/*,application/pdf,.pdf" hidden>
 <input type="file" id="fileBackup" accept="application/json,.json" hidden>
 
@@ -681,10 +669,10 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
   <video id="scVideo" playsinline muted autoplay></video>
   <div class="sc-shade"><div class="sc-guide" id="scGuide"><i></i><i></i><i></i><i></i></div></div>
   <div class="sc-top"><button class="sc-x" id="scClose" aria-label="Chiudi"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
-    <button class="sc-pick" id="scPick">Galleria o PDF</button></div>
+    <button class="sc-pick" id="scPick">Da un file</button></div>
   <p class="sc-hint" id="scHint">Inquadra il documento, in verticale o in orizzontale</p>
   <div class="sc-status"><span class="sc-chip" id="scType"><b>📄</b><span>Cerco cos'è…</span></span><span class="sc-chip" id="scDate"><b>📅</b><span>Cerco la scadenza…</span></span></div>
-  <button class="sc-shot" id="scShot" aria-label="Scatta"><i></i></button>
+  <button class="sc-shot" id="scShot" aria-label="Leggi il documento"><i></i></button>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite">
   <span class="tie"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 100 100"><defs><linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F6BF2"/><stop offset=".55" stop-color="#4C8DF6"/><stop offset="1" stop-color="#2FCDBE"/></linearGradient><clipPath id="lsq"><rect width="100" height="100" rx="22.5"/></clipPath></defs><g clip-path="url(#lsq)"><rect width="100" height="100" fill="url(#lbg)"/><g transform="translate(51 53) scale(0.9726847805739988) translate(-50.43 -56.67)"><defs><clipPath id="lbody"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
@@ -709,7 +697,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.5';
+const VERSION = '2.8';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -728,8 +716,9 @@ const DB = (() => {
   let dbp;
   function open() {
     if (!dbp) dbp = new Promise((res, rej) => {
-      const r = indexedDB.open('memo', 1);
-      r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('items', { keyPath: 'id' }); d.createObjectStore('photos'); };
+      const r = indexedDB.open('memo', 2);
+      // versione 2: l'archivio delle foto delle versioni di prima viene eliminato del tutto (su ogni telefono, alla prima apertura)
+      r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('items')) d.createObjectStore('items', { keyPath: 'id' }); if (d.objectStoreNames.contains('photos')) d.deleteObjectStore('photos'); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     });
     return dbp;
@@ -742,9 +731,6 @@ const DB = (() => {
     all: () => run('items', 'readonly', s => s.getAll()),
     put: it => run('items', 'readwrite', s => s.put(it)),
     del: id => run('items', 'readwrite', s => s.delete(id)),
-    photoPut: (id, data) => run('photos', 'readwrite', s => s.put(data, id)),
-    photoGet: id => run('photos', 'readonly', s => s.get(id)),
-    photoDel: id => run('photos', 'readwrite', s => s.delete(id)),
   };
 })();
 const store = { get(k) { try { return localStorage.getItem('memo.' + k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem('memo.' + k, v); } catch (e) {} } };
@@ -857,7 +843,8 @@ function countUp(el, to) {
 }
 let rowObserver = null;
 // il logo serve ancora per gli avvisi dentro l'app, ma in alto resta solo la scritta MeMo
-const LOGO_SVG = (() => { const el = document.querySelector('.brand svg'); const h = el ? el.outerHTML.replace(/display:\s*none;?/, '') : ''; if (el) el.remove(); return h; })();
+// l'icona di MeMo (la stessa della schermata Home) dove l'app mostra un avviso finto: nel banner e nel tutorial
+const LOGO_SVG = (() => { const el = document.querySelector('.brand svg'); if (el) el.remove(); return '<img src="icon-192.png" alt="">'; })();
 const CALM_LINES = ['Tutto sotto controllo.', 'Ho tutto sotto pinna.', 'Me lo sono segnato io.', 'Tranquillo, ce l\'ho io.', 'Lascia fare a me.', 'Tu vivi, io ricordo.', 'Nessun pensiero: ci sono io.',
   'Mare calmo.', 'Va tutto liscio.', 'Testa leggera, oggi.', 'Ci sono io di guardia.', 'Rilassati, nuoto io.', 'Tutto in ordine.', 'Niente di cui preoccuparsi.', 'Acque tranquille.', 'Io tengo il conto.', 'Pensa ad altro, al resto ci sono io.', 'Tutto sotto pinna, come sempre.'];
 const CALM_LINE = CALM_LINES[Math.floor(Math.random() * CALM_LINES.length)];
@@ -868,7 +855,7 @@ const SAY_TAILN = ['Te li ricordo io al momento giusto.', 'Quando sarà ora, ti 
 const NOW_TAIL = ['Ci penso io.', 'Te lo sto ricordando adesso.', 'È il momento giusto.', 'Lo tengo in cima per te.', 'Quando è fatto, segnalo.', 'Con calma, ma è ora.', 'Eccolo qui, come promesso.'];
 const NOW_TAILN = ['Li trovi qui sotto. Ci penso io.', 'Sono qui sotto, uno alla volta.', 'Te li tengo in cima.', 'Qui sotto, con calma.', 'Uno per volta e sono fatti.'];
 const FAR_H = ['Troppo in là anche solo per ricordartelo.', 'Niente all\'orizzonte.', 'Per ora, mare aperto.', 'Lontano, lontanissimo.', 'Nessuna onda in vista.', 'Tempo libero a volontà.'];
-const EMPTY_P = ['Scadenze, appuntamenti, documenti. Te li ricordo io.', 'Una foto o una frase, e me ne occupo io.', 'Documenti, bollette, compleanni: dimmeli e dimenticali.', 'Parla, scatta o scrivi. Al resto ci penso io.'];
+const EMPTY_P = ['Scadenze, appuntamenti, documenti. Te li ricordo io.', 'Una scansione o una frase, e me ne occupo io.', 'Documenti, bollette, compleanni: dimmeli e dimenticali.', 'Parla, scansiona o scrivi. Al resto ci penso io.'];
 const HOME_PICK = (arr, k) => arr[Math.floor(SAY_SEED[k % SAY_SEED.length] * arr.length)];
 const SAY_SEED = [Math.random(), Math.random(), Math.random(), Math.random()];
 const sayPick = (arr, k) => arr[Math.floor(SAY_SEED[k] * arr.length)];
@@ -1119,7 +1106,11 @@ function savedToast(it) {
   toast(it.title, savedLine(it), [{ label: 'Annulla', fn: async () => { await removeItem(it); render(); } }], () => openDetail(it.id));
 }
 
-// ================= Foto =================
+// ================= Scansione =================
+// il documento si legge qui sul telefono e poi si dimentica: niente foto, niente copie, niente testo letto.
+// Del documento resta solo quello che serve al MeMo: cos'è, come si chiama, la data (e per le garanzie la data d'acquisto).
+const SCAN_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M7.5 12h9"/></svg>';
+const scanDraft = res => ({ type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null });
 let photoRoute = null, ocrWorker = null, ocrProgress = () => {};
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('script')); document.head.appendChild(s); }); }
 async function getOcr() {
@@ -1140,7 +1131,6 @@ function prepForOcr(img) {
   for (let i = 0, j = 0; i < a.length; i += 4, j++) { const v = Math.max(0, Math.min(255, (lum[j] - min) * k)); a[i] = a[i + 1] = a[i + 2] = v; }
   g.putImageData(d, 0, 0); return c;
 }
-const savedPhoto = img => drawScaled(img, 1600).toDataURL('image/jpeg', 0.8);
 // seconda lettura per le foto difficili (riflessi, sfondi colorati come sulla tessera sanitaria):
 // ogni punto viene confrontato con la luce media intorno, così riflessi e ombre spariscono e resta il testo
 function prepFlat(img) {
@@ -1205,9 +1195,9 @@ async function readPhoto(img, onStep, extra) {
   return P.parseOcr(texts.join('\n')); // le letture si completano: il tipo da una, la data dall'altra
 }
 const onFile = e => { const f = e.target.files[0]; e.target.value = ''; const r = photoRoute; photoRoute = null; if (f && r) r(f); };
-$('#fileCamera').addEventListener('change', onFile); $('#fileLibrary').addEventListener('change', onFile); $('#fileAny').addEventListener('change', onFile);
+$('#fileAny').addEventListener('change', onFile);
 // senza "capture" l'iPhone mostra la scelta: Scatta foto, Libreria foto, Scegli file (anche PDF)
-function pickPhoto(camera, route) { photoRoute = route; (camera === 'any' ? $('#fileAny') : camera ? $('#fileCamera') : $('#fileLibrary')).click(); }
+function pickPhoto(camera, route) { photoRoute = route; $('#fileAny').click(); }
 
 // ---------- documenti PDF: si leggono sul telefono, niente va su un server ----------
 const isPdf = f => f && (f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
@@ -1239,21 +1229,19 @@ async function readPdf(file, onPreview) {
 
 async function scanFlow(file) {
   if (isPdf(file)) return pdfFlow(file);
-  let img; try { img = await fileToImage(file); } catch (e) { toast('Non riesco ad aprire questa foto.', "Prova a scattarne un'altra."); return; }
+  let img; try { img = await fileToImage(file); } catch (e) { toast('Non riesco ad aprire questo file.', 'Prova a scansionare il documento.'); return; }
   scanImage(img);
 }
 // legge una foto. Se la fotocamera di MeMo l'aveva già capita mentre inquadravi (known), non serve rileggerla.
 async function scanImage(img, known, liveText) {
-  const photo = savedPhoto(img);
-  openSheet(`<h2>Sto leggendo la foto</h2>
-    <div class="scan"><img src="${photo}" alt=""><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar"></i></div></div></div>
+  openSheet(`<h2>Sto leggendo il documento</h2>
+    <div class="scan"><span class="scan-ic" aria-hidden="true">${SCAN_ICON}</span><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar"></i></div></div></div>
     <button class="btn btn-ghost" id="ocrSkip">Lo scrivo io</button>`);
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
-    const draft = { type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null, photo };
-    openEditor(draft, res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
+    openEditor(scanDraft(res), res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
       : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
-      : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerla bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nella foto: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade. La foto la tengo comunque.", markMissing: true });
+      : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade.", markMissing: true });
   };
   $('#ocrSkip').onclick = () => { cancelled = true; onSheetClose = null; go(null); };
   ocrProgress = m => { const bar = $('#ocrBar'), msg = $('#ocrMsg'); if (!bar) return;
@@ -1261,24 +1249,22 @@ async function scanImage(img, known, liveText) {
     else if (/load|initializ/.test(m.status)) { bar.style.width = '8%'; msg.textContent = 'Preparo la lettura. La prima volta ci vuole qualche secondo in più.'; } };
   if (known) { onSheetClose = null; go(known); return; }
   try { const res = await readPhoto(img, null, liveText); if (cancelled) return; onSheetClose = null; go(res); }
-  catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Per leggere le foto serve la connessione.', 'Intanto puoi inserire i dati a mano.'); }
+  catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Per leggere i documenti serve la connessione.', 'Intanto puoi inserire i dati a mano.'); }
 }
 async function pdfFlow(file) {
-  let photo = null;
   openSheet(`<h2>Sto leggendo il documento</h2>
-    <div class="scan"><img id="pdfThumb" alt="" style="visibility:hidden"><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar" style="width:30%"></i></div></div></div>
+    <div class="scan"><span class="scan-ic" aria-hidden="true">${SCAN_ICON}</span><div style="flex:1"><p class="lead" id="ocrMsg" style="margin:0">Cerco cos'è e quando scade.</p><div class="bar-p"><i id="ocrBar" style="width:30%"></i></div></div></div>
     <button class="btn btn-ghost" id="ocrSkip">Lo scrivo io</button>`);
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
-    const draft = { type: res ? res.type : 'altro', title: res ? res.title : '', date: res ? res.date : null, purchase: res ? res.purchase : null, photo };
-    openEditor(draft, res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
+    openEditor(scanDraft(res), res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
       : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
-      : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade. Il documento lo tengo comunque.", markMissing: true });
+      : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade.", markMissing: true });
   };
   $('#ocrSkip').onclick = () => { cancelled = true; onSheetClose = null; go(null); };
   ocrProgress = m => { const bar = $('#ocrBar'); if (bar && m.status === 'recognizing text') bar.style.width = Math.round(40 + m.progress * 60) + '%'; };
   try {
-    const res = await readPdf(file, c => { photo = drawScaled(c, 1600).toDataURL('image/jpeg', 0.8); const t = $('#pdfThumb'); if (t) { t.src = photo; t.style.visibility = 'visible'; } const b = $('#ocrBar'); if (b) b.style.width = '60%'; });
+    const res = await readPdf(file, () => { const b = $('#ocrBar'); if (b) b.style.width = '60%'; });
     if (cancelled) return; onSheetClose = null; go(res);
   } catch (e) { if (cancelled) return; onSheetClose = null; go(null); toast('Non riesco ad aprire questo documento.', 'Inserisci i dati a mano: al resto penso io.'); }
 }
@@ -1319,11 +1305,11 @@ const Scanner = (() => {
     chip('#scDate', okDate, okDate ? (kind.dateKind === 'purchase' ? 'Acquisto ' + day : DEADLINE.has(res.type) ? 'Scade ' + day : cap(day)) : kind.dateKind === 'purchase' ? 'Cerco la data…' : okType && !DEADLINE.has(res.type) || other ? 'Cerco la data…' : 'Cerco la scadenza…');
     const key = okType && okDate ? res.type + res.date : null; stable = key && last === key ? stable + 1 : key ? 1 : 0; last = key;
     const ready = okDate && (okType || other);
-    if (ready) { if (stable === 1 || other && stable === 0) haptic(); el.classList.add('ok'); hint(stable >= 2 || other ? 'Perfetto, scatta!' : 'Ci sono quasi, tienilo fermo'); }
+    if (ready) { if (stable === 1 || other && stable === 0) haptic(); el.classList.add('ok'); hint(stable >= 2 || other ? 'Perfetto, tocca il pulsante' : 'Ci sono quasi, tienilo fermo'); }
     else { el.classList.remove('ok'); hint(chars < 25 ? 'Avvicinati un po\' e metti il documento nel riquadro' : okType || other ? 'Tienilo fermo, cerco la data' : 'Inquadra il documento, in verticale o in orizzontale'); }
   }
   async function loop() {
-    let w; try { hint('Preparo la lettura…'); w = await getOcr(); } catch (e) { hint('Per leggere dal vivo serve la connessione: scatta pure'); return; }
+    let w; try { hint('Preparo la lettura…'); w = await getOcr(); } catch (e) { hint('Per leggere dal vivo serve la connessione: tocca pure il pulsante'); return; }
     if (open) hint('Inquadra il documento, in verticale o in orizzontale');
     let k = 0, flip = 0, poor = 0;
     while (open) {
@@ -1367,7 +1353,7 @@ const Scanner = (() => {
 // Su iPhone la scelta file va aperta dentro il tocco: per questo, dopo un rifiuto, si passa da un tasto.
 $('#btnPhoto').addEventListener('click', async () => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { pickPhoto('any', scanFlow); return; }
-  if (!(await Scanner.start())) toast('Non posso usare la fotocamera.', 'Puoi scegliere una foto o un PDF.', [{ label: 'Scegli', fn: () => pickPhoto('any', scanFlow) }]);
+  if (!(await Scanner.start())) toast('Non posso usare la fotocamera.', 'Puoi leggere un documento da un file (immagine o PDF).', [{ label: 'Scegli', fn: () => pickPhoto('any', scanFlow) }]);
 });
 
 // ================= Editor: nuova memo, conferma, modifica =================
@@ -1387,7 +1373,7 @@ function leadLabel(min, timed) {
 const ART_OF = { patente: 'la patente', cie: "la carta d'identità", passaporto: 'il passaporto', tessera: 'la tessera sanitaria', bollo: 'il bollo', assicurazione: "l'assicurazione",
   revisione: 'la revisione', caldaia: 'il controllo della caldaia', abbonamento: "l'abbonamento", bolletta: 'un pagamento', tasse: 'le tasse', gomme: 'il cambio gomme', viaggio: 'un viaggio', compleanno: 'un compleanno' };
 function openEditor(draft, opts = {}) {
-  const state = { photo: null, time: null, leadMin: null, ...draft };
+  const state = { time: null, leadMin: null, ...draft }; delete state.photo;
   { const ex = draft.id ? items.find(x => x.id === draft.id) : null; state.rep = 'rep' in draft ? draft.rep || null : ex ? ex.rep || null : null;
     state.remindOn = 'remindOn' in draft ? draft.remindOn || null : ex ? ex.remindOn || null : null; }
   state.typeManual = !!opts.typeLocked;
@@ -1403,40 +1389,11 @@ function openEditor(draft, opts = {}) {
       <p class="e-warn" id="eWarn" hidden></p>
       <div class="chips" id="eQuick" style="margin-top:10px"></div></div>
     <div class="rep-row" id="eRepBox"><span>Si ripete</span><select class="rep-sel" id="eRep" aria-label="Ogni quanto" hidden></select><button class="tgl" id="eRepT" role="switch" aria-checked="false" aria-label="Si ripete"><i></i></button></div>
-    <div class="field"><span class="lbl">Foto o documento <span style="font-weight:600;color:var(--ink-3)">(facoltativo)</span></span><div id="ePhoto"></div></div>
     <div class="summary" id="eSum" hidden><div class="row1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2.2 2.2 0 0 0 4 0"/></svg><p id="eSumTxt"></p><button class="chg" id="eChg">Cambia</button></div><div class="chips" id="eLeads" hidden></div></div>
     <button class="btn btn-main" id="eSave">Ricordamelo</button>
     ${opts.renew ? '<button class="btn btn-ghost" id="eDrop" style="margin-top:10px">Non serve più, toglilo</button>' : ''}`, body => {
     const dateEl = body.querySelector('#eDate'), timeEl = body.querySelector('#eTime'), titleEl = body.querySelector('#eTitle');
     if (state.time) timeEl.value = state.time;
-    let reading = false;
-    const renderPhoto = () => {
-      const box = body.querySelector('#ePhoto');
-      if (state.photo) {
-        box.innerHTML = `<div class="photo-slot"><img class="photo-thumb" src="${state.photo}" alt="Foto allegata"><div class="photo-actions"><button id="pChange">${reading ? 'Sto leggendo la foto…' : 'Cambia foto'}</button><button class="rm" id="pRemove">Togli la foto</button></div></div>`;
-        box.querySelector('#pChange').onclick = () => !reading && pickPhoto('any', onPhoto);
-        box.querySelector('#pRemove').onclick = () => { state.photo = null; state.photoRemoved = true; renderPhoto(); };
-      } else {
-        box.innerHTML = `<button class="photo-add" id="pAdd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>Aggiungi foto o PDF</button>`;
-        box.querySelector('#pAdd').onclick = () => pickPhoto('any', onPhoto);
-      }
-    };
-    const onPhoto = async file => {
-      let img = null;
-      if (isPdf(file)) { reading = true; renderPhoto(); }
-      else { try { img = await fileToImage(file); } catch (e) { return; } state.photo = savedPhoto(img); state.photoRemoved = false; }
-      const known = T(state.type).dateKind === 'purchase' ? state.purchase : state.date;
-      if (img && known) { renderPhoto(); return; }
-      reading = true; renderPhoto();
-      try { const res = img ? await readPhoto(img) : await readPdf(file, c => { state.photo = drawScaled(c, 1600).toDataURL('image/jpeg', 0.8); state.photoRemoved = false; renderPhoto(); });
-        if (known) { reading = false; renderPhoto(); return; }
-        if (!(T(state.type).dateKind === 'purchase' ? state.purchase : state.date) && res.date) {
-          if (!state.typeManual && res.typeScore) state.type = res.type;
-          if (state.autoTitle && res.typeScore) titleEl.value = res.title;
-          state.date = res.date; state.purchase = res.purchase; toast('Ho trovato la data nella foto.', 'Controlla che sia giusta.');
-        } } catch (e) {}
-      reading = false; renderPhoto(); sync();
-    };
     const sync = () => {
       const ty = T(state.type), today = P.todayISO();
       body.querySelector('#eDateLbl').textContent = ty.dateKind === 'purchase' ? ty.ask : `${ty.ask} L'ora è facoltativa.`;
@@ -1512,13 +1469,12 @@ function openEditor(draft, opts = {}) {
       if (state.rep && !T(state.type).recur && !kindP) { it.rep = state.rep; P.rollRep(it); } else delete it.rep;
       if (state.remindOn && !it.rep) it.remindOn = state.remindOn; else delete it.remindOn;
       if (state.said && !it.said) it.said = state.said;
-      if (state.photo) { it.photoId = it.photoId || uid(); await DB.photoPut(it.photoId, state.photo); }
-      else if (state.photoRemoved && it.photoId) { await DB.photoDel(it.photoId); delete it.photoId; }
+      delete it.photoId; // le foto non si tengono più
       await DB.put(it); if (!items.includes(it)) items.push(it);
       haptic(); if (opts.after) { onSheetClose = null; render(); opts.after(it); return; }
       closeSheet(); render(); savedToast(it);
     };
-    renderPhoto(); sync();
+    sync();
     if (opts.focus) setTimeout(() => body.querySelector(opts.focus).focus(), 440);
   });
 }
@@ -1661,9 +1617,10 @@ function micHelp(code) {
 }
 function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove('on'); }
 let aiOff = false, thinking = false, thinkCtl = null;
+const aiOn = () => store.get('ai') !== '0'; // si può spegnere dalle impostazioni: allora le frasi le capisce solo il telefono
 // l'AI del server capisce la frase; il motore dell'app controlla e completa. Se ci sono più cose, ognuna per conto suo
 async function aiOf(t) {
-  if (aiOff || !MEMO_SERVER || navigator.onLine === false) return null;
+  if (aiOff || !aiOn() || !MEMO_SERVER || navigator.onLine === false) return null;
   try { return await Push.understand(t, thinkCtl || undefined); } catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
 }
 function resOf(text, ai, inherit) {
@@ -1946,9 +1903,9 @@ async function applyCmd(cmd, it) {
   }
 }
 async function dropIt(it) {
-  const photo = it.photoId ? await DB.photoGet(it.photoId) : null, old = snapshot(it);
+  const old = snapshot(it);
   await removeItem(it); haptic(); closeSheet(); render();
-  toast(say('drop'), old.title, [{ label: 'Annulla', fn: async () => { await DB.put(old); if (photo) await DB.photoPut(old.photoId, photo); items.push(old); render(); } }]);
+  toast(say('drop'), old.title, [{ label: 'Annulla', fn: async () => { await DB.put(old); items.push(old); render(); } }]);
 }
 const ACT_Q = { move: 'Quale sposto?', delete: 'Quale tolgo?', done: 'Quale hai fatto?', lead: 'Di quale cambio l\'avviso?', add: 'A quale lo aggiungo?' };
 function chooseMemo(list, cmd) {
@@ -2418,13 +2375,12 @@ async function doneItem(it) {
     const old = it.due; it.due = P.addMonths(it.due, ty.recur); delete it.remindOn; await DB.put(it); render();
     toast(say('again'), `${it.title} · di nuovo ${whenText(it)}`, [{ label: 'Annulla', fn: async () => { it.due = old; await DB.put(it); render(); } }]);
   } else {
-    const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
     await removeItem(it); render();
-    toast(say('done'), it.title, [{ label: 'Annulla', fn: async () => { await DB.put(it); if (photo) await DB.photoPut(it.photoId, photo); items.push(it); render(); } }]);
+    toast(say('done'), it.title, [{ label: 'Annulla', fn: async () => { await DB.put(it); items.push(it); render(); } }]);
   }
   return true;
 }
-async function removeItem(it) { await DB.del(it.id); if (it.photoId) await DB.photoDel(it.photoId); items = items.filter(x => x.id !== it.id); }
+async function removeItem(it) { await DB.del(it.id); items = items.filter(x => x.id !== it.id); }
 (() => {
   let row = null, x0 = 0, y0 = 0, dx = 0, mode = null, suppress = false;
   const list = $('#list');
@@ -2450,7 +2406,6 @@ async function removeItem(it) { await DB.del(it.id); if (it.photoId) await DB.ph
 async function openDetail(id) {
   const it = items.find(x => x.id === id); if (!it) return;
   const ty = T(it.type), st = P.statusOf(it);
-  const photo = it.photoId ? await DB.photoGet(it.photoId) : null;
   const past = it.time ? st.minutesLeft < 0 : st.left < 0;
   const when = past ? `Era <b>${esc(whenText(it))}</b>.` : it.purchase ? `Garanzia valida fino al <b>${fmtLong(it.due)}</b>.`
     : it.time ? `<b>${esc(cap(whenText(it)))}</b>.` : `${DEADLINE.has(it.type) ? 'Scade ' : ''}<b>${esc(DEADLINE.has(it.type) ? whenText(it) : cap(whenText(it)))}</b>${st.left > 1 ? ', ' + inWords(st.left * 1440) : ''}.`;
@@ -2460,19 +2415,16 @@ async function openDetail(id) {
   const doneLabel = ty.done === 'renew' ? "L'ho rinnovato" : 'Fatto';
   const doneSub = it.rep ? `Poi te lo ricordo ${P.repText(it.rep)}.` : ty.done === 'reschedule' ? `Te lo ricordo di nuovo tra ${ty.recur === 12 ? 'un anno' : ty.recur === 24 ? 'due anni' : ty.recur + ' mesi'}.` : '';
   openSheet(`<div class="d-head"><span class="orb">${emojiOf(it)}</span><h2>${esc(it.title)}</h2><p class="d-when">${when}${remind}</p></div>
-    ${photo ? `<img class="thumb" id="dPhoto" src="${photo}" alt="Foto salvata, tocca per ingrandire">` : ''}
     ${(it.todo || (TODO_TYPES.includes(it.type) && ty.todo)) ? `<div class="d-card"><span class="lbl">Cosa fare</span><p class="todo">${esc(it.todo || ty.todo)}</p>${(it.link || ty.link) ? `<a class="link" href="${(it.link || ty.link).url}" target="_blank" rel="noopener">${esc((it.link || ty.link).label)}</a>` : ''}</div>` : ''}
     ${nextList ? `<div class="d-card"><span class="lbl">I prossimi avvisi</span><p class="todo" style="margin:0">${esc(nextList)}</p></div>` : ''}
     ${it.said ? `<div class="d-card"><span class="lbl">Mi avevi detto</span><p class="todo" style="margin:0">«${esc(it.said)}»</p></div>` : ''}
     <button class="btn btn-main" id="dDone">${doneLabel}</button>${doneSub ? `<p class="fine">${doneSub}</p>` : ''}
     <div class="btn-row"><button class="btn btn-ghost" id="dEdit">Modifica</button><button class="btn btn-ghost btn-danger" id="dDel">Elimina</button></div>`, body => {
-    const ph = body.querySelector('#dPhoto'); if (ph) ph.onclick = () => openViewer(photo);
-    body.querySelector('#dEdit').onclick = () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase, rep: it.rep || null, photo }, { head: 'Modifica', typeLocked: true });
+    body.querySelector('#dEdit').onclick = () => openEditor({ id: it.id, type: it.type, title: it.title, date: it.due, time: it.time, leadMin: it.leadMin ?? null, purchase: it.purchase, rep: it.rep || null }, { head: 'Modifica', typeLocked: true });
     body.querySelector('#dDel').onclick = async () => { if (!confirm(`Elimino «${it.title}»?`)) return; await removeItem(it); closeSheet(); render(); toast('Eliminato.'); };
     body.querySelector('#dDone').onclick = async () => { if (ty.done !== 'renew') closeSheet(); await doneItem(it); };
   });
 }
-function openViewer(src) { const v = document.createElement('div'); v.className = 'viewer'; v.innerHTML = `<img src="${src}" alt="Foto"><button aria-label="Chiudi"><svg width="16" height="16" viewBox="0 0 16 16" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button>`; v.onclick = () => v.remove(); document.body.appendChild(v); }
 
 // ================= Anticipi degli avvisi (modificabili) =================
 const LEAD_DEFAULTS = {}; P.TYPES.forEach(t => LEAD_DEFAULTS[t.id] = { lead: t.lead, leadMin: t.leadMin });
@@ -2549,7 +2501,10 @@ function renderSettings() {
   const body = $('#setBody');
   body.innerHTML = `
     ${notifBlock()}
-    <div class="s-block"><h3>Backup</h3><p>Le foto e i documenti restano solo su questo ${PHONE}: non li salvo da nessun'altra parte. Ogni tanto salva una copia ${CLOUD}.</p>
+    <div class="s-block"><h3>Privacy</h3><p>I MeMo restano su questo ${PHONE}. Quando scansioni un documento lo leggo qui e tengo solo quello che serve per ricordartelo: niente foto, niente copie. Per le notifiche al server arrivano solo un codice e l'ora dell'avviso, mai cosa c'è scritto.</p>
+      <div class="s-tgl"><div><b>Capire meglio con l'AI</b><span>Le frasi che dici o scrivi passano dall'AI di Cloudflare, che non le salva e non le usa per imparare. Spento: le capisco solo qui sul ${PHONE}, un po' meno bene.</span></div><button class="tgl" id="sAI" role="switch" aria-checked="${aiOn()}" aria-label="Capire meglio con l'AI"><i></i></button></div>
+      <p class="s-note">${DEV === 'ios' ? "La voce la trascrive la dettatura di Apple, non MeMo: a seconda dell'iPhone e delle impostazioni può passare dai server di Apple." : 'La voce la trascrive il riconoscimento vocale del browser, non MeMo: su Chrome passa dai server di Google.'}</p></div>
+    <div class="s-block"><h3>Backup</h3><p>Visto che tutto resta qui, ogni tanto salva una copia ${CLOUD}: se cambi telefono ti basta ripristinarla.</p>
       <div class="btn-row" style="margin:0"><button class="btn btn-ghost" id="sExp">Salva copia</button><button class="btn btn-ghost" id="sImp">Ripristina</button></div></div>
     <div class="s-block"><h3>Quando ti avviso</h3><p>Lo scelgo io per ogni tipo di MeMo. Se preferisci, cambialo.</p>
       <button class="btn btn-ghost" id="sLeads">Cambia gli anticipi</button></div>
@@ -2564,6 +2519,9 @@ function renderSettings() {
   const wk = body.querySelector('#sWeek');
   if (wk) wk.onclick = () => { const on = !weeklyOn(); store.set('weekly', on ? '1' : '0'); wk.setAttribute('aria-checked', on); haptic(); Push.sync();
     toast(on ? 'Riepilogo attivo.' : 'Riepilogo spento.', on ? 'Domenica sera ti racconto la settimana.' : 'Niente più riepilogo della domenica.'); };
+  const ai = body.querySelector('#sAI');
+  if (ai) ai.onclick = () => { const on = !aiOn(); store.set('ai', on ? '1' : '0'); ai.setAttribute('aria-checked', on); haptic();
+    toast(on ? 'AI accesa.' : 'AI spenta.', on ? 'Capisco meglio le frasi più complicate.' : 'Da ora le frasi restano sul telefono.'); };
   body.querySelector('#sLeads').onclick = () => openLeads();
   body.querySelector('#sExp').onclick = exportBackup;
   body.querySelector('#sImp').onclick = () => $('#fileBackup').click();
@@ -2584,8 +2542,7 @@ function notifBlock() {
 }
 function openSettings() { renderSettings(); goPage('set'); }
 async function exportBackup() {
-  const photos = {}; for (const it of items) if (it.photoId) photos[it.photoId] = await DB.photoGet(it.photoId);
-  const blob = new Blob([JSON.stringify({ app: 'memo', v: 1, at: new Date().toISOString(), items, photos })], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: 'memo', v: 2, at: new Date().toISOString(), items })], { type: 'application/json' });
   const file = new File([blob], `memo-backup-${P.todayISO()}.json`, { type: 'application/json' });
   try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Backup MeMo' }); return; } } catch (e) { if (e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
@@ -2593,7 +2550,7 @@ async function exportBackup() {
 $('#fileBackup').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const data = JSON.parse(await f.text()); if (data.app !== 'memo' || !Array.isArray(data.items)) throw 0; let n = 0;
-    for (const it of data.items) { if (!it.id || !it.due) continue; await DB.put(it); n++; if (it.photoId && data.photos && data.photos[it.photoId]) await DB.photoPut(it.photoId, data.photos[it.photoId]); }
+    for (const it of data.items) { if (!it.id || !it.due) continue; delete it.photoId; await DB.put(it); n++; } // le foto di un backup vecchio non si ripristinano
     items = await DB.all(); closeSheet(); render(); if (setOpen) renderSettings(); toast(`Ripristinati ${n} MeMo.`);
   } catch (err) { toast('Questo file non è un backup di MeMo.', 'Scegli il file memo-backup che hai salvato.'); }
 });
@@ -2606,7 +2563,7 @@ function showIntro() {
   const slides = [
     { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${fishFlat()}</div>
         <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
-      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Una foto, due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
+      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Scansiona un documento, oppure due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
   ];
   const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<span>${preLabel(p, true)}</span>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
@@ -2750,10 +2707,19 @@ const Push = (() => {
     if (weeklyOn()) out.push(...weeklyPlan(now));
     return out;
   }
+  // i testi degli avvisi restano sul telefono: quando arriva la notifica è il telefono a scriverla.
+  // Al server mando solo un codice e l'ora, sempre: se il telefono non riesce a salvare i testi, l'avviso arriva lo stesso ma generico («Hai un promemoria»)
+  const notes = (() => { let p = null;
+    const open = () => p || (p = new Promise((ok, ko) => { const r = indexedDB.open('memo-notes', 1); r.onupgradeneeded = () => r.result.createObjectStore('n'); r.onsuccess = () => ok(r.result); r.onerror = () => { p = null; ko(r.error); }; }));
+    return async list => { const db = await open(); await new Promise((ok, ko) => { const tx = db.transaction('n', 'readwrite'), st = tx.objectStore('n'); st.clear();
+      for (const r of list) st.put({ title: r.title, body: r.body }, r.k); tx.oncomplete = ok; tx.onerror = () => ko(tx.error); tx.onabort = () => ko(tx.error); }); };
+  })();
   let timer = null, last = '';
   async function sync() {
     if (state() !== 'on') return;
-    const reminders = plan(), sig = JSON.stringify(reminders.map(r => r.k));
+    let reminders = plan(); const sig = JSON.stringify(reminders.map(r => r.k));
+    try { await notes(reminders); } catch (e) {}
+    reminders = reminders.map(r => ({ k: r.k, at: r.at, tag: r.tag, title: '', body: '', url: r.url + (r.url.includes('?') ? '&' : '?') + 'n=' + encodeURIComponent(r.k) }));
     try { await post('/sync', { reminders }); last = sig; } catch (e) { last = ''; }
   }
   const later = () => { if (state() !== 'on') return; clearTimeout(timer); timer = setTimeout(sync, 1500); };
@@ -2833,6 +2799,8 @@ function tick() {
 // ================= Avvio =================
 (async function init() {
   try { items = await DB.all(); } catch (e) { items = []; }
+  // MeMo non tiene più foto né documenti: l'archivio delle foto è già sparito aprendo il database; qui si toglie anche il riferimento dai MeMo
+  for (const it of items) if (it.photoId) { delete it.photoId; try { await DB.put(it); } catch (e) {} }
   // i "viaggi" che non sono viaggi (un giro in moto): tornano attività normali, senza l'avviso della sera prima
   for (const it of items) if (it.type === 'viaggio' && !/\b(?:vol[oi]|aere|treno|partenz|partir|parto|viaggi|vacanz|aeroporto|nave|traghett|crociera|valigi)/i.test((it.title || '') + ' ' + (it.said || ''))) { it.type = 'altro'; try { await DB.put(it); } catch (e) {} }
   await rollAll();
