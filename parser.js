@@ -72,7 +72,7 @@
       ask: 'Quando?',
       todo: "Prenota per tempo e segnati l'orario.",
       link: null,
-      kw: [[/\bmedic[oa]\b/, 4], [/dentist/, 5], [/\bvisit[ae]\b/, 4], [/vaccin/, 5], [/\besami\b/, 3], [/\banalisi\b/, 3], [/oculist/, 5], [/\bigienista\b/, 5], [/\bcontroll[oi]\s*(dal|medic)/, 3]] },
+      kw: [[/\bmedic[oa]\b/, 4], [/\bdott(?:or[ei]|oressa|\.)?\b(?!\s+[A-Z])/, 3], [/\b(?:pediatra|ginecolog|dermatolog|cardiolog|fisioterap|ortoped|osteopat)/, 5], [/dentist/, 5], [/\bvisit[ae]\b/, 4], [/vaccin/, 5], [/\besami\b/, 3], [/\banalisi\b/, 3], [/oculist/, 5], [/\bigienista\b/, 5], [/\bcontroll[oi]\s*(dal|medic)/, 3]] },
     { id: 'abbonamento', label: 'Abbonamento', emoji: '🔁', lead: 7, recur: 12, dateKind: 'expiry', done: 'reschedule',
       ask: 'Quando si rinnova?',
       todo: "Se non lo usi più, disdicilo prima del rinnovo. Se lo usi, non devi fare niente.",
@@ -683,7 +683,68 @@
   const EVENT_TYPES = ['appuntamento', 'salute', 'viaggio', 'compleanno'];
   // "…perché poi stasera vedo Mattia alle 18": la spiegazione non decide quando avvisare
   const REASON_RE = /\s*[,;.]?\s*\b(?:perche|siccome|visto\s+che|dato\s+che|tanto\s+poi|che\s+poi|cosi\s+poi)\b/;
+
+  // ---------- scritto di fretta: "dom h15 dentista", "tra 2 gg", "x domani", "03/2029" → italiano pieno, così lo capiscono motore e AI ----------
+  const WD_FULL = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+  const MONTH_FULL = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+  function typed(raw, now) {
+    let s = ' ' + String(raw || '').replace(/\s*[\r\n]+\s*/g, '. ').replace(/([.!?;])\.\s/g, '$1 ').replace(/\s+/g, ' ').trim() + ' ';
+    const nowD = now || new Date();
+    const R = (re, to) => { s = s.replace(re, to); };
+    R(/([^\s\w']|\s)x(?=\s+\S)/gi, '$1per');                                           // x = per
+    R(/\b(?:xk[eéè]|xch[eéè]|perche)\b/gi, 'perché'); R(/\bnn\b/gi, 'non'); R(/\bcn\b/gi, 'con'); R(/\bcmq\b/gi, 'comunque'); R(/\bke\b/gi, 'che'); R(/\bqnd\b/gi, 'quando');
+    R(/(^|\s)app\.?(?=\s+(?:d[ai]l?l?[aoe']?|con|dentista|medico|dottor|parrucch|banca|commercialista|notaio|avvocato|estetista)\b)/gi, '$1appuntamento');
+    R(/\b(?:dmn|doma)\b/gi, 'domani'); R(/\bdopodom\b\.?/gi, 'dopodomani'); R(/\bpom\b\.?/gi, 'pomeriggio'); R(/\bmatt\b\.?/gi, 'mattina');
+    R(/(\d)\s*(?:gg|gior)\b\.?/gi, '$1 giorni'); R(/\b(un|1)\s+gg\b/gi, '$1 giorno');
+    R(/(\d)\s*(?:sett|settim|sett\.)\b\.?/gi, (m, d) => d + (d === '1' ? ' settimana' : ' settimane'));
+    R(/(\d)\s*(?:min|mins)\b\.?/gi, '$1 minuti'); R(/\b(\d+)\s*(?:mes|mm)\b\.?/gi, '$1 mesi');
+    // giorni abbreviati, solo dove sono davvero un giorno ("lun 9", "mart ore 10", "dom alle 15"), mai un nome ("con Gio")
+    const WD_AB = [['lun', 1], ['mart', 2], ['mar', 2], ['merc', 3], ['mer', 3], ['giov', 4], ['gio', 4], ['ven', 5], ['sab', 6], ['dom', 0]];
+    for (const [ab, k] of WD_AB) {
+      const after = ab === 'mar' ? `(?=\\s*(?:ore\\b|h\\s?\\d|alle\\b|all'|mattin|pomerigg|sera\\b|prossim))` : /^(?:gio|mer)$/.test(ab) ? `(?=\\s*(?:\\d|ore\\b|h\\s?\\d|alle\\b|all'|mattin|pomerigg|sera\\b|prossim|[,.;]|\\s*$))` : `(?![\\w'])`; // "sab", "dom", "lun" sono sempre giorni; "gio" può essere un nome
+      s = s.replace(new RegExp(`(^|[\\s,;(])(?<!\\b(?:con|da|a|di|e|tra|fra)\\s)${ab}\\.?${after}`, 'gi'), (m, pre) => pre + WD_FULL[k]);
+    }
+    // "dopodomani 18 parrucchiere": dopo oggi/domani un numero da solo è l'ora
+    R(/\b(oggi|domani|dopodomani|stasera|stamattina|stamani)\s+(?:h\s?|ore\s+)?(\d{1,2})(?:[:.](\d{2}))?(?!\s*(?:[\/\-]|\.\d{1,2}\.|gg|giorn|settim|mes|ann|minut|or[ae]\b|euro|€|°|%|x\b|volte|persone))\b/gi,
+      (m, d, h, mi) => +h <= 23 && (!mi || +mi <= 59) ? `${d} alle ${h}${mi ? ':' + mi : ''}` : m);
+    // "giovedì 17": se nelle prossime settimane non c'è un giovedì 17, è l'ora (le 17 di giovedì)
+    s = s.replace(/\b(luned[iìí]|marted[iìí]|mercoled[iìí]|gioved[iìí]|venerd[iìí]|sabato|domenica)\s+(\d{1,2})(?![\d\/\-:.]|\s*(?:di\s+)?(?:gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic))\b/gi, (m, w, n) => {
+      const wd = WD_FULL.findIndex(x => stripAccents(x) === stripAccents(w.toLowerCase())); n = +n;
+      for (let i = 0; i <= 35; i++) { const d = new Date(nowD); d.setDate(d.getDate() + i); if (d.getDate() === n && d.getDay() === wd) return m; }
+      return n >= 7 && n <= 23 ? `${w} alle ${n}` : m;
+    });
+    // un orario scritto da solo, "15:30" o "h15": l'orario c'è anche senza "alle"
+    R(/(^|[\s,;(])(?<!alle\s|ore\s|le\s)([01]?\d|2[0-3]):([0-5]\d)(?![\d\/])/g, '$1alle $2:$3');
+    R(/(^|[\s,;(])h\.?\s?([01]?\d|2[0-3])(?:[:.]([0-5]\d))?\b/gi, (m, pre, h, mi) => `${pre}alle ${h}${mi ? ':' + mi : ''}`);
+    // "ven cena 20.30": con il punto è un orario se i minuti sono "da orologio" (00, 15, 30, 45), mai "il 12.11"
+    R(/(^|[\s,;(])(?<!alle\s|ore\s|le\s|il\s|al\s|del\s)([01]?\d|2[0-3])\.(00|15|30|45)(?![\d.\/]|\s*(?:€|euro|eur\b|%|kg|km|g\b|l\b))/gi, '$1alle $2:$3');
+    // "il 12.11": giorno e mese con il punto
+    R(/(^|[\s,;(])((?:il|al|del|dal|entro(?:\s+il)?|per\s+il)\s+)?(\d{1,2})\.(\d{1,2})(?![\d.\/]|\s*(?:€|euro|eur\b|%|kg|km|g\b|l\b))/gi, (m, pre, prep, d, mo) => +d >= 1 && +d <= 31 && +mo >= 1 && +mo <= 12 ? `${pre}${prep || ''}${d}/${mo}` : m);
+    // "scade 03/2029": il mese di scadenza dei documenti
+    R(/(^|[\s,;(])(?:il\s+|al\s+|entro\s+(?:il\s+)?)?(0?[1-9]|1[0-2])\s?[\/\-]\s?(20\d{2})(?![\d\/])/g, (m, pre, mo, y) => `${pre}a ${MONTH_FULL[+mo - 1]} ${y}`);
+    return s.replace(/\s+/g, ' ').trim();
+  }
+
+  // ---------- più cose in una frase: "vino per Mattia domani alle 18. E domattina il pane!" → due MeMo ----------
+  // si divide solo dove è chiaro (punto, "e poi", "e domani"...) e solo se ogni pezzo sta in piedi da solo (cosa + quando)
+  const MANY_NEXT = "(?:oggi|domani|dopodomani|stasera|stamattina|stamani|domattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|il\\s+\\d|l'\\d|entro\\b|tra\\s|fra\\s|ogni\\b|ricordami\\b|ricordati\\b|devo\\b|mi\\s+scade|scade\\b|ho\\s)";
+  function splitMany(raw, now) {
+    const s = typed(raw, now);
+    const cut = new RegExp(`(?<=[.!?;])\\s+|,?\\s+(?:e\\s+poi|e\\s+anche|poi|inoltre|ed?|anche)\\s+(?=${MANY_NEXT})|,\\s+(?:e\\s+)?poi\\s+`, 'gi');
+    const parts = s.split(cut).map(x => String(x || '').replace(/^(?:e|ed|poi|e\s+poi|anche|inoltre)\s+/i, '').replace(/[\s.!?;,]+$/, '').trim()).filter(x => x.length > 2);
+    if (parts.length < 2) return null;
+    const ok = x => { try { const r = parseSpeech(x, now); return !!(r.date && !r.needTitle && r.title && r.title !== 'MeMo'); } catch (e) { return false; } };
+    // un pezzo che da solo non sta in piedi ("Ricordami di portare le lastre") è il seguito di quello prima
+    const chunks = [];
+    for (const x of parts) { if (chunks.length && !ok(x)) chunks[chunks.length - 1] += '. ' + x; else chunks.push(x); }
+    if (chunks.length > 1 && !ok(chunks[0])) { chunks[1] = chunks[0] + '. ' + chunks[1]; chunks.shift(); }
+    if (chunks.length < 2 || !chunks.every(ok)) return null;
+    const titles = chunks.map(x => norm(parseSpeech(x, now).title));
+    if (new Set(titles).size < titles.length) return null;
+    return chunks.slice(0, 6);
+  }
   function parseSpeech(raw, now) {
+    raw = typed(raw, now);
     const A = anchorOf(raw, now);
     if (A) {
       const out = parseSpeechOnce(A.content, now); out.type = out.typeScore >= 2 ? out.type : detectType(raw).score >= 2 ? detectType(raw).type : out.type;
@@ -1071,7 +1132,7 @@
     return { key: 'calm', ...base };
   }
 
-  const API = { TYPES, TYPE_BY_ID, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
+  const API = { TYPES, TYPE_BY_ID, typed, splitMany, detectType, findDates, findMrzExpiry, parseOcr, parseSpeech,
     phraseOf, fromAI, leadFrom, docTitle, extractRep, nextRep, firstRep, occurrences, rollRep, repText, anchorOf, plausible, MAX_YEARS, todayISO, addDays, addMonths, diffDays, parseISO, toISO, remindDate, remindAt, remindersOf, dueAt, defaultLeadMin, statusOf, lastDay };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MeMoParser = API;
 })(typeof window !== 'undefined' ? window : globalThis);

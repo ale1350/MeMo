@@ -133,46 +133,12 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .install p{margin:0;flex:1}
 .install-go{display:block;margin-top:10px;padding:9px 16px;border-radius:12px;background:var(--brand-grad);color:#fff;font-weight:750;font-size:15px}.install b{color:var(--ink);font-weight:700}
 
-/* ---------- intestazione lista e calendario ---------- */
+/* ---------- intestazione lista ---------- */
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 4px 18px}
 .list-head .list-title{margin:0}
-.cal{background:var(--card);border-radius:24px;box-shadow:var(--card-shadow);padding:14px 10px 10px;border:1px solid var(--stroke);touch-action:pan-y}
-.cal-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px 8px}
-.cal-head h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.015em}
-.cal-nav{display:flex;align-items:center;gap:2px}
-.cal-nav button{min-width:38px;height:38px;border-radius:19px;display:grid;place-items:center;color:var(--ink-2)}
-.cal-nav button:active{background:var(--field)}
-.cal-nav .cal-today{font-size:14px;font-weight:750;color:var(--brand-ink);padding:0 10px}
-.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.dow span{text-align:center;font-size:12px;font-weight:750;color:var(--ink-3);padding:2px 0 6px}
-.day{position:relative;height:50px;display:flex;flex-direction:column;align-items:center;padding-top:4px;border-radius:14px;font-size:16px;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink)}
-.day:active{background:var(--field)}
-.day.out{visibility:hidden}
-.day.past{color:var(--ink-3)}
-.day .n{width:32px;height:32px;display:grid;place-items:center;border-radius:16px}
-.day.today .n{color:var(--brand-ink);font-weight:850;box-shadow:inset 0 0 0 2px rgba(76,141,246,.35)}
-.day.sel .n{background:var(--brand-grad);color:#fff;box-shadow:0 4px 12px rgba(76,141,246,.35)}
-.marks{display:flex;gap:3px;margin-top:3px;height:6px}
-.marks i{width:6px;height:6px;border-radius:3px;background:#B9C6DC}
-.marks i.now{background:var(--now)}
-.marks i.soon{background:var(--azure)}
-.marks i.rep{background:transparent;box-shadow:inset 0 0 0 1.5px var(--azure)}
-.grid.slide-l{animation:slideL .3s cubic-bezier(.2,.8,.2,1)}
-.grid.slide-r{animation:slideR .3s cubic-bezier(.2,.8,.2,1)}
-@keyframes slideL{from{transform:translateX(36px);opacity:0}}
-@keyframes slideR{from{transform:translateX(-36px);opacity:0}}
-.cal-jump{margin:26px 0 4px}
-.cal-jump .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;font-size:12px;font-weight:800;background:rgba(76,141,246,.14);color:var(--brand-ink)}
-.chip[aria-pressed="true"] .cnt{background:rgba(255,255,255,.25);color:#fff}
-.cal-day h4{font-size:17px;font-weight:800;margin:20px 4px 10px}
-.cal-day .rows{gap:8px}
-.cal-empty{color:var(--ink-2);font-size:15px;margin:6px 4px 4px}
-.add-day{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:18px;border:1.5px dashed rgba(76,141,246,.45);color:var(--brand-ink);font-weight:750;font-size:15.5px;margin-top:12px}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-3);margin:10px 8px 2px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
 .top-actions{display:flex;align-items:center}
 
-/* ---------- calendario: pagina affiancata a sinistra, stesso sfondo ---------- */
+/* ---------- impostazioni: pagina affiancata a destra, stesso sfondo ---------- */
 :root{--hx:0px}
 .hero,.list-sec,.peek,.bar{translate:var(--hx) 0}
 .calp{position:fixed;inset:0;z-index:11;background:transparent;overflow-y:auto;overscroll-behavior:contain;translate:calc(var(--hx) - 100vw) 0;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(170px + env(safe-area-inset-bottom));pointer-events:none}
@@ -198,21 +164,11 @@ html{overflow-x:hidden}
 .sw:checked::after{transform:translateX(20px)}
 .sw:focus-visible{outline:3px solid var(--azure);outline-offset:2px}
 .ok-pill{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;background:rgba(47,205,190,.18);color:#118C80;font-size:12.5px;font-weight:800;vertical-align:2px}
-/* calendario leggero: vetro trasparente al posto del bianco pieno */
-.calp .cal{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 30px rgba(43,72,140,.07)}
 .calp .row,.calp .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.65);box-shadow:none}
 .calp .chip{box-shadow:none}
 /* il pannello scorre solo su e giù: niente trascinamenti di lato o in diagonale */
 .calp{overflow-x:hidden;touch-action:pan-y}
 .calp .chips.scroll{margin:0 -16px;padding:2px 16px 10px;touch-action:pan-x pan-y}
-.calp .cal-jump .chip:not([aria-pressed="true"]){background:rgba(255,255,255,.78);border-color:rgba(255,255,255,.95);color:var(--ink)}
-.calp .cal-jump .chip{font-size:15.5px;font-weight:700;padding:11px 15px 11px 14px}
-.calp .cal-jump .cnt{background:rgba(47,107,242,.16);color:var(--brand-ink)}
-.calp .cal-jump .chip[aria-pressed="true"] .cnt{background:rgba(255,255,255,.28);color:#fff}
-.cal-jump-h{font-size:15px;font-weight:750;color:var(--ink-2);margin:28px 4px 10px}
-.cal-jump-h + .cal-jump{margin-top:0}
-.calp .day:active{background:rgba(255,255,255,.5)}
-.calp .add-day{border-color:rgba(76,141,246,.35);background:rgba(255,255,255,.18)}
 .dock{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom) - var(--kbfix, 0px));z-index:12;display:flex;align-items:flex-end;justify-content:center;gap:34px;pointer-events:none}
 .dock .rb{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:750;color:var(--ink-2)}
 .dock .c{display:grid;place-items:center;border-radius:50%;transition:transform .15s}
@@ -287,6 +243,93 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .ptt.cancel .ptt-card{background:rgba(255,236,228,.96)}
 @keyframes pttWave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 .ptt-hint{margin:0;font-weight:750;font-size:14.5px;color:var(--ink);white-space:nowrap}
+
+/* ---------- il pesciolino che arriva dal profondo e ti ascolta ---------- */
+.deep{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;transition:opacity .6s ease;overflow:hidden;
+  background:radial-gradient(120% 75% at 50% 64%, rgba(255,255,255,0) 0%, rgba(44,86,170,.18) 50%, rgba(20,46,110,.38) 100%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.deep.on{opacity:1}
+.deep i{position:absolute;bottom:-14px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 8px rgba(255,255,255,.55);opacity:0}
+.deep.on i{animation:dpMote linear infinite}
+@keyframes dpMote{0%{transform:translateY(0);opacity:0}15%{opacity:.75}100%{transform:translateY(-72vh);opacity:0}}
+.diver{position:fixed;left:0;top:0;z-index:41;pointer-events:none;width:190px;height:134px;opacity:0;will-change:transform,opacity,filter}
+.dv-bob,.dv-head{width:100%;height:100%}
+.diver.idle .dv-bob{animation:dvBob 2.7s ease-in-out infinite}
+.dv-head{transition:transform .4s cubic-bezier(.3,.8,.3,1.25)}
+.dv-head svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 14px 18px rgba(255,110,60,.28))}
+.dv-tail{transform-box:view-box;transform-origin:30px 58px;animation:swTail .2s ease-in-out infinite alternate}
+.diver.idle .dv-tail{animation-duration:.75s}
+.dv-fin{transform-box:fill-box;transform-origin:85% 10%;animation:dvFin .8s ease-in-out infinite alternate}
+.dv-eye{transform-box:fill-box;transform-origin:center;transition:transform .14s ease,opacity .12s}
+.diver.blink .dv-eye{transform:scaleY(.08)!important}
+.dv-pupil{transform:translate(var(--lx,0px),var(--ly,0px));transition:transform .3s ease}
+.dv-brow{transform-box:fill-box;transform-origin:center;transition:transform .3s cubic-bezier(.3,.8,.3,1.3)}
+.dv-blush{opacity:0;transition:opacity .3s}
+.dv-happy{opacity:0;transition:opacity .14s}
+.dv-mouth>*{opacity:0;transition:opacity .12s}
+.diver[data-m="smile"] .m-smile,.diver[data-m="big"] .m-big,.diver[data-m="o"] .m-o,.diver[data-m="flat"] .m-flat,.diver[data-m="side"] .m-side,.diver[data-m="wavy"] .m-wavy{opacity:1}
+.diver[data-f="curious"] .dv-brow{transform:translateY(-2.6px)}
+.diver[data-f="curious"] .dv-eye{transform:scale(1.1)}
+.diver[data-f="mm"] .dv-brow{transform:translateY(-1.8px)}
+.diver[data-f="o"] .dv-brow{transform:translateY(-2.8px)}
+.diver[data-f="o"] .dv-eye{transform:scale(1.08)}
+.diver[data-f="got"] .dv-eye{transform:scaleY(.55)}
+.diver[data-f="got"] .dv-blush,.diver[data-f="happy"] .dv-blush{opacity:.45}
+.diver[data-f="wait"] .dv-brow{transform:translateY(-3px) rotate(9deg)}
+.diver[data-f="wait"] .dv-head{transform:rotate(-7deg)}
+.diver[data-f="think"] .dv-brow{transform:translateY(-2px) rotate(-10deg)}
+.diver[data-f="think"] .dv-head{transform:rotate(6deg)}
+.diver[data-f="happy"] .dv-eye{opacity:0}
+.diver[data-f="happy"] .dv-happy{opacity:1}
+.diver[data-f="happy"] .dv-brow{transform:translateY(-2.6px)}
+.diver[data-f="worry"] .dv-brow{transform:translateY(-1px) rotate(-15deg)}
+.diver[data-f="worry"] .dv-eye{transform:scale(1.1)}
+.diver[data-f="puzzled"] .dv-brow{transform:translateY(-3.4px) rotate(10deg)}
+.diver[data-f="puzzled"] .dv-head{transform:rotate(-9deg)}
+.dv-head.g-nod{animation:dvNod .75s ease-in-out}
+.dv-head.g-hop{animation:dvHop .5s cubic-bezier(.3,.7,.3,1.3)}
+.dv-head.g-shake{animation:dvShake .42s ease-in-out}
+@keyframes dvBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(-2deg)}}
+@keyframes dvFin{from{transform:rotate(-12deg)}to{transform:rotate(16deg)}}
+@keyframes dvNod{0%,100%{transform:rotate(0)}25%{transform:rotate(8deg)}50%{transform:rotate(-1deg)}75%{transform:rotate(6deg)}}
+@keyframes dvHop{0%,100%{transform:none}45%{transform:translateY(-14px) scale(1.06) rotate(-6deg)}}
+@keyframes dvShake{0%,100%{transform:none}20%{transform:translateX(-5px) rotate(-4deg)}50%{transform:translateX(5px) rotate(3deg)}80%{transform:translateX(-3px)}}
+.lbub{position:fixed;left:0;top:0;z-index:41;width:8px;height:8px;margin:-4px;border-radius:50%;border:1.6px solid rgba(255,255,255,.85);background:rgba(255,255,255,.35);box-shadow:0 0 6px rgba(76,141,246,.35);pointer-events:none;opacity:0;animation:lBub 1.4s ease-out forwards}
+@keyframes lBub{0%{opacity:0;transform:translate(var(--bx),var(--by)) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translate(calc(var(--bx) + var(--dx)),calc(var(--by) - 60px)) scale(1.25)}}
+@media (prefers-reduced-motion: reduce){.deep.on i,.diver.idle .dv-bob{animation:none}}
+/* ---------- scrivi a MeMo ---------- */
+.w-ta{resize:none;min-height:100px;font-size:18px;line-height:1.42;transition:opacity .2s}
+.w-ta[readonly]{opacity:.55}
+.btn .dots{display:inline-flex;gap:4px;margin-left:2px}
+.btn .dots i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:wDot 1s ease-in-out infinite;opacity:.35}
+.btn .dots i:nth-child(2){animation-delay:.15s}.btn .dots i:nth-child(3){animation-delay:.3s}
+@keyframes wDot{0%,100%{opacity:.3;transform:none}50%{opacity:1;transform:translateY(-3px)}}
+.w-said{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:0 0 14px;padding:11px 14px;border-radius:16px;background:var(--field,#EEF2F8);color:var(--ink-2);font-size:15px;line-height:1.35}
+.w-said span{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.w-said b{color:var(--brand-ink);font-size:14px;font-weight:750;white-space:nowrap}
+.r-cards{display:flex;flex-direction:column;gap:10px;margin:0 0 18px}
+.r-card{border-radius:22px;background:var(--card);border:1px solid var(--stroke);box-shadow:var(--card-shadow);overflow:hidden;animation:rIn .45s cubic-bezier(.2,.8,.2,1) both}
+.r-card:nth-child(2){animation-delay:.07s}.r-card:nth-child(3){animation-delay:.14s}.r-card:nth-child(4){animation-delay:.21s}
+@keyframes rIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.r-main{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 14px}
+.r-main:active{background:var(--card-press)}
+.r-main .txt{flex:1;min-width:0}
+.r-main .txt b{display:block;font-size:17px;font-weight:750;line-height:1.25}
+.r-main .txt span{display:block;font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.35}
+.r-x,.r-pen{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:var(--ink-3);font-size:21px;margin-right:-4px}
+.r-pen{font-size:16px}
+.r-ask{padding:0 14px 14px}
+.r-ask>span{display:block;font-size:13.5px;font-weight:700;color:var(--ink-2);margin:0 0 8px 2px}
+.r-picks{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:0 14px 2px;scrollbar-width:none;touch-action:pan-x pan-y}
+.r-picks::-webkit-scrollbar{display:none}
+.r-pick{flex:none;display:flex;flex-direction:column;align-items:center;min-width:66px;padding:9px 12px;border-radius:15px;background:var(--field,#EEF2F8);font-size:16.5px;font-weight:800;color:var(--ink);transition:background .15s,color .15s}
+.r-pick small{font-size:11.5px;font-weight:650;color:var(--ink-2)}
+.r-pick[aria-pressed="true"]{background:var(--brand-grad);color:#fff}
+.r-pick[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.sheet-wrap.kb{bottom:auto}
+.sheet-wrap.kb .sheet{max-height:calc(100% - 10px)}
+.sheet-in{animation:shIn .3s ease both}
+@keyframes shIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.r-card,.sheet-in{animation:none}}
 /* ---------- fotocamera di MeMo: legge mentre inquadri ---------- */
 .scanner{position:fixed;inset:0;z-index:60;background:#05070d;color:#fff;overflow:hidden;touch-action:none}
 .scanner[hidden]{display:none}
@@ -493,6 +536,26 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
 <g clip-path="url(#swb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
 <circle cx="67.5" cy="48.5" r="7" fill="#fff"/><circle cx="69.2" cy="47" r="3.7" fill="#1F2552"/></svg></div></div>
+<div class="deep" id="deep" aria-hidden="true"><i style="left:11%;width:5px;height:5px;animation-duration:9.6s;animation-delay:-1.7s"></i><i style="left:15%;width:4px;height:4px;animation-duration:7.7s;animation-delay:-0.6s"></i><i style="left:15%;width:6px;height:6px;animation-duration:8.2s;animation-delay:-0.5s"></i><i style="left:76%;width:3px;height:3px;animation-duration:6.5s;animation-delay:-1.8s"></i><i style="left:84%;width:3px;height:3px;animation-duration:8.3s;animation-delay:-0.5s"></i><i style="left:78%;width:7px;height:7px;animation-duration:7.6s;animation-delay:-7.8s"></i><i style="left:9%;width:3px;height:3px;animation-duration:8.2s;animation-delay:-1.1s"></i><i style="left:57%;width:5px;height:5px;animation-duration:6.6s;animation-delay:-0.9s"></i><i style="left:43%;width:7px;height:7px;animation-duration:8.2s;animation-delay:-5.5s"></i></div>
+<div class="diver" id="diver" aria-hidden="true" data-f="listen" data-m="smile"><div class="dv-bob"><div class="dv-head"><svg viewBox="4 20 88 62">
+<defs><clipPath id="dvb"><path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z"/></clipPath></defs>
+<path class="dv-tail" d="M30 58 L13 44 C11 52 11 60 13 72 Z" fill="#FF9466" stroke="#FF9466" stroke-width="5" stroke-linejoin="round"/>
+<path d="M46 37 C50 26 60 25 64 35 Z" fill="#FF9466" stroke="#FF9466" stroke-width="3" stroke-linejoin="round"/>
+<path d="M28 58 C30 42 46 32 62 34 C76 36 84 46 82 56 C80 66 68 74 52 73 C38 72 27 68 28 58 Z" fill="#FF7A4D"/>
+<g clip-path="url(#dvb)"><ellipse cx="55" cy="72" rx="34" ry="12" fill="#FFA678"/></g>
+<path class="dv-fin" d="M49 59 C43 60 40 66 43.5 69 C47 67.5 50 63.5 49 59 Z" fill="#FF9466"/>
+<ellipse class="dv-blush" cx="66.5" cy="59.5" rx="4.3" ry="2.3" fill="#FF4F6E"/>
+<g transform="translate(67.5 48.5) scale(1.14) translate(-67.5 -48.5)"><g class="dv-eye"><circle cx="67.5" cy="48.5" r="8.4" fill="#fff"/><g class="dv-pupil"><circle cx="68.6" cy="48.4" r="4.6" fill="#1F2552"/><circle cx="70.3" cy="46.5" r="1.5" fill="#fff"/></g></g>
+<path class="dv-happy" d="M60.5 50.5 Q67.5 42.5 74.5 50.5" fill="none" stroke="#1F2552" stroke-width="2.6" stroke-linecap="round"/></g>
+<path class="dv-brow" d="M60.4 37.4 Q67.5 33.9 74.6 37" fill="none" stroke="#C9512C" stroke-width="2.3" stroke-linecap="round"/>
+<g transform="translate(79 59.8) scale(1.5) translate(-79 -59.8)"><g class="dv-mouth" fill="none" stroke="#1F2552" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+<path class="m-smile" d="M76.6 59.2 Q78.9 61.5 81.2 59"/>
+<path class="m-big" d="M76 58.6 Q78.9 64 81.6 58.4 Z" fill="#8E2A3A"/>
+<ellipse class="m-o" cx="79.2" cy="60" rx="1.7" ry="2.2" fill="#1F2552" stroke="none"/>
+<path class="m-flat" d="M76.7 60.3 L81.2 59.7"/>
+<path class="m-side" d="M76.8 60.8 Q79 60.3 81.3 58.7"/>
+<path class="m-wavy" d="M76.2 60.6 q1.2 -1.4 2.4 0 t2.4 0"/>
+</g></g></svg></div></div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs><path id="knotPath" d="M2 28 C14 28 22 28 28 21 C34 13 44 9 46 17 C48 26 36 30 32 23 C28 16 38 10 46 20 C52 27 58 28 66 28"/></defs>
@@ -557,10 +620,6 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
   </div>
 </section>
 
-<section class="calp" id="calPanel" aria-hidden="true" aria-label="Calendario">
-  <div class="calp-head"><h2>Calendario</h2><button class="icon-btn" id="calBack" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="wrap" id="viewCal"></div>
-</section>
 <section class="calp setp" id="setPanel" aria-hidden="true" aria-label="Impostazioni">
   <div class="calp-head"><button class="icon-btn back" id="setBack" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Impostazioni</h2><span style="width:34px"></span></div>
   <div class="wrap" id="setBody"></div>
@@ -568,7 +627,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 <nav class="dock" aria-label="Aggiungi un MeMo">
   <button class="rb photo" id="btnPhoto"><span class="c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg></span>Foto</button>
   <button class="rb voice" id="btnVoice"><span class="c"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></span><span class="rb-l">Tieni premuto</span></button>
-  <button class="rb add" id="btnAdd"><span class="c"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Scrivi</button>
+  <button class="rb add" id="btnAdd" aria-label="Scrivi a MeMo"><span class="c"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18.5c-1.2-1.4-2-3.2-2-5.1C3 8.8 7 5 12 5s9 3.8 9 8.4-4 8.4-9 8.4c-1.4 0-2.7-.3-3.9-.8L4 22l1-3.5z"/><path d="M8.5 12h7M8.5 15.2h4.5"/></svg></span>Scrivi</button>
 </nav>
 
 <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
@@ -616,7 +675,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.42-ter';
+const VERSION = '2.0';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -845,7 +904,6 @@ function render() {
   } else list.querySelectorAll('.row-wrap').forEach(el => el.classList.add('in'));
   $('#swipeTip').hidden = !active.length || store.get('swiped') === '1';
   clearBadge(); // il pallino rosso sull'icona c'è solo per un avviso arrivato e non ancora visto: aprendo MeMo l'hai visto
-  if (calOpen) renderCal();
   onScroll();
   Push.later();
 }
@@ -891,16 +949,7 @@ window.addEventListener('resize', () => render());
 $('#peek').addEventListener('click', () => window.memoGlideToList());
 
 
-// ================= Calendario =================
-let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
-let calSel = P.todayISO();
-const monthKey = (y, m) => `${y}-${pad(m + 1)}`;
-let calOpen = false;
-function openCalendar() {
-  const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO();
-  renderCal(); setCal(true);
-}
-// tre pagine affiancate: calendario | home | impostazioni. --hx sposta tutto insieme
+// due pagine affiancate: home | impostazioni. --hx sposta tutto insieme
 let hx = 0, hxAnim = 0;
 const setHX = px => { hx = px; document.documentElement.style.setProperty('--hx', px.toFixed(2) + 'px'); };
 // il movimento parte alla stessa velocità del dito e rallenta dolcemente fino a fermarsi: nessuno scatto quando lo lasci
@@ -920,27 +969,25 @@ function glideHX(target, v0) {
 }
 let page = 'home', setOpen = false;
 function goPage(to, v0, instant) {
-  page = to; calOpen = to === 'cal'; setOpen = to === 'set';
-  const target = to === 'cal' ? window.innerWidth : to === 'set' ? -window.innerWidth : 0;
+  if (to === 'cal') to = 'home';
+  page = to; setOpen = to === 'set';
+  const target = to === 'set' ? -window.innerWidth : 0;
   if (instant) { cancelAnimationFrame(hxAnim); setHX(target); } else glideHX(target, v0);
-  for (const [id, on] of [['#calPanel', calOpen], ['#setPanel', setOpen]]) { const el = $(id); el.classList.toggle('open', on); el.setAttribute('aria-hidden', String(!on)); if (on) el.scrollTop = 0; }
-  document.body.classList.toggle('cal-on', to !== 'home');
+  for (const [id, on] of [['#setPanel', setOpen]]) { const el = $(id); el.classList.toggle('open', on); el.setAttribute('aria-hidden', String(!on)); if (on) el.scrollTop = 0; }
   if (to !== 'home') haptic();
 }
-const setCal = open => goPage(open ? 'cal' : 'home');
 window.addEventListener('resize', () => goPage(page, 0, true));
-// swipe: verso destra si apre il calendario, verso sinistra le impostazioni; il gesto opposto riporta alla home
+// swipe: verso sinistra le impostazioni; il gesto opposto riporta alla home
 (() => {
   let x0 = null, y0 = 0, mode = null, dx = 0, from = null, onRow = false, lastX = 0, lastT = 0, vx = 0;
   const W = () => window.innerWidth;
   let baseX = 0;
   const start = (e, origin) => { const t = e.touches[0]; x0 = lastX = t.clientX; y0 = t.clientY; lastT = performance.now(); mode = null; dx = 0; vx = 0; from = origin; onRow = !!e.target.closest('#list .row'); baseX = hx; };
-  const allowed = mx => from === 'home' ? (mx > 0 || !onRow) : from === 'cal' ? mx < 0 : mx > 0;
+  const allowed = mx => from === 'home' ? (mx < 0 && !onRow) : mx > 0;
   const move = e => {
     if (x0 == null) return; const t = e.touches[0]; const mx = t.clientX - x0, my = t.clientY - y0;
     if (!mode && (Math.abs(mx) > 8 || Math.abs(my) > 8)) {
       mode = Math.abs(mx) > Math.abs(my) * 1.2 && allowed(mx) ? 'x' : 'y';
-      if (mode === 'x' && from === 'home' && mx > 0) { const n = new Date(); calMonth = new Date(n.getFullYear(), n.getMonth(), 1); calSel = P.todayISO(); renderCal(); $('#calPanel').scrollTop = 0; }
       if (mode === 'x' && from === 'home' && mx < 0) { renderSettings(); $('#setPanel').scrollTop = 0; }
     }
     if (mode !== 'x') return;
@@ -949,14 +996,14 @@ window.addEventListener('resize', () => goPage(page, 0, true));
     vx = vx * 0.35 + v * 0.65; lastX = t.clientX; lastT = now;
     if (dx === 0) cancelAnimationFrame(hxAnim);
     dx = mx;
-    setHX(Math.max(-W(), Math.min(W(), baseX + dx)));
+    setHX(Math.max(-W(), Math.min(0, baseX + dx)));
   };
   const end = () => {
     if (x0 == null) return; x0 = null;
     if (mode !== 'x') return;
     if (performance.now() - lastT > 90) vx = 0; // se ti eri fermato prima di lasciare, nessuna spinta
     const far = Math.abs(dx) > W() * 0.3 || (Math.abs(vx) > 0.35 && Math.sign(vx) === Math.sign(dx));
-    if (from === 'home') goPage(far ? (dx > 0 ? 'cal' : 'set') : 'home', vx);
+    if (from === 'home') goPage(far && dx < 0 ? 'set' : 'home', vx);
     else goPage(far ? 'home' : from, vx);
   };
   document.addEventListener('touchstart', e => {
@@ -964,91 +1011,12 @@ window.addEventListener('resize', () => goPage(page, 0, true));
     if (e.target.closest('.dock, .chips.scroll, .nb, .calp')) return;
     start(e, 'home');
   }, { passive: true });
-  $('#calPanel').addEventListener('touchstart', e => { if (page !== 'cal' || e.target.closest('#cBox, .chips.scroll')) return; start(e, 'cal'); }, { passive: true });
   $('#setPanel').addEventListener('touchstart', e => { if (page !== 'set' || e.target.closest('.chips.scroll, input')) return; start(e, 'set'); }, { passive: true });
   document.addEventListener('touchmove', move, { passive: false });
   document.addEventListener('touchend', end, { passive: true });
   document.addEventListener('touchcancel', end, { passive: true });
-  $('#calBack').addEventListener('click', () => goPage('home'));
   $('#setBack').addEventListener('click', () => goPage('home'));
 })();
-// le scadenze che si ripetono (bollo, compleanno...) compaiono in tutti gli anni
-function occurrencesIn(it, y, m) {
-  if (it.rep) { const start = `${monthKey(y, m)}-01`, end = `${monthKey(y, m)}-${pad(P.lastDay(y, m + 1))}`;
-    return P.occurrences(it, end, 1200).map((d, k) => ({ date: d, rep: k > 0 })).filter(o => o.date >= start); }
-  const rec = T(it.type).recur, start = `${monthKey(y, m)}-01`, end = `${monthKey(y, m)}-${pad(P.lastDay(y, m + 1))}`, out = [];
-  let d = it.due, k = 0;
-  while (d <= end && k < 300) { if (d >= start) out.push({ date: d, rep: k > 0 }); if (!rec) break; k++; d = P.addMonths(it.due, rec * k); }
-  return out;
-}
-function firstDayWithItems(y, m) {
-  const days = items.flatMap(it => occurrencesIn(it, y, m).map(o => o.date)).sort();
-  return days[0] || null;
-}
-function goMonth(delta, anim, target) {
-  calMonth = target || new Date(calMonth.getFullYear(), calMonth.getMonth() + delta, 1);
-  const y = calMonth.getFullYear(), m = calMonth.getMonth(), today = P.todayISO();
-  calSel = today.slice(0, 7) === monthKey(y, m) ? today : firstDayWithItems(y, m);
-  renderCal(anim);
-}
-function calRow(it, st, rep) {
-  const sub = rep ? `Si ripete${it.rep ? ' ' + P.repText(it.rep) : T(it.type).recur === 12 ? ' ogni anno' : ''}` : it.time ? `Alle ${timeLbl(it.time)}. ${rowSub(it, st)}` : rowSub(it, st);
-  return `<div class="row-wrap in"><button class="row" data-s="${rep ? 'calm' : st.key}" data-id="${it.id}">
-    <span class="orb" aria-hidden="true">${emojiOf(it)}</span>
-    <span class="txt"><span class="t">${esc(it.title)}</span><span class="s">${esc(sub)}</span></span></button></div>`;
-}
-function renderCal(anim) {
-  const box = $('#viewCal'); if (!box) return;
-  const y = calMonth.getFullYear(), m = calMonth.getMonth(), nowD = new Date(), today = P.todayISO(), mk = monthKey(y, m);
-  const byDay = {};
-  items.forEach(it => { const st = P.statusOf(it, nowD); occurrencesIn(it, y, m).forEach(o => (byDay[o.date] = byDay[o.date] || []).push({ it, st, rep: o.rep })); });
-  const startDow = (new Date(y, m, 1).getDay() + 6) % 7, nd = P.lastDay(y, m + 1);
-  let cells = '';
-  for (let i = 0; i < startDow; i++) cells += '<span class="day out"></span>';
-  for (let d = 1; d <= nd; d++) {
-    const iso = `${mk}-${pad(d)}`, list = byDay[iso] || [];
-    const marks = list.slice(0, 3).map(x => `<i class="${x.rep ? 'rep' : x.st.key}"></i>`).join('');
-    const lbl = `${fmtDay(iso)}${list.length ? ', ' + list.length + (list.length === 1 ? ' scadenza' : ' scadenze') : ''}`;
-    cells += `<button class="day${iso === today ? ' today' : ''}${iso === calSel ? ' sel' : ''}${iso < today ? ' past' : ''}" data-d="${iso}" aria-label="${esc(lbl)}"><span class="n">${d}</span><span class="marks">${marks}</span></button>`;
-  }
-  const months = {};
-  items.forEach(it => { const k = it.due.slice(0, 7); months[k] = (months[k] || 0) + 1; });
-  const keys = Object.keys(months).filter(k => k >= today.slice(0, 7)).sort();
-  const isNowMonth = mk === today.slice(0, 7);
-  const label = cap(calMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }));
-  const selList = calSel && calSel.slice(0, 7) === mk ? (byDay[calSel] || []) : null;
-  const selLabel = calSel ? P.parseISO(calSel).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
-  const chev = d => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-  box.innerHTML = `
-    <div class="cal" id="cBox"><div class="cal-head"><h3>${label}</h3><div class="cal-nav">
-      ${isNowMonth ? '' : '<button class="cal-today" id="cToday">Oggi</button>'}
-      <button id="cPrev" aria-label="Mese precedente">${chev('M15 5l-7 7 7 7')}</button><button id="cNext" aria-label="Mese successivo">${chev('M9 5l7 7-7 7')}</button></div></div>
-      <div class="dow">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map(x => `<span>${x}</span>`).join('')}</div>
-      <div class="grid ${anim || ''}" id="cGrid">${cells}</div>
-      <div class="legend"><span><i class="marks"><i class="now"></i></i>adesso</span><span><i class="marks"><i class="soon"></i></i>prossimamente</span><span><i class="marks"><i></i></i>più avanti</span><span><i class="marks"><i class="rep"></i></i>si ripete</span></div></div>
-    ${keys.length ? `<div class="cal-jump-h">Mesi con un MeMo</div><div class="chips scroll cal-jump" id="cJump">${keys.map(k => `<button class="chip" data-m="${k}" aria-pressed="${k === mk}">${cap(P.parseISO(k + '-01').toLocaleDateString('it-IT', { month: 'short', year: 'numeric' }))} <span class="cnt">${months[k]}</span></button>`).join('')}</div>` : ''}
-    <div class="cal-day">${selList ? `<h4>${esc(cap(selLabel))}</h4>
-      ${selList.length ? `<div class="rows">${selList.map(x => calRow(x.it, x.st, x.rep)).join('')}</div>` : '<p class="cal-empty">Niente in questo giorno.</p>'}
-      <button class="add-day" id="cAdd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Aggiungi qualcosa per questo giorno</button>`
-      : '<p class="cal-empty">Tocca un giorno per vedere cosa c\'è.</p>'}</div>`;
-  box.querySelector('#cPrev').onclick = () => goMonth(-1, 'slide-r');
-  box.querySelector('#cNext').onclick = () => goMonth(1, 'slide-l');
-  const td = box.querySelector('#cToday'); if (td) td.onclick = () => { const n = new Date(); const back = monthKey(n.getFullYear(), n.getMonth()) < mk; goMonth(0, back ? 'slide-r' : 'slide-l', new Date(n.getFullYear(), n.getMonth(), 1)); };
-  box.querySelector('#cGrid').addEventListener('click', e => { const b = e.target.closest('.day[data-d]'); if (!b) return; calSel = b.dataset.d; haptic(); renderCal(); });
-  const jump = box.querySelector('#cJump');
-  if (jump) {
-    jump.addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; const [yy, mm] = c.dataset.m.split('-').map(Number); goMonth(0, c.dataset.m < mk ? 'slide-r' : 'slide-l', new Date(yy, mm - 1, 1)); });
-    const sel = jump.querySelector('[aria-pressed="true"]'); if (sel) jump.scrollLeft = sel.offsetLeft - 20;
-  }
-  box.querySelectorAll('.cal-day .row').forEach(r => r.onclick = () => openDetail(r.dataset.id));
-  const add = box.querySelector('#cAdd'); if (add) add.onclick = () => openEditor({ type: 'altro', title: '', date: calSel }, { head: 'Nuovo MeMo', sub: `Per ${selLabel}.`, focus: '#eTitle' });
-  // scorri a destra o sinistra per cambiare mese
-  const cb = box.querySelector('#cBox'); let x0 = null, y0 = null;
-  cb.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
-  cb.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) goMonth(dx < 0 ? 1 : -1, dx < 0 ? 'slide-l' : 'slide-r'); });
-}
-
 // ================= Fogli =================
 let onSheetClose = null;
 function openSheet(html, after) {
@@ -1487,7 +1455,7 @@ function openEditor(draft, opts = {}) {
     body.querySelector('#eRepT').onclick = () => { state.rep = state.rep ? null : repFor(state.type === 'bolletta' || state.type === 'tasse' ? 'm' : 'w'); haptic(); sync(); };
     body.querySelector('#eLeads').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; state.leadMin = +c.dataset.m; state.remindOn = null; sync(); });
     const drop = body.querySelector('#eDrop');
-    if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); if (calOpen) renderCal(); toast(say('drop')); };
+    if (drop) drop.onclick = async () => { const it = items.find(x => x.id === state.id); if (it) await removeItem(it); haptic(); closeSheet(); render(); toast(say('drop')); };
     body.querySelector('#eSave').onclick = async () => {
       const it = items.find(x => x.id === state.id) || { id: uid(), createdAt: new Date().toISOString() };
       const kindP = T(state.type).dateKind === 'purchase';
@@ -1496,16 +1464,18 @@ function openEditor(draft, opts = {}) {
       if (state.leadMin != null) it.leadMin = state.leadMin; else delete it.leadMin;
       if (state.rep && !T(state.type).recur && !kindP) { it.rep = state.rep; P.rollRep(it); } else delete it.rep;
       if (state.remindOn && !it.rep) it.remindOn = state.remindOn; else delete it.remindOn;
+      if (state.said && !it.said) it.said = state.said;
       if (state.photo) { it.photoId = it.photoId || uid(); await DB.photoPut(it.photoId, state.photo); }
       else if (state.photoRemoved && it.photoId) { await DB.photoDel(it.photoId); delete it.photoId; }
       await DB.put(it); if (!items.includes(it)) items.push(it);
-      haptic(); closeSheet(); render(); savedToast(it);
+      haptic(); if (opts.after) { onSheetClose = null; render(); opts.after(it); return; }
+      closeSheet(); render(); savedToast(it);
     };
     renderPhoto(); sync();
     if (opts.focus) setTimeout(() => body.querySelector(opts.focus).focus(), 440);
   });
 }
-$('#btnAdd').addEventListener('click', () => openEditor({ type: 'altro', title: '', date: null }, { head: 'Nuovo MeMo', focus: '#eTitle' }));
+$('#btnAdd').addEventListener('click', () => openWrite());
 
 // ================= Voce =================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1644,46 +1614,185 @@ function micHelp(code) {
 }
 function stopRec() { Ear.stop(); const m = $('#vMic'); if (m) m.classList.remove('on'); }
 let aiOff = false, thinking = false, thinkCtl = null;
-async function think(text) {
+// l'AI del server capisce la frase; il motore dell'app controlla e completa. Se ci sono più cose, ognuna per conto suo
+async function aiOf(t) {
   if (aiOff || !MEMO_SERVER || navigator.onLine === false) return null;
-  const h = $('#vHint'), go = $('#vGo'), mic = $('#vMic');
-  // il tasto resta attivo: se lo tocchi mentre ci penso, vado avanti subito senza aspettare l'AI
-  if (h) h.textContent = 'Ci penso un attimo…'; if (go) go.textContent = 'Ci penso… (tocca per fare subito)'; if (mic) mic.classList.add('think');
-  thinkCtl = new AbortController();
-  try { return await Push.understand(text, thinkCtl); }
-  catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
-  finally { thinkCtl = null; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+  try { return await Push.understand(t, thinkCtl || undefined); } catch (e) { if (e && e.message === 'no ai') aiOff = true; return null; }
+}
+function resOf(text, ai) {
+  const t = P.typed(text);
+  let res; try { res = ai ? P.fromAI(ai, t) : P.parseSpeech(t); } catch (e) { res = P.parseSpeech(t); }
+  if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(t); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
+  res.said = String(text || '').trim();
+  return res;
+}
+async function understandAll(text) {
+  const parts = P.splitMany(text) || [String(text || '').trim()];
+  const online = !aiOff && MEMO_SERVER && navigator.onLine !== false;
+  let ais = parts.map(() => null);
+  if (online) { thinkCtl = new AbortController(); try { ais = await Promise.all(parts.map(x => aiOf(P.typed(x)))); } finally { thinkCtl = null; } }
+  return parts.map((x, i) => resOf(x, ais[i]));
 }
 async function submitSpeech(text) {
   stopRec();
   if (thinking) { if (thinkCtl) thinkCtl.abort(); return; } // secondo tocco durante l'attesa: si salta l'AI
   if (!String(text || '').trim()) return; thinking = true;
-  let ai = null; try { ai = await think(text); } finally { thinking = false; }
-  let res; try { res = ai ? P.fromAI(ai, text) : P.parseSpeech(text); } catch (e) { res = P.parseSpeech(text); }
-  if (ai && !res.date && !res.needTitle) { const loc = P.parseSpeech(text); if (loc.date) res = { ...loc, title: res.title || loc.title, type: res.type !== 'altro' ? res.type : loc.type }; } // se l'AI non ha trovato il quando, provo con il motore
+  const h = $('#vHint'), go = $('#vGo'), mic = $('#vMic');
+  // il tasto resta attivo: se lo tocchi mentre ci penso, vado avanti subito senza aspettare l'AI
+  if (h) h.textContent = 'Ci penso un attimo…'; if (go) go.textContent = 'Ci penso… (tocca per fare subito)'; if (mic) mic.classList.add('think');
+  let list; try { list = await understandAll(text); }
+  finally { thinking = false; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
+  if (list.length > 1) { openReview(list, text, { voice: true }); return; } // più cose insieme: un'occhiata prima di segnarle
+  routeOne(list[0], text, { voice: true });
+}
+const draftOf = (res, said) => ({ type: res.type, title: res.title, date: res.date || null, time: res.time || null, leadMin: res.leadMin ?? null,
+  rep: res.rep || null, remindOn: res.remindOn || null, purchase: res.purchase || null, said: String(said || res.said || '').trim() });
+// una cosa sola: se manca qualcosa lo chiedo, altrimenti a voce si segna subito e scritto si mostra prima com'è venuto
+function routeOne(res, text, o = {}) {
   if (res.needTitle) {
     // ho capito quando, ma non cosa: data e avviso sono già pronti, manca solo il titolo
     const lead = res.leadMin != null ? `, con un avviso ${leadLabel(res.leadMin, !!res.time)}` : '';
     const when = res.date ? whenText({ due: res.date, time: res.time }) : '';
-    openEditor({ type: 'altro', title: '', date: res.date || null, time: res.time || null, leadMin: res.leadMin ?? null },
+    openEditor({ ...draftOf(res, text), type: 'altro', title: '' },
       { head: 'Manca solo una cosa', sub: when ? `Ho capito: ${when}${lead}. Dimmi solo cosa.` : 'Dimmi cosa e quando.', focus: '#eTitle' });
     return;
   }
-  if (!res.date) { openEditor({ type: res.type, title: res.title, date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
+  if (!res.date) { openEditor({ ...draftOf(res, text), date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
+  if (!o.voice) { openReview([res], text); return; }
   if (res.remindAsk) { askRemind(res, text); return; }
   if (res.askTime && !res.time) { askTime(res, text); return; }
   saveSpoken(res, text);
 }
-async function saveSpoken(res, text) {
-  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: text.trim() };
+function buildItem(res, text) {
+  const it = { id: uid(), createdAt: new Date().toISOString(), type: res.type, title: res.title, due: res.date, time: res.time || null, purchase: res.purchase || null, said: String(text || res.said || '').trim() };
   if (res.leadMin != null && it.time) it.leadMin = res.leadMin;
   if (res.rep && !T(it.type).recur) { it.rep = res.rep; P.rollRep(it); }
   if (res.remindOn && !it.rep) it.remindOn = res.remindOn; // l'avviso detto a parte: "ricordamelo mercoledì"
+  return it;
+}
+async function saveSpoken(res, text) {
+  const it = buildItem(res, text);
   await DB.put(it); items.push(it); haptic(); closeSheet(); render();
-  const st = P.statusOf(it);
   toast(it.title, savedLine(it), [
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
   ], () => openDetail(it.id));
+}
+
+// ================= Scrivi a MeMo =================
+// come un messaggio a un amico: scrivi come ti viene, MeMo capisce e ti mostra il MeMo già pronto
+let writeDraft = '';
+const WRITE_EX = ['Dentista martedì alle 15:30, avvisami il giorno prima', 'Domani alle 8 pagare il bollo', 'Ogni lunedì palestra alle 19', 'Ricordami venerdì che sabato è il compleanno di Giulia',
+  'Mi scade la patente a marzo 2029', 'Tra 2 ore chiamare la mamma', 'Stasera alle 20 cena da Luca, prendere il vino', 'Il 16 dicembre pagare l\'IMU', 'Sabato mattina cambio gomme',
+  'Ogni mese il 27 pagare l\'affitto', 'Giovedì alle 18 calcetto, avvisami un\'ora prima', 'Domattina ritirare il pacco', 'Il 4 novembre compleanno di papà', 'Dopodomani alle 9 colloquio'];
+const WRITE_LEAD = ['Cosa, quando e, se vuoi, quando avvisarti. Scrivi come ti viene.', 'Scrivi come lo diresti a un amico: al resto ci penso io.', 'Cosa e quando, anche di fretta. Capisco io.'];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const anyOf = a => a[Math.floor(Math.random() * a.length)];
+function openWrite(prefill) {
+  const ex = shuffle(WRITE_EX).slice(0, 4), ph = ex.pop();
+  openSheet(`<div class="sheet-in"><h2>Di' a MeMo cosa ti serve</h2>
+    <p class="lead">${esc(anyOf(WRITE_LEAD))}</p>
+    <div class="field"><textarea class="input w-ta" id="wText" rows="3" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true" aria-label="Cosa devo ricordarti" placeholder="Per esempio: ${esc(ph)}"></textarea></div>
+    <div class="examples" id="wEx">${ex.map(x => `<button>${esc(x)}</button>`).join('')}</div>
+    <button class="btn btn-main" id="wGo" disabled>Fatto</button></div>`, body => {
+    const ta = body.querySelector('#wText'), go = body.querySelector('#wGo'), exEl = body.querySelector('#wEx');
+    let busy = false;
+    ta.value = prefill != null ? prefill : writeDraft;
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(Math.max(ta.scrollHeight, 100), 230) + 'px'; };
+    const upd = () => { const v = ta.value.trim(); go.disabled = !v; exEl.hidden = !!v; if (!busy) writeDraft = ta.value; fit(); };
+    const send = async () => {
+      const v = ta.value.trim(); if (!v) return;
+      if (busy) { if (thinkCtl) thinkCtl.abort(); return; } // secondo tocco: vado avanti senza aspettare l'AI
+      busy = true; ta.readOnly = true; ta.blur(); haptic();
+      go.innerHTML = 'Ci penso<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>';
+      let list; try { list = await understandAll(v); } finally { busy = false; }
+      if ($('#wText') !== ta) return; // nel frattempo hai chiuso
+      writeDraft = '';
+      if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
+    };
+    ta.addEventListener('input', upd);
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+    exEl.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ta.value = b.textContent; upd(); ta.focus(); });
+    go.onclick = send;
+    go.addEventListener('touchend', e => { if (go.disabled) return; e.preventDefault(); send(); });
+    upd(); ta.focus({ preventScroll: true }); const n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (e) {}
+  });
+}
+// gli orari tra cui scegliere quando hai detto solo "domattina", "stasera"…
+function timeOpts(res) {
+  const { part, ctxTime } = res.askTime, now = new Date();
+  let opts = [];
+  if (ctxTime) {
+    const [h, m] = ctxTime.split(':').map(Number);
+    for (const [off, l] of [[60, "un'ora prima"], [30, "mezz'ora prima"], [120, '2 ore prima']]) { const t = h * 60 + m - off; if (t >= 0) opts.push([`${pad(Math.floor(t / 60))}:${pad(t % 60)}`, l]); }
+  }
+  for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '13:00', '18:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
+  const future = v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(res.date); d.setHours(h, m, 0, 0); return d > now; };
+  return res.rep ? opts : opts.filter(([v]) => future(v));
+}
+function remindOpts(res) {
+  const { date, part } = res.remindAsk, now = new Date();
+  return (PART_TIMES[part] || ['09:00', '13:00', '18:00']).filter(v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(date); d.setHours(h, m, 0, 0); return d > now; });
+}
+// cosa resta da scegliere su un MeMo già capito: l'ora, se hai detto solo "domattina"
+function pickOf(res) {
+  if (res.remindAsk) { const o = remindOpts(res); return { kind: 'remind', label: `Te lo ricordo ${whenPart(res.remindAsk.date, res.remindAsk.part)}, a che ora?`, opts: o.map(v => [v, '']) }; }
+  if (res.askTime && !res.time) return { kind: 'time', label: 'A che ora te lo ricordo?', opts: timeOpts(res) };
+  return null;
+}
+function withPick(res, pk, v) {
+  if (!pk) return res;
+  const r = { ...res };
+  if (pk.kind === 'remind') { delete r.remindAsk; if (v) r.remindOn = `${res.remindAsk.date}T${v}`; return r; }
+  delete r.askTime; if (v) { r.time = v; r.leadMin = 0; } return r;
+}
+// ================= Ecco com'è venuto: confermi con un tocco, o lo sistemi =================
+const REVIEW_H = ['Ho capito così', 'Ecco il tuo MeMo', 'Va bene così?', 'Ci siamo?', 'Ecco qua'];
+function openReview(list, text, o = {}) {
+  const cards = list.map(res => { const pk = pickOf(res); return { res, pk, v: pk && pk.opts.length ? pk.opts[0][0] : null }; });
+  const head1 = anyOf(REVIEW_H);
+  const itemOf = c => buildItem(withPick(c.res, c.pk, c.v), cards.length > 1 ? c.res.said : text);
+  const cardHTML = (c, k) => { const it = itemOf(c), many = cards.length > 1;
+    return `<div class="r-card" data-k="${k}">
+      <button class="r-main" data-edit="${k}" aria-label="Modifica ${esc(it.title)}"><span class="orb" aria-hidden="true">${emojiOf(it)}</span><span class="txt"><b>${esc(it.title)}</b><span>${esc(savedLine(it))}</span></span>${many ? `<span class="r-x" data-x="${k}" role="button" aria-label="Togli">×</span>` : '<span class="r-pen" aria-hidden="true">✎</span>'}</button>
+      ${c.pk && c.pk.opts.length ? `<div class="r-ask"><span>${esc(c.pk.label)}</span><div class="r-picks">${c.pk.opts.map(([v, l]) => `<button class="r-pick" data-k="${k}" data-v="${v}" aria-pressed="${v === c.v}">${timeLbl(v)}${l ? `<small>${esc(l)}</small>` : ''}</button>`).join('')}</div></div>` : ''}
+    </div>`; };
+  const draw = () => {
+    const many = cards.length > 1;
+    openSheet(`<div class="sheet-in"><h2 id="rH">${esc(many ? `Ecco i tuoi ${cards.length} MeMo` : head1)}</h2>
+      <button class="w-said" id="rSaid"><span>«${esc(text)}»</span><b>${o.voice ? 'Correggi' : 'Riscrivi'}</b></button>
+      <div class="r-cards" id="rCards">${cards.map(cardHTML).join('')}</div>
+      <button class="btn btn-main" id="rGo">${many ? 'Ricordameli' : 'Ricordamelo'}</button>
+      ${many ? '' : '<button class="btn btn-ghost" id="rEdit" style="margin-top:10px">Modifica</button>'}</div>`, body => {
+      const box = body.querySelector('#rCards');
+      const redraw = () => { if (!cards.length) { closeSheet(); return; } box.innerHTML = cards.map(cardHTML).join('');
+        body.querySelector('#rH').textContent = cards.length > 1 ? `Ecco i tuoi ${cards.length} MeMo` : head1; body.querySelector('#rGo').textContent = cards.length > 1 ? 'Ricordameli' : 'Ricordamelo'; };
+      box.addEventListener('click', e => {
+        const pkb = e.target.closest('.r-pick');
+        if (pkb) { const c = cards[+pkb.dataset.k]; c.v = pkb.dataset.v; haptic(); const el = box.querySelector(`.r-card[data-k="${pkb.dataset.k}"]`), sc = el.querySelector('.r-picks').scrollLeft;
+          el.outerHTML = cardHTML(c, +pkb.dataset.k); const nw = box.querySelector(`.r-card[data-k="${pkb.dataset.k}"]`); nw.style.animation = 'none'; nw.querySelector('.r-picks').scrollLeft = sc; return; }
+        const x = e.target.closest('.r-x'); if (x) { cards.splice(+x.dataset.x, 1); haptic(); redraw(); return; }
+        const m = e.target.closest('.r-main'); if (m) edit(+m.dataset.edit);
+      });
+      body.querySelector('#rSaid').onclick = () => openWrite(text);
+      const ed = body.querySelector('#rEdit'); if (ed) ed.onclick = () => edit(0);
+      body.querySelector('#rGo').onclick = () => saveAll();
+    });
+  };
+  // modifica: l'editor completo, già compilato. Con più MeMo, finito di sistemarne uno si torna agli altri
+  const edit = k => {
+    const c = cards[k], r = withPick(c.res, c.pk, c.v), d = draftOf(r, cards.length > 1 ? c.res.said : text);
+    if (cards.length === 1) { openEditor(d, { head: 'Sistemalo come vuoi' }); return; }
+    openEditor(d, { head: 'Sistemalo come vuoi', after: it => { cards.splice(k, 1); toast(say('saved'), it.title); draw(); } });
+    onSheetClose = () => setTimeout(draw, 430); // se chiudi senza salvare, gli altri sono ancora qui
+  };
+  const saveAll = async () => {
+    const saved = cards.map(itemOf);
+    for (const it of saved) { await DB.put(it); items.push(it); }
+    haptic(); closeSheet(); render();
+    if (saved.length === 1) { const it = saved[0]; toast(it.title, savedLine(it), [{ label: 'Annulla', fn: async () => { await removeItem(it); render(); } }], () => openDetail(it.id)); }
+    else toast(`${saved.length} MeMo segnati`, say('saved'), [{ label: 'Annulla', fn: async () => { for (const it of saved) await removeItem(it); render(); } }]);
+  };
+  draw();
 }
 // "domattina", "domani sera", oppure un impegno con un orario che non è quello dell'avviso: l'ora dell'avviso la scegli tu
 const PART_TIMES = { mattina: ['07:30', '08:00', '08:30', '09:00', '10:00', '11:00'], pomeriggio: ['14:00', '15:00', '16:00', '17:00'], sera: ['18:00', '19:00', '20:00', '21:00'], notte: ['21:00', '22:00', '23:00'] };
@@ -1695,15 +1804,7 @@ function whenPart(iso, part) {
   return `${w} ${part}`;
 }
 function askTime(res, text) {
-  const { part, ctxTime } = res.askTime, now = new Date();
-  let opts = [];
-  if (ctxTime) {
-    const [h, m] = ctxTime.split(':').map(Number);
-    for (const [off, l] of [[60, "un'ora prima"], [30, "mezz'ora prima"], [120, '2 ore prima']]) { const t = h * 60 + m - off; if (t >= 0) opts.push([`${pad(Math.floor(t / 60))}:${pad(t % 60)}`, l]); }
-  }
-  for (const v of PART_TIMES[part] || (ctxTime ? [] : ['09:00', '13:00', '18:00'])) if (!opts.some(o => o[0] === v)) opts.push([v, '']);
-  const future = v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(res.date); d.setHours(h, m, 0, 0); return d > now; };
-  if (!res.rep) opts = opts.filter(([v]) => future(v));
+  const { part, ctxTime } = res.askTime, opts = timeOpts(res);
   const when = whenPart(res.date, part);
   openSheet(`<h2>A che ora te lo ricordo?</h2>
     <p class="lead"><b>${esc(res.title)}</b>, ${esc(res.rep ? P.repText(res.rep) : when)}.${ctxTime ? ` L'impegno è alle ${esc(timeLbl(ctxTime))}.` : ''}</p>
@@ -1722,8 +1823,7 @@ function askTime(res, text) {
 }
 // "…ricordamelo domani sera": la cosa ha già il suo giorno, l'ora dell'avviso la scegli tu
 function askRemind(res, text) {
-  const { date, part } = res.remindAsk, now = new Date();
-  const opts = (PART_TIMES[part] || ['09:00', '13:00', '18:00']).filter(v => { const [h, m] = v.split(':').map(Number), d = P.parseISO(date); d.setHours(h, m, 0, 0); return d > now; });
+  const { date, part } = res.remindAsk, opts = remindOpts(res);
   const what = whenText({ due: res.date, time: res.time });
   openSheet(`<h2>A che ora te lo ricordo?</h2>
     <p class="lead"><b>${esc(res.title)}</b> è ${esc(what)}. Te lo ricordo ${esc(whenPart(date, part))}.</p>
@@ -1738,29 +1838,161 @@ function askRemind(res, text) {
     go.onclick = () => t.value && done(t.value);
   });
 }
+// ================= Il pesciolino che ascolta =================
+// quando tieni premuto il microfono sale dal profondo, si avvicina grande davanti a te e ascolta davvero:
+// sbatte gli occhi, guarda le tue parole, annuisce, alza le sopracciglia, fa "oh", sorride quando capisce.
+// Ogni volta arriva e se ne va in un modo diverso.
+const Fish = (() => {
+  const el = $('#diver'), deep = $('#deep'), none = { come() {}, hear() {}, got() {}, think() {}, worry() {}, go() {} };
+  if (!el || !el.animate) return none;
+  const head = el.querySelector('.dv-head'), calm = matchMedia('(prefers-reduced-motion: reduce)').matches, r = Math.random;
+  let on = false, mode = '', anim = null, at = null, face = 'listen', lastHear = 0, lastReact = 0, lastKind = '', timers = [], bubT = null, exitT = null;
+  const later = (f, ms) => { const t = setTimeout(f, ms); timers.push(t); return t; };
+  const stopAll = () => { timers.forEach(clearTimeout); timers = []; clearInterval(bubT); };
+  const MOUTH = { curious: 'o', listen: 'smile', mm: 'smile', o: 'o', got: 'big', wait: 'flat', think: 'side', happy: 'big', worry: 'wavy', puzzled: 'flat' };
+  const setFace = f => { face = f; el.dataset.f = f; el.dataset.m = MOUTH[f] || 'smile'; };
+  const look = (x, y) => { el.style.setProperty('--lx', x.toFixed(2) + 'px'); el.style.setProperty('--ly', y.toFixed(2) + 'px'); };
+  const gesture = g => { head.classList.remove('g-nod', 'g-hop', 'g-shake'); void head.offsetWidth; head.classList.add('g-' + g); };
+  const tf = (x, y, s, a, fx) => `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${a.toFixed(1)}deg) scale(${(s * fx).toFixed(3)},${s.toFixed(3)})`;
+  const bez = (p0, p1, p2, p3) => t => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
+  // un tragitto: guarda sempre dove va (si gira quando cambia verso), e da lontano è piccolo e sfocato
+  function path(B, o) {
+    const N = 50, fr = []; let fx = o.fx0;
+    for (let i = 0; i <= N; i++) {
+      const t = o.ease(i / N), [x, y] = B(t), [xa, ya] = B(Math.max(0, t - .015)), [xb, yb] = B(Math.min(1, t + .015)), dx = xb - xa, dy = yb - ya;
+      if (Math.abs(dx) > 1.5) fx = dx > 0 ? 1 : -1;
+      const tilt = Math.max(-24, Math.min(24, Math.atan2(dy, Math.abs(dx) + 3) * 57.3 * .55));
+      fr.push({ transform: tf(x, y, o.sz(t), fx * tilt, fx), filter: `blur(${Math.max(0, o.bl(t)).toFixed(2)}px)`, opacity: +Math.max(0, Math.min(1, o.op(i / N))).toFixed(3) });
+    }
+    return fr;
+  }
+  function bubble(n = 1, gap = 180) {
+    for (let i = 0; i < n; i++) setTimeout(() => { if (!at) return;
+      const b = document.createElement('i'), sz = 6 + r() * 6; b.className = 'lbub';
+      b.style.setProperty('--bx', (at.x + at.fx * at.w * .36) + 'px'); b.style.setProperty('--by', (at.y + at.h * .1) + 'px'); b.style.setProperty('--dx', (at.fx * (6 + r() * 16)) + 'px');
+      b.style.width = b.style.height = sz.toFixed(1) + 'px'; document.body.appendChild(b); setTimeout(() => b.remove(), 1500); }, i * gap);
+  }
+  // la vita mentre ascolta: sbatte gli occhi, li sposta sulle tue parole e su di te, se stai zitto ti aspetta curioso
+  function blinkLoop() { later(() => { if (!on) return; el.classList.add('blink'); later(() => el.classList.remove('blink'), 130);
+    if (r() < .22) later(() => { el.classList.add('blink'); later(() => el.classList.remove('blink'), 110); }, 260); blinkLoop(); }, 1600 + r() * 3000); }
+  function eyeLoop() { later(() => { if (!on) return;
+    if (mode === 'listen' && (face === 'listen' || face === 'mm')) { const k = r(); k < .45 ? look(0, .3) : k < .8 ? look(1, 1.7) : look((r() - .5) * 2.6, (r() - .7) * 1.8); }
+    eyeLoop(); }, 900 + r() * 1700); }
+  function waitLoop() { later(() => { if (!on) return;
+    if (mode === 'listen' && face === 'listen' && Date.now() - lastHear > 2800) { setFace('wait'); look(-.7, -1.5); }
+    waitLoop(); }, 700); }
+  function settle() {
+    el.classList.add('idle'); blinkLoop(); eyeLoop(); waitLoop(); later(() => bubble(1), 250);
+    later(() => { if (on && face === 'curious') { setFace('listen'); look(0, .3); } }, 500);
+  }
+  function come() {
+    clearTimeout(exitT); if (on) return;
+    on = true; mode = 'listen'; lastHear = Date.now(); stopAll();
+    const W = innerWidth, H = innerHeight, w = Math.round(Math.min(270, Math.max(170, W * .62))), h = Math.round(w * 62 / 88);
+    el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.margin = `${-h / 2}px 0 0 ${-w / 2}px`;
+    const cEl = $('#ptt .ptt-card'), card = cEl.getBoundingClientRect(), pillTop = card.top - (cEl.closest('.ptt.show') ? 0 : 12);
+    const fx = r() < .5 ? 1 : -1, tx = W / 2 + (r() - .5) * W * .08, ty = Math.max(h / 2 + 80, pillTop - h / 2 - 10);
+    at = { x: tx, y: ty, fx, w, h };
+    deep.classList.add('on'); document.body.classList.add('listening'); el.classList.remove('idle', 'blink');
+    setFace('curious'); look(0, 0);
+    if (anim) anim.cancel();
+    if (calm) { el.style.transform = tf(tx, ty, 1, 0, fx); el.style.filter = 'none'; anim = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: 'forwards' }); settle(); return; }
+    // dal profondo: lontano, piccolo e sfocato; poi si avvicina a te, a volte con una S, a volte passando oltre e tornando
+    const sx = W * (.12 + r() * .76), sy = H * (.1 + r() * .26), way = r();
+    const p0 = [sx, sy], p3 = [tx, ty], p2 = [tx - fx * (45 + r() * 75), ty - 18 - r() * 45];
+    const p1 = way < .4 ? [sx + (r() - .5) * W * .9, sy + (ty - sy) * .35] : way < .7 ? [tx + fx * W * .42, (sy + ty) / 2 + (r() - .5) * 80] : [sx + (r() - .5) * 60, sy + (ty - sy) * .6];
+    const s0 = .09 + r() * .06;
+    const fr = path(bez(p0, p1, p2, p3), { fx0: fx, ease: t => 1 - Math.pow(1 - t, 2.1), sz: t => s0 + (1.08 - s0) * Math.pow(t, 1.8), bl: t => 9 * Math.pow(1 - t, 1.6), op: k => k * 3.2 });
+    fr.forEach((f, i) => { f.offset = .84 * i / (fr.length - 1); });
+    fr.push({ offset: .92, transform: tf(tx, ty + 4, .96, 0, fx), filter: 'blur(0px)', opacity: 1 }, { offset: 1, transform: tf(tx, ty, 1, 0, fx), filter: 'blur(0px)', opacity: 1 });
+    anim = el.animate(fr, { duration: 1100 + r() * 500, easing: 'linear', fill: 'forwards' });
+    anim.onfinish = () => { if (on) settle(); };
+  }
+  // mentre parli: ogni tanto una reazione, mai due volte di fila la stessa
+  const REACT = ['nod', 'mm', 'o', 'got', 'look', 'nod', 'mm'];
+  function hear() {
+    if (!on || mode !== 'listen') return;
+    const n = Date.now(); lastHear = n;
+    if (face === 'wait') { setFace('listen'); look(0, .3); }
+    if (n - lastReact < 1100 || (anim && anim.playState === 'running')) return;
+    lastReact = n; let k; do { k = REACT[Math.floor(r() * REACT.length)]; } while (k === lastKind); lastKind = k;
+    if (k === 'nod') { gesture('nod'); setFace('mm'); look(0, .6); }
+    else if (k === 'mm') { setFace('mm'); look(.4, .1); }
+    else if (k === 'o') { setFace('o'); look(0, -.5); }
+    else if (k === 'got') { setFace('got'); }
+    else { setFace('listen'); look(1.1, 1.8); }
+    if (r() < .45) bubble(1);
+    later(() => { if (on && mode === 'listen' && face !== 'wait') setFace('listen'); }, 800 + r() * 300);
+  }
+  function got() { if (!on) return; mode = 'got'; setFace('got'); gesture('nod'); look(0, 0); bubble(2); }
+  function think() { if (!on) return; mode = 'think'; setFace('think'); look(1.6, -1.9); clearInterval(bubT); bubble(3, 230); bubT = setInterval(() => bubble(2, 220), 1000); }
+  function worry(v) { if (!on) return; if (v) { mode = 'worry'; setFace('worry'); gesture('shake'); look(-1.2, .4); } else { mode = 'listen'; setFace('listen'); look(0, .3); } }
+  function go(kind = 'bye') {
+    if (!on) return; on = false; mode = ''; stopAll();
+    deep.classList.remove('on');
+    const leave = () => {
+      el.classList.remove('idle', 'blink'); document.body.classList.remove('listening');
+      const a = at; if (!a) return;
+      if (calm) { anim = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' }); at = null; return; }
+      const W = innerWidth, H = innerHeight, P0 = [a.x, a.y], smooth = t => t * t * (3 - 2 * t);
+      const pick = kind === 'cancel' ? 'flick' : kind === 'none' ? 'sink' : kind === 'saved' ? (r() < .55 ? 'away' : 'swirl') : ['away', 'flick', 'swirl', 'sink', 'away'][Math.floor(r() * 5)];
+      let o, B;
+      if (pick === 'away') { // torna nel profondo
+        const ex = W * (.12 + r() * .76), ey = H * (.08 + r() * .2);
+        B = bez(P0, [a.x + a.fx * (70 + r() * 60), a.y - 20], [ex + (r() - .5) * 140, ey + 140], [ex, ey]);
+        o = { ease: smooth, sz: t => 1 - .9 * Math.pow(t, .85), bl: t => 9 * t * t, op: k => k < .72 ? 1 : 1 - (k - .72) / .28, dur: 1050 + r() * 350 };
+      } else if (pick === 'swirl') { // una giravolta e via
+        B = bez(P0, [a.x + a.fx * 170, a.y + 50], [a.x - a.fx * 160, a.y - 170], [a.x + (r() - .5) * W * .5, H * .1]);
+        o = { ease: smooth, sz: t => 1.05 - .95 * t, bl: t => 8 * t * t, op: k => k < .75 ? 1 : 1 - (k - .75) / .25, dur: 1350 };
+      } else if (pick === 'flick') { // un colpo di coda e sparisce di lato
+        const dir = kind === 'cancel' ? -a.fx : (r() < .5 ? a.fx : -a.fx);
+        B = bez(P0, [a.x + dir * 30, a.y + 10], [a.x + dir * W * .4, a.y - 20], [a.x + dir * (W * .55 + a.w), a.y - 40 - r() * 90]);
+        o = { ease: t => t * t, sz: () => 1, bl: () => 0, op: k => k < .8 ? 1 : 1 - (k - .8) / .2, dur: kind === 'cancel' ? 430 : 620 };
+      } else { // affonda piano all'indietro
+        B = bez(P0, [a.x, a.y + 24], [a.x + a.fx * 30, a.y - 40], [a.x + a.fx * (30 + r() * 60), a.y - H * .26]);
+        o = { ease: smooth, sz: t => 1 - .86 * t, bl: t => 8 * t, op: k => 1 - k * k, dur: 1500 };
+      }
+      const fr = path(B, { ...o, fx0: a.fx }); fr[0].transform = tf(a.x, a.y, 1, 0, a.fx); fr[0].filter = 'blur(0px)'; fr[0].opacity = 1;
+      if (anim) anim.cancel();
+      anim = el.animate(fr, { duration: o.dur, easing: 'linear', fill: 'forwards' }); at = null;
+    };
+    // prima la faccia giusta: contento se ha segnato, perplesso se non ha sentito, preoccupato se annulli
+    let wait = 260;
+    if (kind === 'saved') { setFace('happy'); gesture('hop'); bubble(2); wait = 600; }
+    else if (kind === 'none') { setFace('puzzled'); look(-.8, -1.2); wait = 800; }
+    else if (kind === 'cancel') { setFace('worry'); wait = 140; }
+    else setFace('mm');
+    exitT = setTimeout(leave, wait);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden && on) { on = false; mode = ''; stopAll(); clearTimeout(exitT); if (anim) anim.cancel(); at = null; deep.classList.remove('on'); document.body.classList.remove('listening'); el.classList.remove('idle'); } });
+  // il pesciolino è un di più: se qualcosa va storto, il microfono funziona lo stesso
+  const safe = f => (...x) => { try { f(...x); } catch (e) { try { on = false; deep.classList.remove('on'); document.body.classList.remove('listening'); el.style.opacity = 0; } catch (e2) {} } };
+  return { come: safe(come), hear: safe(hear), got: safe(got), think: safe(think), worry: safe(worry), go: safe(go) };
+})();
+
 // ---------- tieni premuto e parla: finché tieni premuto ascolto, quando lasci segno il MeMo ----------
 const PTT = (() => {
   const btn = $('#btnVoice'), el = $('#ptt'), hintEl = $('#pttHint'), textEl = { textContent: '' }; // le parole non si mostrano qui: restano nel MeMo («Mi avevi detto»)
-  let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0;
+  let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0, fishMood = 'bye';
   const hint = h => { hintEl.textContent = h; };
-  const show = h => { el.hidden = false; el.classList.remove('idle', 'cancel'); requestAnimationFrame(() => el.classList.add('show')); hint(h); };
-  const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
+  const show = h => { el.hidden = false; el.classList.remove('idle', 'cancel'); hint(h); fishMood = 'bye'; Fish.come(); requestAnimationFrame(() => el.classList.add('show')); };
+  const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); Fish.go(fishMood); fishMood = 'bye'; setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
   const clear = () => { clearTimeout(endT); clearTimeout(quiet); };
   function listen() {
     return Ear.start({
       start: () => {},
-      result: t => { if (mode === 'off') return; text = joinText(base, t); textEl.textContent = text;
+      result: t => { if (mode === 'off') return; text = joinText(base, t); textEl.textContent = text; Fish.hear();
         if (mode === 'hold') hint(away ? 'Lascia per annullare' : 'Ti ascolto…');
         else if (mode === 'free') { hint('Ti ascolto… fai una pausa per finire'); clearTimeout(quiet); quiet = setTimeout(finish, 1800); } },
       error: code => { if (code === 'aborted' || code === 'no-speech' || mode === 'off') return;
-        clear(); Ear.reset(); mode = 'off'; btn.classList.remove('holding', 'away'); el.classList.add('idle');
+        clear(); Ear.reset(); mode = 'off'; btn.classList.remove('holding', 'away'); el.classList.add('idle'); fishMood = 'none';
         if (code === 'not-allowed' || code === 'service-not-allowed') { hint('Il microfono è bloccato.'); hide(400); setTimeout(() => { openVoice(); }, 650); }
         else if (code === 'network') { hint('Per capire la voce serve internet.'); hide(2200); }
         else { hint('Qualcosa non è andato: riprova.'); hide(1800); } },
       end: () => {
         if (mode === 'finishing') return finalize();
         if (mode === 'hold' && down) { base = text; listen(); return; } // il telefono ha chiuso da solo mentre tieni premuto: si riparte senza perdere niente
-        if (mode === 'free') { if (text.trim()) finish(); else { mode = 'off'; el.classList.add('idle'); hint('Non ti ho sentito'); hide(1800); } }
+        if (mode === 'free') { if (text.trim()) finish(); else { mode = 'off'; el.classList.add('idle'); hint('Non ti ho sentito'); fishMood = 'none'; hide(1800); } }
       }
     });
   }
@@ -1769,18 +2001,18 @@ const PTT = (() => {
     if (mode !== 'off') { if (mode === 'free') finish(); return; }
     down = true; away = false; done = false; t0 = Date.now(); text = ''; base = ''; textEl.textContent = ''; x0 = x; y0 = y;
     mode = 'hold'; btn.classList.add('holding'); haptic(); show('Ti ascolto…');
-    if (!listen()) { mode = 'off'; btn.classList.remove('holding'); hint('Non riesco ad aprire il microfono.'); hide(1600); }
+    if (!listen()) { mode = 'off'; btn.classList.remove('holding'); hint('Non riesco ad aprire il microfono.'); fishMood = 'none'; hide(1600); }
   }
   function move(x, y) {
     if (!down || mode !== 'hold') return;
     const far = Math.hypot(x - x0, y - y0) > 110; if (far === away) return;
-    away = far; btn.classList.toggle('away', far); el.classList.toggle('cancel', far); hint(far ? 'Lascia per annullare' : 'Ti ascolto…');
+    away = far; btn.classList.toggle('away', far); el.classList.toggle('cancel', far); hint(far ? 'Lascia per annullare' : 'Ti ascolto…'); Fish.worry(far);
   }
   function release() {
     if (!down) return; down = false; btn.classList.remove('holding', 'away'); haptic();
     if (mode !== 'hold') return;
-    if (away) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Annullato.'); hide(900); return; }
-    if (Date.now() - t0 < 350 && !text) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Tienilo premuto mentre parli'); hide(1700); return; }
+    if (away) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Annullato.'); fishMood = 'cancel'; hide(500); return; }
+    if (Date.now() - t0 < 350 && !text) { mode = 'off'; Ear.stop(); el.classList.add('idle'); hint('Tienilo premuto mentre parli'); fishMood = 'none'; hide(1700); return; }
     finish();
   }
   // il tocco è stato interrotto (per esempio dalla richiesta del permesso): si continua ad ascoltare e ci si ferma da soli dopo una pausa
@@ -1791,13 +2023,13 @@ const PTT = (() => {
   }
   function finish() {
     if (mode === 'off' || mode === 'finishing') return; clear(); mode = 'finishing'; el.classList.add('idle');
-    hint(text ? 'Ho capito' : 'Un attimo…'); Ear.quietFinish(400); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
+    hint(text ? 'Ho capito' : 'Un attimo…'); if (text) Fish.got(); Ear.quietFinish(400); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
   }
   async function finalize() {
     if (done) return; done = true; clear(); const said = text.trim();
-    if (!said) { mode = 'off'; hint('Non ti ho sentito'); hide(1700); return; }
-    hint('Ci penso…');
-    try { await submitSpeech(said); } finally { mode = 'off'; hide(0); }
+    if (!said) { mode = 'off'; hint('Non ti ho sentito'); fishMood = 'none'; hide(1700); return; }
+    hint('Ci penso…'); Fish.think(); const n0 = items.length;
+    try { await submitSpeech(said); } finally { mode = 'off'; fishMood = items.length > n0 ? 'saved' : 'bye'; hide(0); }
   }
   btn.addEventListener('touchstart', e => { e.preventDefault(); lastTouch = Date.now(); const t = e.changedTouches[0]; press(t.clientX, t.clientY); }, { passive: false });
   btn.addEventListener('touchmove', e => { const t = e.changedTouches[0]; move(t.clientX, t.clientY); }, { passive: true });
@@ -1809,7 +2041,7 @@ const PTT = (() => {
   btn.addEventListener('contextmenu', e => e.preventDefault());
   btn.addEventListener('click', e => { if (e.detail === 0) openVoice(); }); // da tastiera: la scheda classica, dove si può anche scrivere
   el.addEventListener('click', () => { if (mode === 'free') finish(); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden && mode !== 'off') { down = false; btn.classList.remove('holding', 'away'); if (text.trim()) finish(); else { mode = 'off'; Ear.stop(); hide(0); } } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && mode !== 'off') { down = false; btn.classList.remove('holding', 'away'); if (text.trim()) finish(); else { mode = 'off'; Ear.stop(); fishMood = 'none'; hide(0); } } });
   return { busy: () => mode !== 'off' };
 })();
 
@@ -1820,7 +2052,7 @@ const PTT = (() => {
   const el = $('#swimmer'); let tm = null, anim = null;
   if (!el || !el.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const later = ms => { clearTimeout(tm); tm = setTimeout(swim, ms); };
-  const free = () => document.visibilityState === 'visible' && page === 'home' && $('#sheetWrap').hidden && !document.querySelector('.intro')
+  const free = () => document.visibilityState === 'visible' && page === 'home' && $('#sheetWrap').hidden && !document.querySelector('.intro') && !document.body.classList.contains('listening')
     && window.scrollY < innerHeight * 0.4 && $('#heroKnot').hasAttribute('hidden');
   function swim(force) {
     if (!force && !free()) { later(20000); return; }
@@ -2055,7 +2287,7 @@ function showIntro() {
     { art: `<div class="photo-art"><div class="pdfdoc"><b>PDF</b><i></i><i></i><i style="width:60%"></i></div><div class="doc"><i style="width:55%"></i><i style="width:40%"></i><i style="width:48%"></i><span class="date">Scade 12.03.2031</span><span class="face"></span><span class="scanline"></span></div></div>`,
       h: 'Fai una foto.', p: `Scatta o scegli una foto o un PDF. Leggo io cos'è e quando scade, e resta tutto sul tuo ${PHONE}.` },
     { art: `<span class="bubble wide">Vino per Mattia domani alle 18, avvisami il giorno prima. E domattina il pane!</span><div class="mic-big on"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>`,
-      h: 'Oppure dillo.', p: "Tieni premuto il microfono e parla come con un amico, anche più cose insieme." },
+      h: 'Oppure dimmelo.', p: "Tieni premuto e parla, oppure scrivi come in chat. Anche più cose insieme." },
     { art: `<div class="get-art"><div class="g-card"><span class="g-ic">🍷</span><div><b>Vino per Mattia</b><small>domani alle 18:00</small><em>🔔 ti avviso il giorno prima</em></div></div><div class="g-card"><span class="g-ic">🥖</span><div><b>Comprare il pane</b><small>domattina · a che ora?</small></div></div></div>`,
       h: 'Capisco al volo.', p: "Tiro fuori l'essenziale. Se manca qualcosa, te lo chiedo." }
   ];
@@ -2271,6 +2503,14 @@ function tick() {
     setTimeout(() => { if (!typing) fixFixed(); }, 80); setTimeout(() => { if (!typing) fixFixed(); }, 450); });
   if (vv) { let h = vv.height; vv.addEventListener('resize', () => { if (vv.height - h > 120 && !typing) setTimeout(fixFixed, 60); h = vv.height; gapFix(); }); }
   window.addEventListener('pageshow', fixFixed);
+  // mentre scrivi a MeMo il foglio resta sopra la tastiera, con il tasto Fatto a portata di pollice
+  const kbSheet = () => {
+    const w = $('#sheetWrap'), on = vv && document.activeElement && document.activeElement.id === 'wText' && window.innerHeight - vv.height > 120;
+    w.classList.toggle('kb', !!on);
+    if (on) { w.style.top = vv.offsetTop + 'px'; w.style.height = vv.height + 'px'; } else { w.style.top = ''; w.style.height = ''; }
+  };
+  if (vv) { vv.addEventListener('resize', kbSheet); vv.addEventListener('scroll', kbSheet); }
+  document.addEventListener('focusin', () => setTimeout(kbSheet, 50)); document.addEventListener('focusout', () => setTimeout(kbSheet, 120));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(fixFixed, 60); });
 })();
 
