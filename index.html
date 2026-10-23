@@ -247,7 +247,7 @@ body.listening #heroKnot{opacity:0;transition:none}
 /* il pesciolino in 3D vero: è uno solo e va dove serve (cerchio, sfondo, tutorial, quando ascolta) */
 .fish3d-c{position:absolute;display:block;pointer-events:none}
 .knot3{position:absolute;pointer-events:none;animation:swim 5s ease-in-out infinite;filter:drop-shadow(0 10px 18px rgba(242,87,58,.22))}
-body.listening .knot3{opacity:0}
+body.listening .knot3,#heroKnot[hidden]+.knot3{opacity:0;visibility:hidden}
 body.fish3d #heroKnot,body.fish3d #diver .dv-3d,body.fish3d #swimmer .f3,body.fish3d .i-fish>svg{visibility:hidden}
 .i-fish{position:relative}
 .i-fish .fish3d-c{filter:drop-shadow(0 16px 20px rgba(255,110,60,.25))}
@@ -545,12 +545,18 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 @keyframes iBlink{0%,93%,100%{transform:none}95.5%{transform:scaleY(.08)}}
 .hi-b{position:absolute;display:grid;place-items:center;border-radius:50%;color:#fff;box-shadow:0 8px 20px rgba(47,107,242,.25);animation:hiFloat 3.4s ease-in-out infinite}
 .hi-b svg{width:22px;height:22px}
-.hi-b.b1{width:50px;height:50px;left:-4px;top:12px;background:linear-gradient(135deg,#4C8DF6,#2FCDBE)}
-.hi-b.b2{width:58px;height:58px;right:-8px;top:-4px;background:linear-gradient(135deg,#2F6BF2,#4C8DF6 60%,#2FCDBE);animation-delay:-1.1s}
-.hi-b.b2 svg{width:26px;height:26px}
-.hi-b.b3{width:48px;height:48px;left:26px;bottom:-6px;background:#fff;color:var(--ink);box-shadow:0 8px 20px rgba(43,72,140,.16);animation-delay:-2.2s}
+.hi-b.b1{width:40px;height:40px;left:4px;top:18px;opacity:.82;background:linear-gradient(135deg,#4C8DF6,#2FCDBE)}
+.hi-b.b1 svg,.hi-b.b3 svg{width:18px;height:18px}
+.hi-b.b2{width:80px;height:80px;right:-14px;bottom:-14px;background:linear-gradient(135deg,#2F6BF2,#4C8DF6 60%,#2FCDBE);animation-delay:-1.1s;box-shadow:0 12px 28px rgba(47,107,242,.38);z-index:2}
+.hi-b.b2 svg{width:36px;height:36px}
+/* il microfono è il modo principale: lo si fa "chiamare", come quando ascolta */
+.hi-b.b2::before,.hi-b.b2::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(76,141,246,.5);animation:hiPing 2.2s ease-out infinite}
+.hi-b.b2::after{animation-delay:1.1s}
+@keyframes hiPing{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.75);opacity:0}}
+.slide p.i-alt{font-size:14.5px;color:var(--ink-3);margin-top:12px}
+.hi-b.b3{width:38px;height:38px;left:30px;bottom:4px;opacity:.82;background:#fff;color:var(--ink);box-shadow:0 8px 20px rgba(43,72,140,.16);animation-delay:-2.2s}
 @keyframes hiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@media (prefers-reduced-motion: reduce){.i-fish,.hi-b,.i-fish .dv-eye{animation:none}}
+@media (prefers-reduced-motion: reduce){.i-fish,.hi-b,.i-fish .dv-eye,.hi-b.b2::before,.hi-b.b2::after{animation:none}}
 .intro-foot{padding:10px 24px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:18px}
 .dots{display:flex;gap:8px}
 .dots i{width:8px;height:8px;border-radius:4px;background:color-mix(in srgb, var(--ink) 25%, transparent);transition:width .3s,background .3s}
@@ -697,7 +703,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.8';
+const VERSION = '2.9';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -2320,7 +2326,7 @@ const PTT = (() => {
     && window.scrollY < innerHeight * 0.4 && $('#heroKnot').hasAttribute('hidden');
   const stop = () => { anims.forEach(a => a.cancel()); anims = []; cur = null; };
   function swim(force) {
-    if (!force && !free()) { later(15000); return; }
+    if (!force && !free()) { later(6000); return; }
     stop(); if (window.memoFish3D) memoFish3D.wake();
     const W = innerWidth, H = innerHeight, size = .95 + r() * .3;
     const x0 = dir > 0 ? -70 : W + 70, x1 = dir > 0 ? W + 70 : -70, way = r();
@@ -2339,17 +2345,17 @@ const PTT = (() => {
     anims = [a, b]; cur = { meta: fr.meta, a, dur };
     a.onfinish = () => { anims = []; cur = null; };
     dir = -dir; // la prossima volta dall'altra parte
-    if (!force) later((20 + r() * 20) * 1000);
+    if (!force) later((r() < 0.22 ? 30 + r() * 25 : 5 + r() * 9) * 1000); // di solito torna presto, ogni tanto si fa desiderare
   }
   // se mentre nuota lo chiami con il microfono, è lui che viene da te: dove sta, quanto è grande, com'è girato
   window.memoSwimTake = () => {
     if (!cur || !cur.a || cur.a.playState !== 'running') return null;
     const q = Math.min(1, Math.max(0, cur.a.currentTime / cur.dur)), m = cur.meta[Math.round(q * (cur.meta.length - 1))];
     if (!m || m.x < -40 || m.x > innerWidth + 40) return null;
-    stop(); later((25 + r() * 20) * 1000);
+    stop(); later((12 + r() * 12) * 1000);
     return { x: m.x, y: m.y, z: m.z, yaw: m.yaw, px: BASE * m.s };
   };
-  later((7 + r() * 8) * 1000);
+  later((3 + r() * 5) * 1000);
   window.memoSwim = () => swim(true);
 })();
 
@@ -2563,7 +2569,8 @@ function showIntro() {
   const slides = [
     { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${fishFlat()}</div>
         <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
-      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Scansiona un documento, oppure due parole dette o scritte di getto. Capisco io cosa ricordarti.' }
+      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Dimmi cosa devo ricordarti: tieni premuto il microfono e parla. Al resto ci penso io.',
+      extra: '<p class="i-alt">Se preferisci, puoi anche scansionare un documento o scrivermi.</p>' }
   ];
   const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<span>${preLabel(p, true)}</span>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
