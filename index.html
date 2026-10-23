@@ -616,7 +616,7 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.42';
+const VERSION = '1.42-bis';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -2280,7 +2280,9 @@ function tick() {
   await rollAll();
   // l'iPhone, per le webapp, chiede il permesso del microfono una volta per ogni apertura: lo chiedo subito,
   // così quando tieni premuto il tasto parti a parlare senza interruzioni
-  const warmMic = () => { if (!SR || inAppBrowser() || store.get('micWarm') === '0' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  const warmMic = async () => { if (!SR || inAppBrowser() || store.get('micWarm') === '0' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    // se il telefono ricorda già il permesso (Android, computer) non serve accendere niente
+    try { if (navigator.permissions && (await navigator.permissions.query({ name: 'microphone' })).state === 'granted') return; } catch (e) {}
     navigator.mediaDevices.getUserMedia({ audio: true }).then(st => st.getTracks().forEach(t => t.stop())).catch(() => {}); };
   if (store.get('intro') === '1') setTimeout(warmMic, 600); else window.addEventListener('memo:introdone', warmMic, { once: true });
   render();
