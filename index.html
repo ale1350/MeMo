@@ -548,8 +548,9 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '1.32';
+const VERSION = '1.33';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+function clearBadge() { try { if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {}); } catch (e) {} }
 const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
 // ================= Archivio sul telefono (IndexedDB) =================
@@ -746,7 +747,7 @@ function render() {
     list.querySelectorAll('.row-wrap').forEach((el, k) => { el.style.transitionDelay = Math.min(k, 6) * 45 + 'ms'; rowObserver.observe(el); });
   } else list.querySelectorAll('.row-wrap').forEach(el => el.classList.add('in'));
   $('#swipeTip').hidden = !active.length || store.get('swiped') === '1';
-  try { if ('setAppBadge' in navigator) groups.now.length ? navigator.setAppBadge(groups.now.length) : navigator.clearAppBadge(); } catch (e) {}
+  clearBadge(); // il pallino rosso sull'icona c'è solo per un avviso arrivato e non ancora visto: aprendo MeMo l'hai visto
   if (calOpen) renderCal();
   onScroll();
   Push.later();
@@ -1937,7 +1938,7 @@ function tick() {
 
   document.addEventListener('visibilitychange', () => { if (!document.hidden) Push.refresh().finally(() => importInbox().finally(() => Push.sync())); });
   setInterval(tick, 30000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(); clearBadge(); } });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
