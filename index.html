@@ -703,7 +703,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.9';
+const VERSION = '2.9.1';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1511,8 +1511,12 @@ const Ear = (() => {
   function stop() { h = null; queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } }
   // chiude ma aspetta le ultime parole: il risultato finale arriva prima della fine
   function finish() { queued = null; if (r && busy) { try { r.stop(); } catch (e) {} } else if (h && h.end) h.end(); }
-  // come finish, ma senza il "din" di chiusura dell'iPhone: si interrompe (abort) dopo aver lasciato arrivare le ultime parole
-  function quietFinish(after) { queued = null; const cb = h && h.end; setTimeout(() => { if (r && busy) { h = null; try { r.abort(); } catch (e) {} busy = false; } if (cb) cb(); }, after || 350); }
+  // come finish, ma senza il "din" di chiusura dell'iPhone: su iPhone le parole arrivano subito, quindi si interrompe (abort) dopo un attimo.
+  // Su Android (e Chrome) le ultime parole arrivano dai server di Google qualche istante DOPO che lasci il tasto: lì si chiude con calma (stop)
+  // e si aspetta che arrivino, altrimenti si perde proprio la fine della frase (spesso il «cosa»: «domani alle 10… il dentista»)
+  function quietFinish(after) { queued = null; const cb = h && h.end;
+    if (!isIOS) { if (r && busy) { try { r.stop(); } catch (e) { if (cb) cb(); } } else if (cb) cb(); return; }
+    setTimeout(() => { if (r && busy) { h = null; try { r.abort(); } catch (e) {} busy = false; } if (cb) cb(); }, after || 350); }
   // se qualcosa si è inceppato, la prossima volta si riparte con un orecchio nuovo
   function reset() { const old = r; r = null; busy = false; h = null; queued = null;
     if (old) { old.onresult = old.onend = old.onerror = old.onstart = null; try { old.abort(); } catch (e) {} } }
@@ -2240,14 +2244,15 @@ const Fish = (() => {
 // ---------- tieni premuto e parla: finché tieni premuto ascolto, quando lasci segno il MeMo ----------
 const PTT = (() => {
   const btn = $('#btnVoice'), el = $('#ptt'), hintEl = $('#pttHint'), textEl = { textContent: '' }; // le parole non si mostrano qui: restano nel MeMo («Mi avevi detto»)
-  let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0, fishMood = 'bye';
+  let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0, fishMood = 'bye', ready = false;
   const hint = h => { hintEl.textContent = h; };
   const show = h => { el.hidden = false; el.classList.remove('idle', 'cancel'); hint(h); fishMood = 'bye'; Fish.come(); requestAnimationFrame(() => el.classList.add('show')); };
   const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); Fish.go(fishMood); fishMood = 'bye'; setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
   const clear = () => { clearTimeout(endT); clearTimeout(quiet); };
   function listen() {
     return Ear.start({
-      start: () => {},
+      // su Android il microfono si apre con un attimo di ritardo: «Ti ascolto» (e una vibrazione) solo quando è davvero pronto, così l'inizio della frase non si perde
+      start: () => { if (!ready && mode === 'hold') { ready = true; if (!isIOS) { hint(away ? 'Lascia per annullare' : 'Ti ascolto…'); haptic(); } } },
       result: t => { if (mode === 'off') return; text = joinText(base, t); textEl.textContent = text; Fish.hear();
         if (mode === 'hold') hint(away ? 'Lascia per annullare' : 'Ti ascolto…');
         else if (mode === 'free') { hint('Ti ascolto… fai una pausa per finire'); clearTimeout(quiet); quiet = setTimeout(finish, 1800); } },
@@ -2267,7 +2272,7 @@ const PTT = (() => {
     if (!SR) { openVoice(); return; }
     if (mode !== 'off') { if (mode === 'free') finish(); return; }
     down = true; away = false; done = false; t0 = Date.now(); text = ''; base = ''; textEl.textContent = ''; x0 = x; y0 = y;
-    mode = 'hold'; btn.classList.add('holding'); haptic(); show('Ti ascolto…');
+    mode = 'hold'; ready = false; btn.classList.add('holding'); haptic(); show(isIOS ? 'Ti ascolto…' : 'Un attimo…');
     if (!listen()) { mode = 'off'; btn.classList.remove('holding'); hint('Non riesco ad aprire il microfono.'); fishMood = 'none'; hide(1600); }
   }
   function move(x, y) {
@@ -2290,7 +2295,7 @@ const PTT = (() => {
   }
   function finish() {
     if (mode === 'off' || mode === 'finishing') return; clear(); mode = 'finishing'; el.classList.add('idle');
-    hint(text ? 'Ho capito' : 'Un attimo…'); if (text) Fish.got(); Ear.quietFinish(400); endT = setTimeout(finalize, 1500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
+    hint(text ? 'Ho capito' : 'Un attimo…'); if (text) Fish.got(); Ear.quietFinish(400); endT = setTimeout(finalize, isIOS ? 1500 : 3500); // se il telefono non chiude in tempo, si va avanti con quello che c'è
   }
   async function finalize() {
     if (done) return; done = true; clear(); const said = text.trim();
