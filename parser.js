@@ -1345,7 +1345,11 @@
     if (item.remindOn) { const r = remindOnDate(item); if (r < dueAt(item)) return r; }
     const T = TYPE_BY_ID[item.type] || TYPE_BY_ID.altro;
     const lm = leadOf(item);
-    if (lm != null && item.time) return new Date(dueAt(item).getTime() - lm * 60000);
+    if (lm != null && item.time) {
+      // anticipo di giorni interi («il giorno prima»): stesso orario, giorni di calendario (così il cambio dell'ora legale non lo sposta di un'ora)
+      if (lm >= 1440 && lm % 1440 === 0) { const d = dueAt(item); d.setDate(d.getDate() - lm / 1440); return d; }
+      return new Date(dueAt(item).getTime() - lm * 60000);
+    }
     if (lm != null && !item.time) { const d = parseISO(addDays(item.due, -Math.round(lm / 1440))); d.setHours(NOON, 0, 0, 0); return d; }
     const d = parseISO(addDays(item.due, -T.lead)); d.setHours(NOON, 0, 0, 0);
     if (item.time) { const due = dueAt(item); if (d >= due) return new Date(due.getTime() - 15 * 60000); }

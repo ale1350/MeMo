@@ -238,6 +238,29 @@ textarea.input{height:auto;min-height:100px;padding:14px 16px;line-height:1.4;re
 .ptt-wave i:nth-child(2){animation-delay:.12s}.ptt-wave i:nth-child(3){animation-delay:.24s}.ptt-wave i:nth-child(4){animation-delay:.36s}.ptt-wave i:nth-child(5){animation-delay:.48s}.ptt-wave i:nth-child(6){animation-delay:.6s}.ptt-wave i:nth-child(7){animation-delay:.72s}
 .ptt.idle .ptt-wave i{animation:none;transform:scaleY(.25);opacity:.5}
 .ptt.cancel .ptt-card{background:rgba(255,236,228,.96)}
+/* la domanda di MeMo, sopra il microfono */
+.ask{position:fixed;left:14px;right:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:13;display:flex;justify-content:center;pointer-events:none;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .25s,transform .3s cubic-bezier(.3,.8,.3,1.2)}
+.ask.show{opacity:1;transform:none}
+.ask[hidden]{display:none}
+body.listening .ask{opacity:0!important;transition:none}
+.ask-card{pointer-events:auto;position:relative;width:100%;max-width:420px;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--stroke);border-radius:26px;padding:16px 18px 10px;box-shadow:0 16px 40px rgba(43,72,140,.22);text-align:center}
+.ask-card::after{content:'';position:absolute;left:50%;bottom:-9px;width:18px;height:18px;background:rgba(255,255,255,.97);border-right:1px solid var(--stroke);border-bottom:1px solid var(--stroke);transform:translateX(-50%) rotate(45deg);border-radius:0 0 5px 0}
+.ask-ctx{margin:0 0 6px;font-size:13.5px;font-weight:650;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ask-q{margin:0;font-size:22px;font-weight:850;letter-spacing:-.02em;line-height:1.18;color:#141A2E;text-wrap:balance}
+.ask-sub{margin:6px 0 0;font-size:14px;line-height:1.35;color:#5A6378;text-wrap:pretty}
+.ask-how{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 0;font-size:13.5px;font-weight:750;color:var(--brand-ink)}
+.ask-act{display:flex;justify-content:center;gap:20px;margin-top:4px}
+.ask-act:not(:has(button:not([hidden]))){display:none}
+/* 5 secondi per iniziare a rispondere: la barretta si consuma */
+.ask-bar{display:block;height:4px;border-radius:2px;background:var(--field);margin:12px 6px 4px;overflow:hidden}
+.ask-bar b{display:block;height:100%;width:100%;border-radius:2px;background:var(--brand-grad);transform-origin:left center}
+.ask-bar b.run{animation:askBar 5s linear forwards}
+@keyframes askBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.ask-act button{font-weight:700;font-size:14px;color:#5A6378;padding:8px 2px}
+.ask-act button.no{color:#8A93A6}
+body.asking #btnVoice .c{animation:askPulse 1.5s ease-in-out infinite}
+@keyframes askPulse{0%,100%{box-shadow:0 0 0 8px rgba(47,107,242,.14),0 16px 34px rgba(47,107,242,.42)}50%{box-shadow:0 0 0 20px rgba(47,107,242,.2),0 16px 34px rgba(47,107,242,.42)}}
+@media (prefers-reduced-motion: reduce){body.asking #btnVoice .c{animation:none}}
 @keyframes pttWave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 .ptt-hint{margin:0;font-weight:750;font-size:14.5px;color:var(--ink);white-space:nowrap}
 
@@ -554,6 +577,23 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 .hi-b.b2::after{animation-delay:1.1s}
 @keyframes hiPing{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.75);opacity:0}}
 .slide p.i-alt{font-size:14.5px;color:var(--ink-3);margin-top:12px}
+/* tutorial: «basta dirmelo» */
+.say-art{display:flex;flex-direction:column;align-items:center;gap:10px;width:290px}
+.say-row{display:flex;align-items:center;gap:12px}
+.say-mic{position:relative;flex:0 0 64px;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#2F6BF2,#4C8DF6 60%,#2FCDBE);box-shadow:0 10px 24px rgba(47,107,242,.35)}
+.say-mic svg{width:30px;height:30px}
+.say-mic::before,.say-mic::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(76,141,246,.5);animation:hiPing 2.2s ease-out infinite}
+.say-mic::after{animation-delay:1.1s}
+.say-bub{background:var(--card);border:1px solid var(--stroke);border-radius:18px 18px 18px 6px;padding:11px 14px;font-weight:750;font-size:15.5px;color:var(--ink);box-shadow:0 8px 20px rgba(43,72,140,.1);text-align:left}
+.say-arrow{font-size:22px;color:var(--ink-3);line-height:1}
+.say-card{display:flex;align-items:center;gap:12px;width:100%;background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:12px 14px;box-shadow:var(--card-shadow);text-align:left}
+.say-card .orb{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:var(--field)}
+.say-card b{display:block;font-size:16px}
+.say-card small{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
+.i-notif.btn-main{margin-top:20px;width:auto;padding:0 30px;background:var(--brand-grad)!important;color:#fff!important;border:0!important}
+.i-notif.btn-main.done{background:var(--card)!important;color:#118C80!important;border:1.5px solid rgba(17,140,128,.3)!important}
+.btn-soft{background:var(--field)!important;color:var(--ink)!important;box-shadow:none!important}
+@media (prefers-reduced-motion: reduce){.say-mic::before,.say-mic::after{animation:none}}
 .hi-b.b3{width:38px;height:38px;left:30px;bottom:4px;opacity:.82;background:#fff;color:var(--ink);box-shadow:0 8px 20px rgba(43,72,140,.16);animation-delay:-2.2s}
 @keyframes hiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media (prefers-reduced-motion: reduce){.i-fish,.hi-b,.i-fish .dv-eye,.hi-b.b2::before,.hi-b.b2::after{animation:none}}
@@ -671,6 +711,10 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 <button class="nb" id="nb" aria-live="assertive"><span class="ni" id="nbIcon"></span><span class="nt"><span class="nh"><b>MeMo</b><span>ora</span></span><span class="nti" id="nbT"></span><span class="nbo" id="nbB"></span></span></button>
 <div class="ptt" id="ptt" hidden aria-live="polite"><div class="ptt-card"><div class="ptt-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <p class="ptt-hint" id="pttHint">Ti ascolto…</p></div></div>
+<div class="ask" id="ask" hidden role="dialog" aria-label="Una domanda di MeMo"><div class="ask-card">
+  <p class="ask-ctx" id="askCtx"></p><h3 class="ask-q" id="askQ"></h3><p class="ask-sub" id="askSub"></p>
+  <p class="ask-how"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>Tieni premuto il microfono e rispondi</p>
+  <div class="ask-act"><button id="askHand" hidden>Fallo a mano</button></div><i class="ask-bar" aria-hidden="true"><b id="askBar"></b></i></div></div>
 <div class="scanner" id="scanner" hidden role="dialog" aria-label="Inquadra il documento">
   <video id="scVideo" playsinline muted autoplay></video>
   <div class="sc-shade"><div class="sc-guide" id="scGuide"><i></i><i></i><i></i><i></i></div></div>
@@ -703,7 +747,7 @@ textarea.input.w-ta{display:block;width:100%;height:auto;resize:none;min-height:
 'use strict';
 const P = window.MeMoParser;
 const $ = s => document.querySelector(s);
-const VERSION = '2.9.1';
+const VERSION = '2.10';
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // MeMo si adatta da sola a dove la apri: iPhone, Android o computer (testi, aiuti, installazione)
 const DEV = isIOS ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'other';
@@ -1110,6 +1154,21 @@ function savedLine(it) {
 }
 function savedToast(it) {
   toast(it.title, savedLine(it), [{ label: 'Annulla', fn: async () => { await removeItem(it); render(); } }], () => openDetail(it.id));
+  notifNudge();
+}
+// hai segnato un MeMo ma le notifiche sono spente: una volta al giorno un avviso in basso (non blocca niente) ti spiega perché servono
+function notifNudge() {
+  const st = Push.state(); if (st !== 'off' && st !== 'install') return;
+  if (store.get('nudgeDay') === P.todayISO() || document.querySelector('.intro')) return;
+  setTimeout(() => {
+    if (Ask.on() || document.body.classList.contains('listening') || store.get('nudgeDay') === P.todayISO()) return;
+    store.set('nudgeDay', P.todayISO());
+    const enable = async () => { let r; try { r = await Push.enable(); } catch (e) { r = 'error'; }
+      if (r === 'on') toast('Notifiche attive.', 'Da ora ti avviso anche a MeMo chiusa.'); else if (r === 'denied') toast('Notifiche bloccate.', `Riattivale ${notifDeniedText()}.`); };
+    if (st === 'off') toast('Te lo ricordo anche a MeMo chiusa?', 'Attiva le notifiche: ti scrivo solo per le cose che mi hai detto tu.', [{ label: 'Attiva', fn: enable }], enable);
+    else toast('Per avvisarti a MeMo chiusa', 'Aggiungimi alla schermata Home e aprimi da lì: poi attiva le notifiche.', [], () => openSettings());
+    clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 8000);
+  }, 4300);
 }
 
 // ================= Scansione =================
@@ -1245,6 +1304,7 @@ async function scanImage(img, known, liveText) {
     <button class="btn btn-ghost" id="ocrSkip">Lo scrivo io</button>`);
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
+    if (!res || !res.date || !res.title) { Ask.start({ list: [scanDraft(res)], kind: 'scan' }); return; } // manca qualcosa: te lo chiedo a voce
     openEditor(scanDraft(res), res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
       : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
       : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade.", markMissing: true });
@@ -1263,6 +1323,7 @@ async function pdfFlow(file) {
     <button class="btn btn-ghost" id="ocrSkip">Lo scrivo io</button>`);
   let cancelled = false; onSheetClose = () => { cancelled = true; };
   const go = res => {
+    if (!res || !res.date || !res.title) { Ask.start({ list: [scanDraft(res)], kind: 'scan' }); return; } // manca qualcosa: te lo chiedo a voce
     openEditor(scanDraft(res), res && res.date && !res.title ? { head: 'Ho trovato la data', sub: "Dimmi solo cos'è e al resto penso io.", focus: '#eTitle' }
       : res && res.date ? { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }
       : { head: res && res.typeScore ? 'Manca solo la data' : 'Non sono riuscito a leggerlo bene', sub: res && res.typeScore ? 'Non ho trovato la scadenza nel documento: inseriscila tu, al resto penso io.' : "Dimmi cos'è e quando scade.", markMissing: true });
@@ -1664,25 +1725,15 @@ async function submitSpeech(text) {
   finally { thinking = false; if (mic) mic.classList.remove('think'); if (go) { go.textContent = 'Ricordamelo'; go.disabled = false; } }
   if (list[0] && list[0].chat) { showChat(list[0].chat, text, true); return; }
   if (list[0] && list[0].cmd) { await handleCommand(list[0].cmd, text); return; }
-  if (list.length > 1) { openReview(list, text, { voice: true }); return; } // più cose insieme: un'occhiata prima di segnarle
+  if (list.length > 1) { if (needsAsk(list)) Ask.start({ list, text, voice: true }); else openReview(list, text, { voice: true }); return; } // più cose insieme: prima chiedo quello che manca, poi un'occhiata
   routeOne(list[0], text, { voice: true });
 }
 const draftOf = (res, said) => ({ type: res.type, title: res.title, date: res.date || null, time: res.time || null, leadMin: res.leadMin ?? null,
   rep: res.rep || null, remindOn: res.remindOn || null, purchase: res.purchase || null, said: String(said || res.said || '').trim() });
 // una cosa sola: se manca qualcosa lo chiedo, altrimenti a voce si segna subito e scritto si mostra prima com'è venuto
 function routeOne(res, text, o = {}) {
-  if (res.needTitle) {
-    // ho capito quando, ma non cosa: data e avviso sono già pronti, manca solo il titolo
-    const lead = res.leadMin != null ? `, con un avviso ${leadLabel(res.leadMin, !!res.time)}` : '';
-    const when = res.date ? whenText({ due: res.date, time: res.time }) : '';
-    openEditor({ ...draftOf(res, text), type: 'altro', title: '' },
-      { head: 'Manca solo una cosa', sub: when ? `Ho capito: ${when}${lead}. Dimmi solo cosa.` : 'Dimmi cosa e quando.', focus: '#eTitle' });
-    return;
-  }
-  if (!res.date) { openEditor({ ...draftOf(res, text), date: null }, { head: 'Manca solo la data', sub: `Ho capito «${res.title}». Quando?`, markMissing: true }); return; }
+  if (missingOf(res)) { Ask.start({ list: [res], text, voice: o.voice }); return; } // manca qualcosa: te lo chiedo a voce
   if (!o.voice) { openReview([res], text); return; }
-  if (res.remindAsk) { askRemind(res, text); return; }
-  if (res.askTime && !res.time) { askTime(res, text); return; }
   saveSpoken(res, text);
 }
 function buildItem(res, text) {
@@ -1698,6 +1749,7 @@ async function saveSpoken(res, text) {
   toast(it.title, savedLine(it), [
     { label: 'Annulla', fn: async () => { await DB.del(it.id); items = items.filter(x => x.id !== it.id); render(); } }
   ], () => openDetail(it.id));
+  notifNudge();
 }
 
 // ================= Scrivi a MeMo =================
@@ -1731,7 +1783,7 @@ function openWrite(prefill) {
       let list; try { list = await understandAll(v); } finally { busy = false; }
       if ($('#wText') !== ta) return; // nel frattempo hai chiuso
       writeDraft = '';
-      if (list[0] && list[0].chat) showChat(list[0].chat, v); else if (list[0] && list[0].cmd) handleCommand(list[0].cmd, v); else if (list.length === 1) routeOne(list[0], v); else openReview(list, v);
+      if (list[0] && list[0].chat) showChat(list[0].chat, v); else if (list[0] && list[0].cmd) handleCommand(list[0].cmd, v); else if (list.length === 1) routeOne(list[0], v); else if (needsAsk(list)) Ask.start({ list, text: v }); else openReview(list, v);
     };
     ta.addEventListener('input', upd);
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
@@ -1815,6 +1867,7 @@ function openReview(list, text, o = {}) {
     haptic(); closeSheet(); render();
     if (saved.length === 1) { const it = saved[0]; toast(it.title, savedLine(it), [{ label: 'Annulla', fn: async () => { await removeItem(it); render(); } }], () => openDetail(it.id)); }
     else toast(`${saved.length} MeMo segnati`, say('saved'), [{ label: 'Annulla', fn: async () => { for (const it of saved) await removeItem(it); render(); } }]);
+    notifNudge();
   };
   draw();
 }
@@ -1997,6 +2050,131 @@ function askRemind(res, text) {
     go.onclick = () => t.value && done(t.value);
   });
 }
+// ================= Se manca qualcosa, te lo chiedo a voce =================
+// Niente moduli da compilare: se non ho capito il cosa, il quando o l'ora, la domanda compare sopra il microfono
+// («Stasera, a che ora?») e rispondi tenendolo premuto, come la prima volta. Si può anche scrivere la risposta.
+// Quando ho tutto, il MeMo è fatto (e dopo si può sempre modificare).
+const ASK_NO = /^(?:no|niente|nessun[oa]?(?: orario| ora)?|senza(?: orario| ora)?|non importa|va bene così|quando vuoi|fa lo stesso|non c'è(?: un)? orario)[.!]?$/i;
+const ASK_STOP = /^(?:annulla|lascia (?:stare|perdere)|lascia stare tutto|basta|stop)[.!]?$/i;
+function missingOf(res) {
+  if (!res) return null;
+  if (res.needTitle || !res.title || res.title === 'MeMo') return 'title';
+  if (!res.date) return 'date';
+  if (res.remindAsk) return 'remind';
+  if (res.askTime && !res.time) return res.askTime.ctxTime ? 'ctx' : 'time';
+  return null;
+}
+// l'ora dentro una risposta breve: «alle 9», «le 21», «9 e mezza», «mezzogiorno», «un'ora prima» (se l'impegno ha già un orario)
+function timeFromAnswer(said, part, ctxTime) {
+  const s = String(said || '').toLowerCase().trim();
+  if (ctxTime) { const m = /(mezz'? ?ora|un'? ?ora|(\d+|due|tre)\s*or[ae]|(\d+)\s*minut[io]|un quarto d'ora)\s+prima/.exec(s);
+    if (m) { const n = { due: 2, tre: 3 }; const off = /mezz/.test(m[1]) ? 30 : /quarto/.test(m[1]) ? 15 : /^un'? ?ora/.test(m[1]) ? 60 : m[3] ? +m[3] : (+(m[2]) || n[m[2]] || 1) * 60;
+      const [h, mi] = ctxTime.split(':').map(Number), t = (h * 60 + mi - off + 1440) % 1440; return `${pad(Math.floor(t / 60))}:${pad(t % 60)}`; } }
+  if (/mezzogiorno/.test(s)) return '12:00';
+  if (/mezzanotte/.test(s)) return '00:00';
+  let t = null; try { t = P.parseSpeech(P.typed('domani ' + s)).time; } catch (e) {}
+  if (!t) { const m = /\b(\d{1,2})(?:[:.,](\d{2}))?\b/.exec(s); if (m && +m[1] < 24 && (!m[2] || +m[2] < 60)) t = `${pad(+m[1])}:${m[2] || '00'}`; }
+  if (!t) return null;
+  let [h, mi] = t.split(':').map(Number);
+  if ((part === 'sera' || part === 'pomeriggio') && h < 12) h += 12;           // «stasera alle 9» sono le 21
+  else if (part === 'notte' && h >= 7 && h < 12) h += 12;
+  return `${pad(h)}:${pad(mi)}`;
+}
+const Ask = (() => {
+  const el = $('#ask'), ctxEl = $('#askCtx'), qEl = $('#askQ'), subEl = $('#askSub'), handEl = $('#askHand');
+  let job = null; // { list, k, text, voice, kind: 'speech'|'scan'|'renew', answers, tries, done }
+  const on = () => !!job;
+  function show() {
+    const r = job.list[job.k], miss = job.miss || missingOf(r), many = job.list.length > 1;
+    const when = r.date ? (r.askTime && r.askTime.part ? whenPart(r.date, r.askTime.part) : whenText({ due: r.date, time: r.time })) : '';
+    const title = r.title && r.title !== 'MeMo' && !r.needTitle ? r.title : '';
+    let q = '', sub = '';
+    if (miss === 'title') { q = job.kind === 'scan' ? "Cos'è questo documento?" : 'Cosa devo ricordarti?'; sub = when ? `Ho capito ${when}: dimmi solo cosa.` : job.kind === 'scan' ? 'Non sono riuscito a leggerlo bene.' : ''; }
+    else if (miss === 'date') { const deadline = DEADLINE.has(r.type); q = job.kind === 'renew' ? 'Ottimo! Quando scade il nuovo?' : T(r.type).dateKind === 'purchase' ? "Quando l'hai comprato?" : deadline ? 'Quando scade?' : 'Per quando te lo ricordo?';
+      sub = job.kind === 'renew' ? 'Dimmi la nuova scadenza e te la ricordo io.' : 'Per esempio «domani», «venerdì alle 18», «il 3 marzo».'; }
+    else if (miss === 'time') { const w = r.askTime.part ? whenPart(r.date, r.askTime.part) : (dayWord(r.date) || ''); q = w ? `${cap(w)}, a che ora?` : 'A che ora?'; sub = 'Ti avviso un\'ora prima. Se non c\'è un orario, dimmi «senza orario».'; }
+    else if (miss === 'ctx') { q = 'A che ora te lo ricordo?'; sub = `L'impegno è alle ${timeLbl(r.askTime.ctxTime)}. Puoi dirmi anche «un'ora prima».`; }
+    else if (miss === 'remind') { q = `A che ora te lo ricordo ${whenPart(r.remindAsk.date, r.remindAsk.part)}?`; sub = ''; }
+    if (job.tries) sub = (miss === 'title' ? 'Scusa, non ho capito cosa. ' : miss === 'date' ? 'Scusa, non ho capito quando. ' : 'Scusa, non ho capito l\'ora. ') + (sub || '');
+    ctxEl.textContent = title ? `${emojiOf({ type: r.type, title })} ${title}${when && miss !== 'title' ? ' · ' + when : ''}${many ? ` (${job.k + 1} di ${job.list.length})` : ''}` : (many ? `${job.k + 1} di ${job.list.length}` : '');
+    ctxEl.hidden = !ctxEl.textContent; qEl.textContent = q; subEl.textContent = sub; subEl.hidden = !sub;
+    handEl.hidden = !(job.tries >= 2 || job.kind === 'renew'); handEl.textContent = job.kind === 'renew' ? 'Non serve più' : 'Fallo a mano';
+    el.hidden = false; document.body.classList.add('asking'); requestAnimationFrame(() => el.classList.add('show')); arm();
+  }
+  function hide() { pause(); el.classList.remove('show'); document.body.classList.remove('asking'); setTimeout(() => { if (!job) el.hidden = true; }, 260); }
+  // se entro 5 secondi non inizi a rispondere, il MeMo si lascia stare. Il tempo parte quando la domanda si vede davvero
+  let tm = null; const bar = $('#askBar');
+  function pause() { clearTimeout(tm); tm = null; bar.classList.remove('run'); }
+  function arm() { pause(); const go = () => { if (!job) return; if (document.body.classList.contains('listening') || el.hidden) { tm = setTimeout(go, 200); return; }
+      void bar.offsetWidth; bar.classList.add('run'); tm = setTimeout(() => { if (job) cancel(); }, 5000); }; go(); }
+  function start(o) {
+    job = { list: o.list.map(r => ({ ...r })), k: 0, text: o.text || '', voice: !!o.voice, kind: o.kind || 'speech', answers: [], tries: 0, done: o.done, item: o.item };
+    if (job.kind === 'renew') job.miss = 'date';
+    closeSheet(); next(true);
+  }
+  // passa alla prossima cosa che manca; quando non manca più niente, il MeMo è fatto
+  function next(first) {
+    while (job.k < job.list.length && !(job.miss || missingOf(job.list[job.k]))) job.k++;
+    if (job.k < job.list.length) { job.tries = first ? 0 : job.tries; show(); haptic(); return; }
+    const j = job; job = null; hide(); finishJob(j);
+  }
+  function stop() { if (!job) return; job = null; hide(); }
+  function cancel() { const j = job; stop(); if (j) toast('Lasciato stare.', j.kind === 'renew' ? 'Quando vuoi, ridimmi la nuova scadenza.' : 'Quando vuoi, ridimmelo.'); }
+  // la risposta (detta o scritta): capisco quello che manca, e se manca ancora qualcosa ti richiedo
+  async function answer(said) {
+    if (!job) return false;
+    said = String(said || '').trim(); if (!said) { show(); return true; }
+    if (ASK_STOP.test(said)) { cancel(); return true; }
+    const j = job, r = j.list[j.k], miss = j.miss || missingOf(r); j.answers.push(said);
+    let nr = null;
+    if (miss === 'time' || miss === 'ctx' || miss === 'remind') {
+      if (ASK_NO.test(said)) { nr = { ...r }; delete nr.askTime; delete nr.remindAsk; }
+      else { const t = timeFromAnswer(said, miss === 'remind' ? r.remindAsk.part : r.askTime.part, miss === 'ctx' ? r.askTime.ctxTime : null);
+        if (t) { nr = { ...r }; if (miss === 'remind') { nr.remindOn = `${r.remindAsk.date}T${t}`; delete nr.remindAsk; } else { nr.time = t; if (miss === 'ctx') nr.leadMin = 0; delete nr.askTime; } } }
+    } else if (miss === 'date') {
+      let d = null; try { const p = P.parseSpeech(P.typed('ricordamelo ' + said)); if (p.date) d = p; } catch (e) {}
+      if (!d && j.kind === 'speech') { try { const l = await understandAll(`${j.text} ${said}`); const x = l.find(y => !y.cmd && !y.chat && y.date); if (x) d = x; } catch (e) {} }
+      if (d && d.date) { nr = { ...r, date: d.date }; delete nr.needDate; if (d.time && !r.time) { nr.time = d.time; delete nr.askTime; }
+        if (T(r.type).dateKind === 'purchase') nr.purchase = d.date;
+        if (j.kind === 'speech' && !nr.time && P.needsTime(nr)) nr.askTime = { part: d.askTime ? d.askTime.part : null, soon: true }; }
+      if (nr && j.kind === 'renew') delete j.miss;
+    } else if (miss === 'title') {
+      let x = null;
+      if (j.kind === 'speech') { try { const l = await understandAll(`${said} ${j.text}`); x = l.find(y => !y.cmd && !y.chat && !y.needTitle && y.title && y.title !== 'MeMo'); } catch (e) {} }
+      if (!x) { try { const p = P.parseSpeech(P.typed(said)); if (p.title && p.title !== 'MeMo' && !p.needTitle) x = p; } catch (e) {} }
+      const t0 = x ? x.title : cap(said.replace(/^(?:è |e |si tratta di |ricordami (?:di )?)/i, '').replace(/[.!?]+$/, ''));
+      nr = { ...r, title: t0, type: x && x.type !== 'altro' ? x.type : r.type || 'altro' }; delete nr.needTitle;
+      if (x) { if (!nr.date && x.date) nr.date = x.date; if (!nr.time && x.time) { nr.time = x.time; delete nr.askTime; } if (x.leadMin != null && nr.leadMin == null) nr.leadMin = x.leadMin; }
+    }
+    if (job !== j) return true; // nel frattempo hai annullato
+    if (!nr) { j.tries++; show(); return true; }
+    j.list[j.k] = nr; j.tries = 0; next();
+    return true;
+  }
+  // a fine domande: il MeMo è fatto (a voce o scritto), oppure dalla scansione si mostra com'è venuto
+  async function finishJob(j) {
+    const said = [j.text, ...j.answers].filter(Boolean).join(' — ');
+    if (j.done) return j.done(j.list, said);
+    if (j.kind === 'renew') { const it = j.item, r = j.list[0]; if (!it || !r.date) return; it.due = r.date; delete it.remindOn; await DB.put(it); render(); toast(say('again'), `${it.title} · scade ${whenText(it)}`); return; }
+    if (j.kind === 'scan') { const r = j.list[0]; openEditor(scanDraft(r), { head: 'Ho capito così', sub: 'Controlla e tocca Ricordamelo. Puoi cambiare tutto.' }); return; }
+    if (j.list.length === 1) { await saveSpoken(j.list[0], said); return; }
+    openReview(j.list, j.text, { voice: j.voice });
+  }
+  // dopo due tentativi a vuoto (o per il rinnovo), si può sempre fare a mano
+  function byHand() {
+    if (!job) return; const j = job; stop();
+    if (j.kind === 'renew') { if (j.item) removeItem(j.item).then(() => { render(); toast(say('drop'), j.item.title); }); return; }
+    const r = j.list[j.k];
+    if (j.kind === 'scan') { openEditor(scanDraft(r), { head: 'Completalo tu', sub: 'Inserisci quello che manca.', markMissing: true }); return; }
+    openEditor({ ...draftOf(r, j.text), type: r.type || 'altro', title: r.needTitle ? '' : r.title }, { head: 'Completalo tu', sub: 'Inserisci quello che manca.', markMissing: true, focus: missingOf(r) === 'title' ? '#eTitle' : undefined });
+  }
+  handEl.onclick = byHand;
+  // se fai altro (scansioni, scrivi una cosa nuova, apri le impostazioni) la domanda si chiude
+  for (const id of ['#btnPhoto', '#btnAdd', '#btnSettings']) { const b = $(id); if (b) b.addEventListener('click', () => { if (job) stop(); }, true); }
+  return { on, start, answer, stop, pause, resume: () => { if (job) arm(); } };
+})();
+// una cosa sola o più cose insieme: se manca qualcosa lo chiedo a voce, altrimenti si va avanti come sempre
+function needsAsk(list) { return list.some(r => !r.cmd && !r.chat && missingOf(r)); }
 // ================= Il pesciolino in 3D =================
 // non è un'immagine piatta: è fatto a fette, come una TAC. Davanti e dietro i due fianchi (occhio, pinna, faccia),
 // in mezzo il corpo con il suo spessore (più largo al centro, come un pesce vero), e al centro la coda e la pinna sul dorso.
@@ -2247,7 +2425,7 @@ const PTT = (() => {
   let down = false, t0 = 0, text = '', base = '', mode = 'off', away = false, done = false, endT = null, quiet = null, x0 = 0, y0 = 0, lastTouch = 0, fishMood = 'bye', ready = false;
   const hint = h => { hintEl.textContent = h; };
   const show = h => { el.hidden = false; el.classList.remove('idle', 'cancel'); hint(h); fishMood = 'bye'; Fish.come(); requestAnimationFrame(() => el.classList.add('show')); };
-  const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); Fish.go(fishMood); fishMood = 'bye'; setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
+  const hide = (ms = 0) => setTimeout(() => { if (mode !== 'off') return; el.classList.remove('show'); Fish.go(fishMood); fishMood = 'bye'; Ask.resume(); /* c'era una domanda in sospeso: riparte il tempo per rispondere */ setTimeout(() => { if (mode === 'off' && !el.classList.contains('show')) el.hidden = true; }, 260); }, ms);
   const clear = () => { clearTimeout(endT); clearTimeout(quiet); };
   function listen() {
     return Ear.start({
@@ -2272,7 +2450,7 @@ const PTT = (() => {
     if (!SR) { openVoice(); return; }
     if (mode !== 'off') { if (mode === 'free') finish(); return; }
     down = true; away = false; done = false; t0 = Date.now(); text = ''; base = ''; textEl.textContent = ''; x0 = x; y0 = y;
-    mode = 'hold'; ready = false; btn.classList.add('holding'); haptic(); show(isIOS ? 'Ti ascolto…' : 'Un attimo…');
+    mode = 'hold'; ready = false; btn.classList.add('holding'); haptic(); Ask.pause(); show(isIOS ? 'Ti ascolto…' : 'Un attimo…');
     if (!listen()) { mode = 'off'; btn.classList.remove('holding'); hint('Non riesco ad aprire il microfono.'); fishMood = 'none'; hide(1600); }
   }
   function move(x, y) {
@@ -2301,7 +2479,7 @@ const PTT = (() => {
     if (done) return; done = true; clear(); const said = text.trim();
     if (!said) { mode = 'off'; hint('Non ti ho sentito'); fishMood = 'none'; hide(1700); return; }
     hint('Ci penso…'); Fish.think(); const n0 = items.length;
-    try { await submitSpeech(said); } finally { mode = 'off'; fishMood = items.length > n0 ? 'saved' : 'bye'; hide(0); }
+    try { if (Ask.on()) await Ask.answer(said); else await submitSpeech(said); } finally { mode = 'off'; fishMood = items.length > n0 ? 'saved' : 'bye'; hide(0); }
   }
   btn.addEventListener('touchstart', e => { e.preventDefault(); lastTouch = Date.now(); const t = e.changedTouches[0]; press(t.clientX, t.clientY); }, { passive: false });
   btn.addEventListener('touchmove', e => { const t = e.changedTouches[0]; move(t.clientX, t.clientY); }, { passive: true });
@@ -2377,7 +2555,7 @@ const lastSaid = {};
 function say(kind) { const a = SAYINGS[kind]; let k; do { k = Math.floor(Math.random() * a.length); } while (a.length > 1 && k === lastSaid[kind]); lastSaid[kind] = k; return a[k]; }
 async function doneItem(it) {
   const ty = T(it.type);
-  if (ty.done === 'renew') { openEditor({ id: it.id, type: it.type, title: it.title, date: null }, { head: 'Ottimo. Quando scade il nuovo?', sub: 'Inserisci la nuova scadenza e te la ricordo io. Se non ti serve più, toglilo.', typeLocked: true, markMissing: true, renew: true }); return false; }
+  if (ty.done === 'renew') { Ask.start({ list: [{ type: it.type, title: it.title, date: null }], kind: 'renew', item: it }); return false; } // «Quando scade il nuovo?» te lo chiedo a voce
   haptic();
   if (it.rep) {
     const old = it.due; it.due = P.nextRep(it); delete it.remindOn; P.rollRep(it); await DB.put(it); render();
@@ -2571,25 +2749,34 @@ $('#btnSettings').addEventListener('click', openSettings);
 function showIntro() {
   // poche pagine: chi sono, che ci penso io, e (se vuoi) le scadenze di tutti. Il resto l'app lo fa capire da sola
   const ic = id => { const c = $(id + ' .c'); return c ? c.innerHTML : ''; };
+  const parr = { type: 'altro', title: 'Parrucchiere' };
   const slides = [
-    { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${fishFlat()}</div>
-        <span class="hi-b b1">${ic('#btnPhoto')}</span><span class="hi-b b2">${ic('#btnVoice')}</span><span class="hi-b b3">${ic('#btnAdd')}</span></div>`,
-      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Dimmi cosa devo ricordarti: tieni premuto il microfono e parla. Al resto ci penso io.',
-      extra: '<p class="i-alt">Se preferisci, puoi anche scansionare un documento o scrivermi.</p>' }
+    // 1. chi sono e a cosa servo
+    { art: `<div class="hi-art"><div class="i-fish" data-f="listen" data-m="smile">${fishFlat()}</div></div>`,
+      h: 'Ciao, sono <span class="brandw">MeMo</span>.', p: 'Ti ricordo io le cose importanti: scadenze, appuntamenti, bollette, compleanni, cose da fare. Tu non devi più tenerle a mente.' },
+    // 2. come si fa: basta dirlo
+    { art: `<div class="say-art"><div class="say-row"><span class="say-mic">${ic('#btnVoice')}</span><span class="say-bub">«Domani alle 18 parrucchiere»</span></div>
+        <span class="say-arrow" aria-hidden="true">↓</span>
+        <div class="say-card"><span class="orb">${emojiOf(parr)}</span><span><b>Parrucchiere</b><small>Domani alle 18:00 · ti avviso alle 17:00</small></span></div></div>`,
+      h: 'Basta dirmelo.', p: 'Tieni premuto il microfono e dimmi cosa e quando. Se manca qualcosa, te lo chiedo io.',
+      extra: '<p class="i-alt">Puoi anche scansionare un documento o scrivermi.</p>' }
   ];
   const lastSlide = { art: `<div class="start-art">${['🪪 Carta d\'identità', '🚗 Patente', '🚙 Bollo auto', '💡 Bollette', '🎂 Compleanni'].map(x => `<span>${x}</span>`).join('')}${PRESETS.map(p => `<span>${preLabel(p, true)}</span>`).join('')}</div>`,
     h: 'Svuota la testa.', p: 'Dimmi subito tutto quello che è importante. Lo fai una volta, poi non ci pensi più.' };
   const pst = Push.state();
+  let notifIdx = -1;
   if (pst !== 'noserver' && pst !== 'nosupport') {
-    const forget = 'Ti avviso io quando è il momento. Tu puoi pure scordarti tutto.';
+    // 3. perché servono le notifiche: è così che ti avviso
+    const why = 'Quando è il momento ti mando una notifica sul telefono, anche con MeMo chiusa. È così che ti ricordo le cose: senza notifiche non posso avvisarti.';
     const np = {
-      off: forget,
-      on: forget,
-      install: forget + ' Mettimi nella Home e attiva le notifiche.',
-      denied: forget + ` Riattiva le notifiche ${notifDeniedText()}.`
+      off: why,
+      on: 'Le notifiche sono attive: quando è il momento ti avviso io, anche con MeMo chiusa.',
+      install: why + ` Per riceverle, mettimi nella schermata Home (Condividi › «Aggiungi alla schermata Home») e aprimi da lì.`,
+      denied: why + ` Adesso sono bloccate: riattivale ${notifDeniedText()}.`
     }[pst];
-    slides.push({ art: `<div class="lock-art"><b>9:41</b><span class="lk-date">venerdì 23 ottobre</span><div class="lk-note"><span class="lk-ic">${LOGO_SVG}</span><div><span class="lk-t">📞 Chiamare Luca adesso</span><span class="lk-b">Telefono in mano, sorriso pronto.</span></div><span class="lk-now">adesso</span></div></div>`,
-      h: 'Ci penso io.', p: np, extra: pst === 'off' ? '<button class="btn btn-ghost i-notif" id="iNotif">Attiva le notifiche</button>' : '' });
+    notifIdx = slides.length;
+    slides.push({ art: `<div class="lock-art"><b>9:41</b><span class="lk-date">venerdì 23 ottobre</span><div class="lk-note"><span class="lk-ic">${LOGO_SVG}</span><div><span class="lk-t">💇 Parrucchiere tra un'ora</span><span class="lk-b">Alle 18:00. Ci vai bello rilassato.</span></div><span class="lk-now">adesso</span></div></div>`,
+      h: 'Ti avviso io.', p: np, extra: pst === 'off' ? '<button class="btn btn-main i-notif" id="iNotif">Attiva le notifiche</button><p class="i-alt">Ti scrivo solo per le cose che mi hai detto tu.</p>' : '' });
   }
   slides.push(lastSlide);
   const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Come funziona MeMo');
@@ -2598,7 +2785,8 @@ function showIntro() {
   document.body.appendChild(el);
   const sc = el.querySelector('.slides'), dots = el.querySelectorAll('.dots i'), next = el.querySelector('#iNext');
   const idx = () => Math.round(sc.scrollLeft / sc.clientWidth);
-  sc.addEventListener('scroll', () => requestAnimationFrame(() => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); next.textContent = i === slides.length - 1 ? 'Inizia' : 'Avanti'; }), { passive: true });
+  const label = i => i === slides.length - 1 ? 'Inizia' : i === notifIdx && Push.state() === 'off' ? 'Più tardi' : 'Avanti';
+  sc.addEventListener('scroll', () => requestAnimationFrame(() => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); next.textContent = label(i); next.classList.toggle('btn-soft', label(i) === 'Più tardi'); }), { passive: true });
   const close = () => { store.set('intro', '1'); window.dispatchEvent(new Event('memo:introdone')); el.style.transition = 'opacity .35s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); };
   next.onclick = () => { const i = idx(); if (i >= slides.length - 1) close(); else sc.scrollTo({ left: (i + 1) * sc.clientWidth, behavior: 'smooth' }); };
   el.querySelector('.skip').onclick = close;
